@@ -1,0 +1,7 @@
+Django==3.0.7
+jsonfield2
+Markdown
+absl-py
+urllib3
+gunicorn
+django-heroku

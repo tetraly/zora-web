@@ -1,0 +1,49 @@
+{% extends 'randomizer/layouts/default.html' %}
+
+{% block content %}
+    <h1>What is ZORA?</h1>
+    <div class="card card-body bg-light border my-2">
+        <p>ZORA is a backronym for Zelda One Randomizer for All, a program that generates 
+           completely new dungeons and shuffles around a bunch of stuff in The Legend of Zelda, 
+           a.k.a. Zelda 1. The world looks the same, the game's objective is the same, but plenty 
+           of things can get shuffled around &mdash; such as enemies, progression items, and shop 
+           items! It's a different experience every time!</p>
+    </div>
+    <h1>Woah cool! Where do I download this?</h1>
+    <div class="card card-body bg-light border my-2">
+        <p>You don't! ZORA is entirely web-based. You simply provide your original ROM to the site,
+           and it does the rest. No downloading required! Click the
+            <a href="{% url 'randomizer:randomize' %}">Generate Randomized Game</a> link to get started!
+        </p>
+    </div>
+    <h1>Awesome! Can I play with others?</h1>
+    <div class="card card-body bg-light border my-2">
+        <p>Yes! Join the our discord at
+            <a href="https://discord.gg/EdJUSug" target="_blank">https://discord.gg/EdJUSug</a>! If you're
+            interested in speedrunning the original game, there are plenty of resources to help you get started at <a href="http://www.redcandle.us" target="_blank">http://www.redcandle.us</a>!</p>
+    </div>
+    <h1>What does the "for All" in ZORA mean?</h1>
+    <div class="card card-body bg-light border my-2">
+        <p>ZORA is intended to be a randomizer that's both created by and created for the Zelda One community. All interested members of the community should be able to:
+          <ul>
+            <li>View the entirity of the ZORA source code.</li>
+            <li>Contribute features or other content to the code base.</li> 
+            <li>Take an active role in decision-making.</li>
+          </ul>
+        </p>
+        Additionally, the community is intended to be welcoming to all people. [Insert link to a code of conduct soon?] 
+    </div>
+    <h1>Just who is responsible for this thing?</h1>
+    <div class="card card-body bg-light border my-2">
+        <p>This program wouldn't have been possible without the work of many people:</p>
+        <ul>
+            <li>ZORA was written and maintained by
+                <a href="https://github.com/tetraly" target="_blank">Tetraly</a> with contributions from Flutterby, Madewokherd, Drascia, and others on ROM hacking, coding work, and playtesting.
+            </li>
+            <li>Huge thanks to fcoughlin for his <a href="https://sites.google.com/site/zeldarandomizer/" target="_blank">Zelda Randomizer</a> that provided much of the inspiration for creating this randomizer. Some included features, such as select swap, code/hash generation, removing low-health beeping, were directly adapted from his work. </li>
+            <li>Metalmachine and the team behind the Z1M1 randomizer, who inspired the incremental upgrades feature.</li>
+            <li>A major hat tip to <a href="https://github.com/DorkmasterFlek" target="_blank">Dormaster Flek</a> for his work on the SMRPG Randomizer web UI, which was blatently copied (with permission) for ZORA.
+            </li>
+        </ul>
+    </div>
+{% endblock %}
