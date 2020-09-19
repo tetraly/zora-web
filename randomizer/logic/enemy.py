@@ -74,6 +74,14 @@ class Enemy(IntEnum):
   BLUE_GORIYA_RED_GORIYA = 0x7A
   BLUE_WIZZROBE_RED_WIZZROBE = 0x7B
   BLUE_WIZZROBE_LIKE_LIKE_BUBBLE = 0x7C
+  TRIFORCE_CHECKER_PLACEHOLDER_ELDER = 0x7F
+
+  def HasBubbles(self) -> bool:
+    return self in [
+        Enemy.BLUE_WIZZROBE_RED_WIZZROBE_BUBBLE, Enemy.BLUE_DARKNUT_RED_DARKNUT_GORIYA_BUBBLE,
+        Enemy.BLUE_GORIYA_KEESE_BUBBLE, Enemy.WALLMASTER_BUBBLE,
+        Enemy.BLUE_WIZZROBE_LIKE_LIKE_BUBBLE
+    ]
 
   def CanMoveThroughBlockWalls(self) -> bool:
     return self in [
@@ -181,14 +189,14 @@ class Enemy(IntEnum):
         Enemy.BLUE_WIZZROBE_RED_WIZZROBE
     ]
 
-  def RequiresSolidWallToNorth(self) -> bool:
+  def IsElder(self) -> bool:
     return self in [
         Enemy.ELDER, Enemy.ELDER_2, Enemy.ELDER_3, Enemy.ELDER_4, Enemy.BOMB_UPGRADER,
         Enemy.ELDER_5, Enemy.MUGGER, Enemy.ELDER_6
     ]
 
   def IsElderOrHungryEnemy(self) -> bool:
-    return self.RequiresSolidWallToNorth() or self == Enemy.HUNGRY_ENEMY
+    return self.IsElder() or self == Enemy.HUNGRY_ENEMY
 
   def IsBoss(self) -> bool:
     return self.IsInDodongoSpriteSet() or self.IsInGleeokSpriteSet() or self.IsInPatraSpriteSet(
@@ -207,7 +215,7 @@ class Enemy(IntEnum):
     ]
 
   def IsInPatraSpriteSet(self) -> bool:
-    return self in [Enemy.THE_BEAST, Enemy.THE_KIDNAPPED, Enemy.PATRA_2, Enemy.PATRA_1]
+    return self in [Enemy.PATRA_2, Enemy.PATRA_1]
 
   def IsInAllSpriteSets(self) -> bool:
     return self in [
@@ -224,10 +232,10 @@ class Enemy(IntEnum):
         enemy = cls(random.randrange(0x0, 0x7F))
       except ValueError:
         continue
-      if enemy.HasTraps():
+      if enemy.HasTraps() and random.choice([True, True, True, True, True, True, True, False]):
         continue
 
-      if ((enemy.IsInAllSpriteSets() and not must_be_in_sprite_set) or
+      if ((not must_be_in_sprite_set and enemy.IsInAllSpriteSets()) or
           (sprite_set == SpriteSet.GORIYA_SPRITE_SET and enemy.IsInGoriyaSpriteSet()) or
           (sprite_set == SpriteSet.DARKNUT_SPRITE_SET and enemy.IsInDarknutSpriteSet()) or
           (sprite_set == SpriteSet.WIZZROBE_SPRITE_SET and enemy.IsInWizzrobeSpriteSet())):

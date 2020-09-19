@@ -7,17 +7,17 @@ from .constants import CaveType, LevelNum, LevelNumOrCaveType, PositionNum, Rang
 class Location():
 
   def __init__(self,
-               level_num: LevelNum = None,
-               cave_type: CaveType = None,
+               level_num: LevelNum = LevelNum.NO_LEVEL_NUM,
+               cave_type: CaveType = CaveType.NO_CAVE_TYPE,
                room_num: RoomNum = None,
                position_num: Optional[int] = None):
     self.level_num_or_cave_type: LevelNumOrCaveType
     self.sub_id: RoomOrPositionNum
 
-    if level_num is not None:
+    if level_num != LevelNum.NO_LEVEL_NUM:
       assert level_num in Range.VALID_LEVEL_NUMBERS
       assert room_num in Range.VALID_ROOM_NUMBERS
-      assert cave_type is None
+      assert cave_type is CaveType.NO_CAVE_TYPE
       assert position_num is None
       self.level_num_or_cave_type = level_num
       self.sub_id = RoomOrPositionNum(room_num)
@@ -25,7 +25,7 @@ class Location():
     elif cave_type is not None:
       assert cave_type in Range.VALID_CAVE_TYPES
       assert position_num in Range.VALID_CAVE_POSITION_NUMBERS
-      assert level_num is None
+      assert level_num is LevelNum.NO_LEVEL_NUM
       assert room_num is None
       self.level_num_or_cave_type = cave_type
       self.sub_id = RoomOrPositionNum(position_num)

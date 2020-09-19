@@ -22,7 +22,7 @@ class DataTable():
   COAST_ITEM_ADDRESS = 0x1788A + NES_FILE_OFFSET
   CAVE_TYPE_CAVE_NUM_OFFSET = 0x10
   BOMB_UPGRADE_PRICE_ADDRESS = 0x4B72 + NES_FILE_OFFSET
-  BOMB_UPGRADE_QUANTITY_ADDRESS = 0x4B8A + NES_FILE_OFFSET
+  BOMB_UPGRADE_QUANTITY_ADDRESS = 0x4B8B + NES_FILE_OFFSET
   TEXT_ASSIGNMENT_ADDRESS = 0x4A07 + NES_FILE_OFFSET
   ANY_ROAD_SCREEN_NUMS_ADDRESS = 0x19334 + NES_FILE_OFFSET
   RECORDER_SCREEN_NUMS_ADDRESS = 0x6010 + NES_FILE_OFFSET
@@ -183,20 +183,20 @@ class DataTable():
         done = True
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_PRICE_ADDRESS, [price])
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_QUANTITY_ADDRESS, [quantity])
-    
+
     # Change white and magical sword heart container requirements.
     # Note that it's stored in the upper 4 bits, not the lower 4 bits, of that byte
     self.misc_data_patch.AddData(self.WHITE_SWORD_REQUIRED_HEARTS_ADDRESS,
-                                [random.randrange(4, 6) * 0x10])
+                                 [random.randrange(4, 6) * 0x10])
     self.misc_data_patch.AddData(self.MAGICAL_SWORD_REQUIRED_HEARTS_ADDRESS,
-                                [random.randrange(8, 12) * 0x10])
-                                
+                                 [random.randrange(8, 12) * 0x10])
+
     # Turn off low health warning
-    
+
     self.misc_data_patch.AddData(0x1ED33, [0x00])
-    
 
   def SetTextGroup(self, level_num: int, group_id: str) -> None:
+    assert level_num in range(1,10)
     assert group_id in ["a", "b"]
     self.misc_data_patch.AddData(self.TEXT_ASSIGNMENT_ADDRESS + 2 * level_num,
                                  [0x23, 0x8A] if group_id == "a" else [0x69, 0x8A])
@@ -234,7 +234,6 @@ class DataTable():
   def UpdateCompassPointer(self, location: Location) -> None:
     assert location.IsLevelRoom()
     (level_num, room_num) = (location.GetLevelNum(), location.GetRoomNum())
-    #room = self.GetRoom(location.GetLevelNum(), room_num)
     assert room_num in range(0, 0x100)
     self.level_metadata[level_num * self.LEVEL_METADATA_OFFSET +
                         self.TRIFORCE_LOCATION_OFFSET] = room_num
@@ -281,6 +280,8 @@ class DataTable():
 
   def SetStartRoomDataForLevel(self, level_num: LevelNum, start_room: RoomNum,
                                entrance_direction: Direction) -> None:
+    print("SetStartRoomDataForLevel: level %d, room 0x%x, %s " %
+          (level_num, start_room, entrance_direction))
     level_offset = level_num * self.LEVEL_METADATA_OFFSET
     if start_room:
       self.level_metadata[level_offset + self.START_ROOM_OFFSET] = start_room
@@ -311,9 +312,9 @@ class DataTable():
 
   def SetItemPositionsForLevel(self, level_num: LevelNum, item_positions: List[int]) -> None:
     enemy_quantities = []
-    enemy_quantities.append(random.randrange(1, 5))
-    enemy_quantities.append(random.randrange(2, 6))
-    enemy_quantities.append(random.randrange(3, 7))
+    enemy_quantities.append(random.randrange(1, 6))
+    enemy_quantities.append(random.randrange(2, 7))
+    enemy_quantities.append(random.randrange(3, 8))
     enemy_quantities.append(random.randrange(4, 8))
     enemy_quantities.sort()
 

@@ -39,16 +39,20 @@ class Validator():
       return False
     while self.inventory.StillMakingProgress():
       num_iterations += 1
+      log.info("")
       log.info("Iteration #%d of checking", num_iterations)
       self.inventory.ClearMakingProgressBit()
       self.data_table.ClearAllVisitMarkers()
       self._VisitAccessibleOverworldCaves()
+      #print("Kidnapped check")
+      #input("")
       if self.inventory.Has(Item.RESCUED_KIDNAPPED_VIRTUAL_ITEM):
         log.info("Seed appears to be beatable. :)")
         return True
       if num_iterations > 10:
         return False
     log.warning("Seed doesn't appear to be beatable. :(")
+    #input("")
     return False
 
   def _IsAnIncrementalUpgradeItemAvaliableInAShop(self) -> bool:
@@ -63,33 +67,42 @@ class Validator():
     return False
 
   def _VisitAccessibleOverworldCaves(self) -> None:
+    log.info("Visiting open caves ...")
     self._ConditionallyVisitCavesForScreens(True, Screen.OPEN_CAVE_SCREENS)
+    log.info("Visiting bomb caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.HasSwordOrWand(),
                                             Screen.BOMB_BLOCKED_CAVE_SCREENS)
+    log.info("Visiting burn bushes if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.HasCandle(),
                                             Screen.CANDLE_BLOCKED_CAVE_SCREENS)
+    log.info("Visiting power bracelet-blocked caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.Has(Item.POWER_BRACELET),
                                             Screen.POWER_BRACELET_BLOCKED_CAVE_SCREENS)
+    log.info("Visiting raft-blocked caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.Has(Item.RAFT),
                                             Screen.RAFT_BLOCKED_CAVE_SCREENS)
+    log.info("Visiting recorder-blocked caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.Has(Item.RECORDER),
                                             Screen.RECORDER_BLOCKED_CAVE_SCREENS)
+    log.info("Visiting Armos and coast 'virtual caves'")
     self._VisitCave(CaveType.ARMOS_ITEM_VIRTUAL_CAVE)
     self._VisitCave(CaveType.COAST_ITEM_VIRTUAL_CAVE)
 
   def _ConditionallyVisitCavesForScreens(self, condition: bool, screen_numbers: List[int]) -> None:
     if not condition:
+      log.info('... condition not met')
       return
     for screen_number in screen_numbers:
       level_num_or_cave_type = self.data_table.GetLevelNumberOrCaveType(screen_number)
       if level_num_or_cave_type in Range.VALID_LEVEL_NUMBERS:
         level_num = LevelNum(level_num_or_cave_type)
-        if level_num == LevelNum.LEVEL_9 and self.inventory.GetTriforceCount() < 8:
-          continue
-        log.info("Visiting level %s" % level_num)
+        log.info("Level %s is accessible. Visiting it -- %x %s ..." %
+                 (level_num, self.data_table.GetLevelStartRoomNumber(level_num),
+                  self.data_table.GetLevelEntranceDirection(level_num)))
         self._RecursivelyTraverseLevel(level_num,
                                        self.data_table.GetLevelStartRoomNumber(level_num),
                                        self.data_table.GetLevelEntranceDirection(level_num))
+        log.info("... Done with level")
       elif level_num_or_cave_type in Range.VALID_CAVE_TYPES:
         cave_type = CaveType(level_num_or_cave_type)
         self._VisitCave(cave_type)
@@ -117,7 +130,7 @@ class Validator():
 
   def _RecursivelyTraverseLevel(self, level_num: LevelNum, room_num: RoomNum,
                                 entry_direction: Direction) -> None:
-    log.debug("Visiting level %d room %x" % (level_num, room_num))
+    #log.info("Visiting level %d room %x" % (level_num, room_num))
     if not room_num in Range.VALID_ROOM_NUMBERS:
       return
     room = self.data_table.GetRoom(level_num, room_num)
@@ -211,6 +224,13 @@ class Validator():
     enemy = room.GetEnemy()
     if enemy.HasNoEnemiesToKill():
       return True
+    if enemy == Enemy.TRIFORCE_CHECKER_PLACEHOLDER_ELDER:
+      if self.inventory.GetTriforceCount() < 8:
+        #input("triforce check failed -- %d tringles" % self.inventory.GetTriforceCount())
+        return False
+      else:
+        pass
+        #input("triforce check passed")
     if enemy == Enemy.THE_BEAST and not self.inventory.HasBowSilverArrowsAndSword():
       return False
     if enemy.IsDigdogger() and not self.inventory.HasRecorderAndReusableWeapon():

@@ -27,9 +27,16 @@ class ZoraRandomizer():
     self.data_table.ResetToVanilla()
     self.level_generator.Generate()
 
-    while not self.validator.IsSeedValid():
+    while True:
+      print()
       print("Re-randomizing items")
+      print()
       self.item_randomizer.Randomize()
+      print()
+      print("Back to Validating")
+      print()
+      if self.validator.IsSeedValid():
+        break
 
   def GetPatch(self) -> Patch:
     patch = self.data_table.GetPatch()
@@ -47,7 +54,6 @@ class ZoraRandomizer():
     # Fix for ring/tunic colors
     patch.AddData(0x6BFB, [0x20, 0xE4, 0xFF])
     patch.AddData(0x1FFF4, [0x8E, 0x02, 0x06, 0x8E, 0x72, 0x06, 0xEE, 0x4F, 0x03, 0x60])
-
     self._AddExtras(patch)
     return patch
 
@@ -56,7 +62,7 @@ class ZoraRandomizer():
       patch.AddData(0x6B49, [0x11, 0x12, 0x13])  # Swords
       patch.AddData(0x6B4E, [0x11, 0x12])  # Candles
       patch.AddData(0x6B50, [0x11, 0x12])  # Arrows
-      patch.AddData(0x6B5A, [0x11, 0x12])  # Rings
+     # patch.AddData(0x6B5A, [0x11, 0x12])  # Rings
 
     # Change "no item" code from 0x03 (Mags) to 0x0E (Triforce of Power)
     patch.AddData(0x1785F, [0x0E])

@@ -56,6 +56,13 @@ class Room():
     self.rom_data[byte_num] = bits_to_save + bits_to_write
 
   def GetRomData(self) -> List[int]:
+    if self.GetRoomType() in [
+        RoomType.ELDER_PLACEHOLDER_ROOM_TYPE, RoomType.HUNGRY_ENEMY_PLACEHOLDER_ROOM_TYPE,
+        RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE
+    ]:
+      self.SetRoomType(RoomType.BLACK_ROOM)
+    if not self.IsStairwayRoom() and self.GetEnemy() == Enemy.TRIFORCE_CHECKER_PLACEHOLDER_ELDER:
+      self.SetEnemy(Enemy.ELDER)
     return self.rom_data
 
   def IsMarkedAsVisited(self) -> bool:
@@ -148,11 +155,13 @@ class Room():
 
   # Byte 2
   def GetEnemy(self) -> Enemy:
+    assert not self.IsStairwayRoom()
     lower_bits = self._ReadRomBits(byte_num=2, read_bitmask=0x3F)
     upper_bit = self._ReadRomBits(byte_num=3, read_bitmask=0x80)
     return Enemy(lower_bits + 0x40 if upper_bit > 0 else lower_bits)
 
   def SetEnemy(self, enemy: Enemy) -> None:
+    assert not self.IsStairwayRoom()
     enemy_code = enemy.value
     self._SetRomBits(3, 0x80, 1 if enemy_code >= 0x40 else 0)
     self._SetRomBits(2, 0x3F, (enemy_code % 0x40))
@@ -197,7 +206,7 @@ class Room():
     return self._ReadRomBits(byte_num=5, read_bitmask=0x07) == 0x07
 
   def SetBossRoarSound(self, roar_sound: bool = True) -> None:
-    self._SetRomBits(4, 0x20, 0x01)
+    self._SetRomBits(4, 0x20, 0x01 if roar_sound else 0x00)
 
   # TODO: This could be re-implemented using math on room_action's value more easily
   def SetRoomAction(self, room_action: RoomAction) -> None:

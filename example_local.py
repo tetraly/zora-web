@@ -33,8 +33,8 @@ SITE_PREFIX = ''
 
 SECRET_KEY = 'IHaveNoIdeaWhatThisIsOrWhatItDoes'
 
-STATIC_URL = "/static/" + SITE_PREFIX
-STATIC_ROOT = os.path.join(BASE_DIR, 'static', SITE_PREFIX)
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Use this for running a separate beta testing site for people to generate beta seeds.
 BETA = False

@@ -164,8 +164,8 @@ class ItemShuffler():
     if self.settings.IsEnabled(flags.ProgressiveItems):
       if item == Item.RED_CANDLE:
         item = Item.BLUE_CANDLE
-      elif item == Item.RED_RING:
-        item = Item.BLUE_RING
+      # elif item == Item.RED_RING:
+      #   item = Item.BLUE_RING
       elif item == Item.SILVER_ARROWS:
         item = Item.WOOD_ARROWS
       elif item == Item.WHITE_SWORD:
@@ -186,7 +186,9 @@ class ItemShuffler():
   def ShuffleItems(self) -> None:
     print("Shuffling items")
     print(self.item_num_list)
+    print(len(self.item_num_list))
     shuffle(self.item_num_list)
+    print()
     print(self.item_num_list)
     #input("...")
     for level_or_cave_num in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:
@@ -206,6 +208,8 @@ class ItemShuffler():
 
       if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:  # Technically this could be for OW and caves too
         shuffle(self.per_level_item_lists[level_or_cave_num])
+    print()
+    print(self.item_num_list)
     assert not self.item_num_list
 
   def GetAllLocationAndItemData(self) -> Iterable[Tuple[Location, Item]]:

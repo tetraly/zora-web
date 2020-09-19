@@ -44,10 +44,13 @@ class RoomType(IntEnum):
   TWO_BEAMOS_ROOM = 0x23
   FOUR_BEAMOS_ROOM = 0x24
   EMPTY_DOTTED_ROOM = 0x25
-  ELDER_ROOM = 0x26
-  ZELDA_ROOM = 0x27
-  GANNON_ROOM = 0x28
+  BLACK_ROOM = 0x26
+  KIDNAPPED_ROOM = 0x27
+  BEAST_ROOM = 0x28
   TRIFORCE_ROOM = 0x29
+  ELDER_PLACEHOLDER_ROOM_TYPE = 0x31
+  HUNGRY_ENEMY_PLACEHOLDER_ROOM_TYPE = 0x32
+  TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE = 0x33
   TRANSPORT_STAIRCASE = 0x3E
   ITEM_STAIRCASE = 0x3F
 
@@ -119,7 +122,7 @@ class RoomType(IntEnum):
         RoomType.VERTICAL_CHUTE_ROOM, RoomType.HORIZONTAL_CHUTE_ROOM, RoomType.VERTICAL_LINES,
         RoomType.ZIGZAG_ROOM, RoomType.T_ROOM, RoomType.CHEVY_ROOM, RoomType.NSU,
         RoomType.SPIRAL_STAIR_ROOM, RoomType.SINGLE_SIX_BLOCK_ROOM, RoomType.DOUBLE_SIX_BLOCK_ROOM,
-        RoomType.TURNSTILE_ROOM, RoomType.ENTRANCE_ROOM, RoomType.ZELDA_ROOM,
+        RoomType.TURNSTILE_ROOM, RoomType.ENTRANCE_ROOM, RoomType.KIDNAPPED_ROOM,
         RoomType.TRIFORCE_ROOM, RoomType.DIAMOND_STAIR_ROOM
     ]
 
@@ -137,7 +140,7 @@ class RoomType(IntEnum):
         RoomType.SECOND_QUEST_T_LIKE_ROOM, RoomType.MAZE_ROOM, RoomType.VERTICAL_CHUTE_ROOM,
         RoomType.HORIZONTAL_CHUTE_ROOM, RoomType.VERTICAL_LINES, RoomType.T_ROOM,
         RoomType.CIRCLE_MOAT_ROOM, RoomType.POINTLESS_MOAT_ROOM, RoomType.CHEVY_ROOM, RoomType.NSU,
-        RoomType.SPIRAL_STAIR_ROOM, RoomType.ZELDA_ROOM, RoomType.TRIFORCE_ROOM
+        RoomType.SPIRAL_STAIR_ROOM, RoomType.KIDNAPPED_ROOM, RoomType.TRIFORCE_ROOM
     ]
 
   def IsBadForLanmola(self) -> bool:
@@ -153,41 +156,52 @@ class RoomType(IntEnum):
 
   def IsPartitionedByBlockWalls(self) -> bool:
     return self.value in [
+        #RoomType.VERTICAL_CHUTE_ROOM,RoomType.HORIZONTAL_CHUTE_ROOM,
+        RoomType.CIRCLE_BLOCK_WALL_ROOM
+    ]
+
+  def IsHardToPlace(self) -> bool:
+    return self.value in [
         RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.VERTICAL_CHUTE_ROOM,
-        RoomType.HORIZONTAL_CHUTE_ROOM
+        RoomType.HORIZONTAL_CHUTE_ROOM, RoomType.TURNSTILE_ROOM, RoomType.T_ROOM,
+        RoomType.SECOND_QUEST_T_LIKE_ROOM
     ]
 
   def HasBeamoses(self) -> bool:
-    return self.value in [RoomType.TWO_BEAMOS_ROOM, RoomType.FOUR_BEAMOS_ROOM, RoomType.GOHMA_ROOM]
-
-  def ShouldntBeDarkRoom(self) -> bool:
-    return self.value in [RoomType.ENTRANCE_ROOM, RoomType.ELDER_ROOM]
+    return self.value in [RoomType.TWO_BEAMOS_ROOM, RoomType.FOUR_BEAMOS_ROOM]
 
   @classmethod
-  def RandomValueOkayForStairs(cls, has_solid_east_wall: bool, has_shutters: bool) -> "RoomType":
+  def RandomValueOkayForStairs(cls) -> "RoomType":
     while True:
       try:
         room_type = cls(random.randrange(0x0, 0x29))
       except ValueError:
-        continue
-      if not has_solid_east_wall and room_type == RoomType.NARROW_STAIR_ROOM:
-        continue
-      if has_shutters and not room_type.HasOpenStairs():
         continue
       if room_type.CanHaveStairs():
         return room_type
 
   @classmethod
-  def RandomValue(cls) -> "RoomType":
+  def RandomValue(cls, allow_hard_to_place: bool = True) -> "RoomType":
     while True:
       try:
         room_type = cls(random.randrange(0x0, 0x29))
       except ValueError:
         continue
-      if not room_type.HasOpenStairs() and not room_type in [
-          RoomType.ZELDA_ROOM, RoomType.ENTRANCE_ROOM, RoomType.ELDER_ROOM
-      ]:
-        return room_type
+      if room_type.HasOpenStairs():
+        continue
+      if room_type in [RoomType.KIDNAPPED_ROOM, RoomType.ENTRANCE_ROOM, RoomType.BEAST_ROOM]:
+        continue
+      if not allow_hard_to_place and room_type.IsHardToPlace():
+        continue
+      if room_type.HasBeamoses() and random.choice([True, False]):
+        continue
+      if room_type.HasWater() and random.choice([True, True, True, False]):
+        continue
+      if room_type.IsBadForTraps() and random.choice([True, True, True, False]):
+        continue
+      if room_type.IsBadForBosses() and random.choice([True, True, True, False]):
+        continue
+      return room_type
 
   @classmethod
   def IsValidPositionForRoomType(cls, position_code: int, room_type: int) -> bool:
