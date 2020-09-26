@@ -10,6 +10,8 @@ from .item import Item
 from .location import Location
 from .settings import Settings
 
+class NotAllItemsWereShuffledAndIDontKnowWhyException(Exception):
+  pass
 
 class ItemRandomizer():
 
@@ -58,7 +60,7 @@ class ItemRandomizer():
       for pos in [1, 2, 3]:
         #print("Shop %s pos %d" % (shop, pos))
         loc = Location.CavePosition(shop, pos)
-        print(self.data_table.GetCaveItem(loc))
+        #print(self.data_table.GetCaveItem(loc))
     if self.settings.IsEnabled(flags.ShuffleShopItems):
       items.extend([
           self.WOODEN_ARROWS_LOCATION, self.BLUE_CANDLE_LOCATION, self.BLUE_RING_LOCATION,
@@ -186,11 +188,11 @@ class ItemShuffler():
 
   def ShuffleItems(self) -> None:
     print("Shuffling items")
-    #print(self.item_num_list)
-    #print(len(self.item_num_list))
+#    print(self.item_num_list)
+#    print(len(self.item_num_list))
     shuffle(self.item_num_list)
-    print()
-    #print(self.item_num_list)
+ #   print()
+ #   print(self.item_num_list)
     #input("...")
     for level_or_cave_num in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:
       # Levels 1-8 shuffle a triforce, heart container, and 1-2 stairway items.
@@ -209,9 +211,10 @@ class ItemShuffler():
 
       if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:  # Technically this could be for OW and caves too
         shuffle(self.per_level_item_lists[level_or_cave_num])
-    #print()
-    #print(self.item_num_list)
-    assert not self.item_num_list
+#    print()
+#    print(self.item_num_list)
+    if self.item_num_list:
+      raise NotAllItemsWereShuffledAndIDontKnowWhyException()
 
   def GetAllLocationAndItemData(self) -> Iterable[Tuple[Location, Item]]:
     for level_num_or_cave_type in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:

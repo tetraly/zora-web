@@ -42,7 +42,7 @@ class Validator():
     return False
 
   def IsSeedValid(self) -> bool:
-    log.info("Starting check of whether the seed is valid or not")
+    print("Starting check of whether the seed is valid or not")
     self.inventory.Reset()
     self.inventory.SetStillMakingProgressBit()
     num_iterations = 0
@@ -50,28 +50,28 @@ class Validator():
 
     # TODO: Only check this if incremental upgrade flag is enabled
     if self._IsAnIncrementalUpgradeItemAvaliableInAShop():
-      print("Incremental upgrade item found in shop")
+      #print("Incremental upgrade item found in shop")
       return False
 
     if not self._HasInitialWeapon():
-      print("No initial weapon")
+      #print("No initial weapon")
       return False
 
     while self.inventory.StillMakingProgress():
       num_iterations += 1
-      log.info("")
-      log.info("Iteration #%d of checking", num_iterations)
+      print("")
+      print("Iteration #%d of checking" % num_iterations)
       self.inventory.ClearMakingProgressBit()
       self.data_table.ClearAllVisitMarkers()
       self._VisitAccessibleOverworldCaves()
       #print("Kidnapped check")
       #input("")
       if self.inventory.Has(Item.KIDNAPPED_PLACEHOLDER_ITEM):
-        log.info("Seed appears to be beatable. :)")
+        print("Seed appears to be beatable. :)")
         return True
       if num_iterations > 10:
         return False
-    log.warning("Seed doesn't appear to be beatable. :(")
+    print("Seed doesn't appear to be beatable. :(")
     #input("")
     return False
 
@@ -80,37 +80,37 @@ class Validator():
       for position_num in [1, 2, 3]:
         location = Location(cave_type=cave_type, position_num=position_num)
         if self.data_table.GetCaveItem(location).IsAnIncrementalUpgradeItem():
-          print("Found %s in %s pos %d" %
-                (self.data_table.GetCaveItem(location), cave_type, position_num))
+        #  print("Found %s in %s pos %d" %
+        #        (self.data_table.GetCaveItem(location), cave_type, position_num))
           #input("...")
           return True
     return False
 
   def _VisitAccessibleOverworldCaves(self) -> None:
-    log.info("Visiting open caves ...")
+    #log.info("Visiting open caves ...")
     self._ConditionallyVisitCavesForScreens(True, Screen.OPEN_CAVE_SCREENS)
-    log.info("Visiting bomb caves if able ...")
+    #log.info("Visiting bomb caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.HasSwordOrWand(),
                                             Screen.BOMB_BLOCKED_CAVE_SCREENS)
-    log.info("Visiting burn bushes if able ...")
+    #log.info("Visiting burn bushes if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.HasCandle(),
                                             Screen.CANDLE_BLOCKED_CAVE_SCREENS)
-    log.info("Visiting power bracelet-blocked caves if able ...")
+    #log.info("Visiting power bracelet-blocked caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.Has(Item.POWER_BRACELET),
                                             Screen.POWER_BRACELET_BLOCKED_CAVE_SCREENS)
-    log.info("Visiting raft-blocked caves if able ...")
+    #log.info("Visiting raft-blocked caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.Has(Item.RAFT),
                                             Screen.RAFT_BLOCKED_CAVE_SCREENS)
-    log.info("Visiting recorder-blocked caves if able ...")
+    #log.info("Visiting recorder-blocked caves if able ...")
     self._ConditionallyVisitCavesForScreens(self.inventory.Has(Item.RECORDER),
                                             Screen.RECORDER_BLOCKED_CAVE_SCREENS)
-    log.info("Visiting Armos and coast 'virtual caves'")
+    #log.info("Visiting Armos and coast 'virtual caves'")
     self._VisitCave(CaveType.ARMOS_ITEM_VIRTUAL_CAVE)
     self._VisitCave(CaveType.COAST_ITEM_VIRTUAL_CAVE)
 
   def _ConditionallyVisitCavesForScreens(self, condition: bool, screen_numbers: List[int]) -> None:
     if not condition:
-      log.info('... condition not met')
+      #log.info('... condition not met')
       return
     for screen_number in screen_numbers:
       level_num_or_cave_type = self.data_table.GetLevelNumberOrCaveType(screen_number)
@@ -122,7 +122,7 @@ class Validator():
         self._RecursivelyTraverseLevel(level_num,
                                        self.data_table.GetLevelStartRoomNumber(level_num),
                                        self.data_table.GetLevelEntranceDirection(level_num))
-        log.info("... Done with level")
+        #log.info("... Done with level")
       elif level_num_or_cave_type in Range.VALID_CAVE_TYPES:
         cave_type = CaveType(level_num_or_cave_type)
         self._VisitCave(cave_type)
@@ -175,12 +175,12 @@ class Validator():
     if self._CanGetRoomItem(entry_direction, room) and room.HasItem():
       self.inventory.AddItem(room.GetItem(), current_location)
     if room.GetEnemy() == Enemy.THE_BEAST and self.inventory.HasBowSilverArrowsAndSword():
-      log.info("Got the triforce of power!")
+      print("Got the triforce of power!")
       self.inventory.AddItem(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM, current_location)
     if room.GetEnemy() == Enemy.THE_KIDNAPPED:
-      log.info("Found the kidnapped")
+      print("Found the kidnapped")
       assert self.inventory.Has(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM)
-      log.info("And rescued the kidnapped! :)")
+      print("And rescued the kidnapped! :)")
       self.inventory.AddItem(Item.KIDNAPPED_PLACEHOLDER_ITEM, current_location)
 
     for direction in (Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH):
@@ -203,7 +203,7 @@ class Validator():
     # how it's not possible to move up in the room until the goriya has been properly fed.
     if (exit_direction == Direction.NORTH and room.GetEnemy() == Enemy.HUNGRY_ENEMY and
         not self.inventory.Has(Item.BAIT)):
-      log.info("Hungry goriya is still hungry :(")
+      #log.info("Hungry goriya is still hungry :(")
       return False
 
     if not room.GetRoomType().AllowsDoorToDoorMovement(entry_direction, exit_direction,
@@ -240,15 +240,7 @@ class Validator():
     return True
 
   def _CanDefeatEnemies(self, room: Room) -> bool:
-    #if room.HasKillingTheBeastOpensShutterDoorsRoomAction():
-      #input("Found a room with L9 room action")
     enemy = room.GetEnemy()
-    if enemy == Enemy.THE_BEAST:
-      if self.inventory.HasBowSilverArrowsAndSword():
-        print("HasBowSilverArrowsAndSword")
-      else:
-        print("not HasBowSilverArrowsAndSword")
-      #input("Found the beast")
     if (room.HasKillingTheBeastOpensShutterDoorsRoomAction() and
         not self.inventory.Has(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM)):
       return False
@@ -256,9 +248,6 @@ class Validator():
         self.inventory.GetTriforceCount() < 8):
       print("triforce check failed -- %d tringles" % self.inventory.GetTriforceCount())
       return False
-    #if (enemy == Enemy.TRIFORCE_CHECKER_PLACEHOLDER_ELDER and
-    #    self.inventory.GetTriforceCount() >= 8):
-      #input("YAY!")
     if enemy == Enemy.THE_BEAST and not self.inventory.HasBowSilverArrowsAndSword():
       return False
     if enemy.HasNoEnemiesToKill():

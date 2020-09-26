@@ -1,7 +1,7 @@
 import random
 
 from .data_table import DataTable
-from .item_randomizer import ItemRandomizer
+from .item_randomizer import ItemRandomizer, NotAllItemsWereShuffledAndIDontKnowWhyException
 from .level_generator import LevelGenerator
 from .patch import Patch
 from .settings import Settings
@@ -37,7 +37,11 @@ class ZoraRandomizer():
         print()
         print("Re-randomizing items")
         print()
-        self.item_randomizer.Randomize()
+        try:
+          self.item_randomizer.Randomize()
+        except NotAllItemsWereShuffledAndIDontKnowWhyException:
+          print("NotAllItemsWereShuffledAndIDontKnowWhyException")
+          break
         print()
         print("Back to Validating")
         print()

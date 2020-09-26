@@ -383,10 +383,6 @@ class LevelGenerator:
     for screen_num in all_screen_nums:
       dest = self.data_table.GetCaveDestination(screen_num)
       screen_nums.append(dest)
-      try:
-        print(CaveType(dest))
-      except ValueError:
-        print(LevelNum(dest))
     random.shuffle(screen_nums)
     for screen_num in Screen.ALL_SCREENS_WITH_1Q_CAVES:
       destination = screen_nums.pop()
@@ -576,14 +572,6 @@ class LevelGenerator:
       if Enemy.BOMB_UPGRADER in elder_assignments[level_num]:
         self.data_table.SetBombUpgradeLevel(level_num, found_first_bomb_upgrader)
         found_first_bomb_upgrader = True
-    """
-    for level_num in level_pool_a:
-      self.data_table.SetTextGroup(level_num, "a")
-      print("Level %d in group A" % level_num)
-    for level_num in level_pool_b:
-      print("Level %d in group B" % level_num)
-      self.data_table.SetTextGroup(level_num, "b")
-    """
     # For debugging bomb upgrades
     for level_num in [1, 2, 3, 4, 5, 6, 7, 8]:
       self.data_table.SetTextGroup(level_num, "a")
@@ -599,8 +587,6 @@ class LevelGenerator:
       major_item_assignments[n].append(major_item_pool.pop(0))
       if n in [7, 8, 9]:
         major_item_assignments[n].append(major_item_pool.pop(0))
-
-    print(major_item_assignments)
 
     # 3) Staircases
     item_stairway_assignments: List[List[RoomNum]] = [[], [], [], [], [], [], [], [], [], []]
@@ -619,8 +605,6 @@ class LevelGenerator:
     for unused_counter in range(3):
       transport_stairway_assignments[9].append(stairway_rooms_b.pop(0))
     assert len(stairway_rooms_a) == 0 and len(stairway_rooms_b) == 0
-    print(item_stairway_assignments)
-    print(transport_stairway_assignments)
 
     # Main level creation loop
 
@@ -629,7 +613,7 @@ class LevelGenerator:
       while True:
         counter += 1
         if counter > MAIN_THRESHOLD:
-          print("Reached main counter timeout")
+          #print("Reached main counter timeout")
           exit()
         if not self.AddRoomTypes(level_num,
                                  item_stairway_assignments[level_num],
@@ -638,27 +622,27 @@ class LevelGenerator:
           continue
 
         if not self.AddInteriorWalls(level_num):
-          print("\nTIMEOUT! level %d, step %d\n" % (level_num, 2))
+          #print("\nTIMEOUT! level %d, step %d\n" % (level_num, 2))
           continue
 
         if not self.AddEnemies(level_num, elder_assignments[level_num]):
-          print("\nTIMEOUT! level %d, step %d\n" % (level_num, 3))
+          #print("\nTIMEOUT! level %d, step %d\n" % (level_num, 3))
           continue
 
         if not self.AddItems(level_num, major_item_assignments[level_num]):
-          print("\nTIMEOUT! level %d, step %d\n" % (level_num, 4))
+          #print("\nTIMEOUT! level %d, step %d\n" % (level_num, 4))
           continue
 
         if not self.AddFinishingTouches(level_num):
-          print("\nTIMEOUT! level %d, step %d\n" % (level_num, 5))
+          #print("\nTIMEOUT! level %d, step %d\n" % (level_num, 5))
           continue
 
         print("Level #%d complete!" % level_num)
         break
 
-    print(self.sprite_sets)
-    print(self.boss_sprite_sets)
-    print()
+    #print(self.sprite_sets)
+    #print(self.boss_sprite_sets)
+    #print()
 
   # ----- Step 1: Add RoomTypes -----
   def AddRoomTypes(self, level_num: LevelNum, item_staircase_room_list: List[RoomNum],
@@ -701,15 +685,8 @@ class LevelGenerator:
     counter = 0
     while True:
       counter += 1
-      print()
-      print("-- Level %d, Step 1 (Add RoomTypes), Iteration %d ---" % (level_num, counter))
-      #      print()
-      #      print(room_type_pool_template)
-      #      print(transport_stairway_rooms_template)
-      #      PrintListInHex(item_staircase_room_list)
-      #      PrintListInHex(room_nums_template)
-      #      print()
-      #input()
+      #print()
+      #print("-- Level %d, Step 1 (Add RoomTypes), Iteration %d ---" % (level_num, counter))
       random.shuffle(room_type_pool_template)
       random.shuffle(transport_stairway_rooms_template)
       random.shuffle(item_staircase_room_list)
@@ -722,10 +699,10 @@ class LevelGenerator:
           item_staircase_room_list.copy(),
           transport_stairway_rooms_template.copy(),
       ):
-        print("---- Success after %d attempts ---" % counter)
+        #print("---- Success after %d attempts ---" % counter)
         return True
       if counter >= THRESHOLD_1A:
-        print("\n---- TIMEOUT after %d attempts\n" % counter)
+        #print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
   def ReallyAddRoomTypes(self, level_num: LevelNum, room_nums: List[RoomNum],
@@ -906,16 +883,16 @@ class LevelGenerator:
     counter = 0
     while True:
       counter += 1
-      print("--- Level %d, Step 2 (Add WallTypes), Iteration %d ---" % (level_num, counter))
+      #print("--- Level %d, Step 2 (Add WallTypes), Iteration %d ---" % (level_num, counter))
       random.shuffle(wall_type_pool_template)
       random.shuffle(interior_walls)
 
       if self.ReallyAddInteriorWalls(level_num, interior_walls.copy(),
                                      wall_type_pool_template.copy()):
-        print("---- Success after %d attempts ---" % counter)
+        #print("---- Success after %d attempts ---" % counter)
         return True
       if counter >= THRESHOLD_2A:
-        print("\n---- TIMEOUT after %d attempts\n" % counter)
+        #print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
   def ReallyAddInteriorWalls(self, level_num: LevelNum,
@@ -926,11 +903,6 @@ class LevelGenerator:
     #print("Start of for loop")
     #    a = 0
     for (room_num_1, direction_1, room_num_2, direction_2) in interior_walls:
-      #      a += 1
-      #      print()
-      #      print("Assigning wall for room 0x%x, %s wall (and counterpart)" % (room_num_1, direction_1))
-      #      print("%d / %d sets of interior walls to go" %(a, len(interior_walls)))
-      #      print()
       counter = 0
       while True:
         counter += 1
@@ -1015,24 +987,24 @@ class LevelGenerator:
     expected.sort()
     actual = list(rooms_visited.keys())
     actual.sort()
-    print("Expected: vs. Actual: ")
-    PrintListInHex(expected)
-    PrintListInHex(actual)
-    print()
-    if len(self._GetRoomNumsForLevel(level_num)) < len(rooms_visited):
-      print("len(self._GetRoomNumsForLevel(level_num)) %d < len(rooms_visited) %d" %
-            (len(self._GetRoomNumsForLevel(level_num)), len(rooms_visited)))
-      print()
-
-      exit(1)
-    if len(self._GetRoomNumsForLevel(level_num)) != len(rooms_visited):
-      print("len(self._GetRoomNumsForLevel(level_num)) %d != len(rooms_visited) %d" %
-            (len(self._GetRoomNumsForLevel(level_num)), len(rooms_visited)))
+#    print("Expected: vs. Actual: ")
+#    PrintListInHex(expected)
+#    PrintListInHex(actual)
+#    print()
+#    if len(self._GetRoomNumsForLevel(level_num)) < len(rooms_visited):
+#      print("len(self._GetRoomNumsForLevel(level_num)) %d < len(rooms_visited) %d" %
+#            (len(self._GetRoomNumsForLevel(level_num)), len(rooms_visited)))
+#      print()
+#
+#      exit(1)
+#    if len(self._GetRoomNumsForLevel(level_num)) != len(rooms_visited):
+#      print("len(self._GetRoomNumsForLevel(level_num)) %d != len(rooms_visited) %d" %
+#            (len(self._GetRoomNumsForLevel(level_num)), len(rooms_visited)))
       #input()
-      return False
-    else:
-      print("len(self._GetRoomNumsForLevel(level_num)) %d == len(rooms_visited) %d" %
-            (len(self._GetRoomNumsForLevel(level_num)), len(rooms_visited)))
+#      return False
+#    else:
+#      print("len(self._GetRoomNumsForLevel(level_num)) %d == len(rooms_visited) %d" %
+#            (len(self._GetRoomNumsForLevel(level_num)), len(rooms_visited)))
     #input()
     return True
 
@@ -1065,16 +1037,16 @@ class LevelGenerator:
     counter = 0
     while True:
       counter += 1
-      print("--- Level %d, Step 3 (Add Enemies), Iteration %d ---" % (level_num, counter))
+#      print("--- Level %d, Step 3 (Add Enemies), Iteration %d ---" % (level_num, counter))
       random.shuffle(enemy_pool_template)
       random.shuffle(room_nums)
       if self.ReallyAddEnemies(level_num, room_nums.copy(), enemy_pool_template.copy()):
-        print("---- Success after %d attempts ---" % counter)
+#        print("---- Success after %d attempts ---" % counter)
         #input("sds")
         return True
       #input("sds")
       if counter >= THRESHOLD_3A:
-        print("\n---- TIMEOUT after %d attempts\n" % counter)
+#        print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
   def ReallyAddEnemies(self, level_num: LevelNum, room_nums: List[RoomNum],
@@ -1118,7 +1090,7 @@ class LevelGenerator:
   # Step 4
   def AddItems(self, level_num: LevelNum, major_item_pool_template: List[Item]) -> bool:
     assert level_num in Range.VALID_LEVEL_NUMBERS
-    print("Add Items")
+#    print("Add Items")
     num_rooms = len(self._GetRoomNumsForLevel(level_num))
     num_keys = min(4, math.floor(num_rooms / 5))
     minor_item_pool_template = [Item.MAP, Item.COMPASS]
@@ -1132,16 +1104,16 @@ class LevelGenerator:
       minor_item_pool_template.append(random.choice([Item.BOMBS, Item.FIVE_RUPEES, Item.NOTHING]))
     counter = 0
     while True:
-      print("-- Level %d, Step 4 (Add Enemies), Iteration %d ---" % (level_num, counter))
+#      print("-- Level %d, Step 4 (Add Enemies), Iteration %d ---" % (level_num, counter))
       counter += 1
       random.shuffle(minor_item_pool_template)
       random.shuffle(major_item_pool_template)
       if self.ReallyAddItems(level_num, major_item_pool_template.copy(),
                              minor_item_pool_template.copy()):
-        print("\n---- Success after %d attempts\n" % counter)
+#        print("\n---- Success after %d attempts\n" % counter)
         return True
       if counter >= THRESHOLD_4A:
-        print("\n---- TIMEOUT after %d attempts\n" % counter)
+#        print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
   def ReallyAddItems(self, level_num: LevelNum, major_item_pool: List[Item],
@@ -1257,7 +1229,7 @@ class LevelGenerator:
   def AddFinishingTouches(self, level_num: LevelNum) -> bool:
     if level_num != LevelNum.LEVEL_9:
       return True
-    print("---- AddFinishingTouches Level %s" % level_num)
+#    print("---- AddFinishingTouches Level %s" % level_num)
     start_room_num = self.level_start_rooms[level_num]
     entrance_dir = self.level_entrance_directions[level_num]
     grid_id = self._GetGridIdForLevel(level_num)
@@ -1301,11 +1273,11 @@ class LevelGenerator:
     assert triforce_check_room_num in Range.VALID_ROOM_NUMBERS
     start_room = self._GetRoom(start_room_num, grid_id)
     check_diff = triforce_check_room_num - start_room_num
-    print(start_room_num)
-    print(triforce_check_room_num)
-    print()
-    print(check_diff)
-    print()
+#    print(start_room_num)
+#    print(triforce_check_room_num)
+#    print()
+#    print(check_diff)
+#    print()
     assert check_diff in [-0x10, -0x1, 0x1, 0x10]
     check_direction = Direction(check_diff)
     for direction in Range.CARDINAL_DIRECTIONS:
@@ -1364,7 +1336,7 @@ class LevelGenerator:
     result = self._PerformEnemyChecks(room_type, enemy)
     if result.message == "OK":
       return True
-    print(result.message)
+#    print(result.message)
     return False
 
   def _PerformEnemyChecks(self, room_type: RoomType, enemy: Enemy) -> CheckResult:
@@ -1397,8 +1369,8 @@ class LevelGenerator:
     if room_type.CanHavePushBlock() and enemy.IsGleeok():
       return CheckResult("Gleeoks don't fire in rooms with blocks, we think.")
     if (enemy.HasTraps() and room_type.IsBadForTraps()):
-      print(enemy)
-      print(room_type)
+  #    print(enemy)
+  #    print(room_type)
       #input()
       return CheckResult("Traps in a bad room for traps")
     if (enemy.IsBoss() or enemy == Enemy.RUPEE_BOSS) and room_type.IsBadForBosses():
@@ -1423,7 +1395,7 @@ class LevelGenerator:
     result = self._PerformRoomWideWallTypeChecks(room)
     if result.message == "OK":
       return True
-    print(result.message)
+    #print(result.message)
     return False
 
   def _PerformRoomWideWallTypeChecks(self, room: Room) -> CheckResult:

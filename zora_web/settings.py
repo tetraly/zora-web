@@ -29,7 +29,7 @@ SECRET_KEY = local.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = local.DEBUG
 
-ALLOWED_HOSTS = ['localhost', '.herokuapp.com'] 
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.herokuapp.com'] 
 
 # Application definition
 
@@ -132,7 +132,6 @@ TIME_ZONE = local.TIME_ZONE
 USE_I18N = True
 
 USE_L10N = True
-data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjUiIHZpZXdCb3g9IjAgMCAyNSAyNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+Y2xvc2U8L3RpdGxlPjxwYXRoIGQ9Ik0yNC44MDUgMi4zMThMMjIuNjgyLjE5NyAxMi41IDEwLjM3OSAyLjMxOC4xOTcuMTk3IDIuMzE4IDEwLjM3OSAxMi41LjE5NyAyMi42ODJsMi4xMjEgMi4xMjFMMTIuNSAxNC42MjFsMTAuMTgyIDEwLjE4MiAyLjEyMS0yLjEyMUwxNC42MjEgMTIuNSAyNC44MDUgMi4zMTh6IiBmaWxsPSIjRkZGIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
