@@ -106,11 +106,25 @@ class ZoraRandomizer():
 
     if self.settings.IsEnabled(flags.RandomizeLevelText) or self.settings.IsEnabled(
         flags.SpeedUpText):
-      random_level_text = random.choice(
-          [
-            #'palace', 'random',  'castle'
-           'house-', 'block-', '_cage-', '_home-', '_maze-', 'shape-', 'kitty-', 'vault-'
-           'thing-', 'world-', '_land-', 'puppy-', '_area-', 'roost-', '_hole-', '_cave-'])
+      random_level_text = random.choice([
+          #'palace', 'random',  'castle'
+          'house-',
+          'block-',
+          '_cage-',
+          '_home-',
+          '_maze-',
+          'shape-',
+          'kitty-',
+          'vault-'
+          'thing-',
+          'world-',
+          '_land-',
+          'puppy-',
+          '_area-',
+          'roost-',
+          '_hole-',
+          '_cave-'
+      ])
       text_data_table = TextDataTable(
           "very_fast" if self.settings.IsEnabled(flags.SpeedUpText) else "normal",
           random_level_text if self.settings.IsEnabled(flags.RandomizeLevelText) else "level-")

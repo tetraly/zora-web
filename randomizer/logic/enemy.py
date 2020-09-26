@@ -55,7 +55,6 @@ class Enemy(IntEnum):
   RED_LEEVER = 0x10
   ZOLA = 0x11
   PEAHAT = 0x1A
-  FALLING_ROCK_GENERATOR = 0x1E
   GHINI_MAIN = 0x21
   GHINI_SECONDARY = 0x22
   FAIRY = 0x2F
@@ -98,11 +97,20 @@ class Enemy(IntEnum):
 
   def IsInOverworldSpriteSet(self) -> bool:
     return self in [
-        Enemy.BLUE_LYNEL, Enemy.RED_LYNEL, Enemy.BLUE_MOBLIN, Enemy.RED_MOBLIN, Enemy.RED_OCTOROK,
-        Enemy.FAST_RED_OCTOROK, Enemy.BLUE_OCTOROK, Enemy.FAST_BLUE_OCTOROK, Enemy.BLUE_TEKTITE,
-        Enemy.RED_TEKTITE, Enemy.BLUE_LEEVER, Enemy.RED_LEEVER,# Enemy.ZOLA, Enemy.PEAHAT,
+        Enemy.BLUE_LYNEL,
+        Enemy.RED_LYNEL,
+        Enemy.BLUE_MOBLIN,
+        Enemy.RED_MOBLIN,
+        Enemy.RED_OCTOROK,
+        Enemy.FAST_RED_OCTOROK,
+        Enemy.BLUE_OCTOROK,
+        Enemy.FAST_BLUE_OCTOROK,
+        Enemy.BLUE_TEKTITE,
+        Enemy.RED_TEKTITE,
+        Enemy.BLUE_LEEVER,
+        Enemy.RED_LEEVER,  # Enemy.ZOLA, Enemy.PEAHAT,
         #Enemy.FALLING_ROCK_GENERATOR,
-         Enemy.GHINI_MAIN#, Enemy.GHINI_SECONDARY, Enemy.FAIRY
+        Enemy.GHINI_MAIN  #, Enemy.GHINI_SECONDARY, Enemy.FAIRY
     ]
 
   def HasBubbles(self) -> bool:
@@ -266,7 +274,9 @@ class Enemy(IntEnum):
         continue
       if enemy.HasTraps() and random.choice([True, True, True, True, True, True, True, False]):
         continue
-      """if (enemy.IsInAllSpriteSets() or
+        
+      """ Uncomment for mixey glitchy fun sprite enemies
+        if (enemy.IsInAllSpriteSets() or
                 enemy.IsInOverworldSpriteSet() or
                 enemy.IsInGoriyaSpriteSet() or
                 enemy.IsInDarknutSpriteSet() or
@@ -276,7 +286,6 @@ class Enemy(IntEnum):
       """
 
       if ((not must_be_in_sprite_set and enemy.IsInAllSpriteSets()) or
- #         (not must_be_in_sprite_set and enemy.IsInOverworldSpriteSet()) or
           (sprite_set == SpriteSet.GORIYA_SPRITE_SET and enemy.IsInGoriyaSpriteSet()) or
           (sprite_set == SpriteSet.DARKNUT_SPRITE_SET and enemy.IsInDarknutSpriteSet()) or
           (sprite_set == SpriteSet.WIZZROBE_SPRITE_SET and enemy.IsInWizzrobeSpriteSet())):
@@ -284,22 +293,6 @@ class Enemy(IntEnum):
 
   @classmethod
   def RandomBossFromSpriteSet(cls, boss_sprite_set: SpriteSet) -> "Enemy":
-    """return random.choice([
-          Enemy.SINGLE_DODONGO, Enemy.TRIPLE_DODONGO,
-          Enemy.SINGLE_DODONGO, Enemy.TRIPLE_DODONGO,
-           Enemy.SINGLE_DIGDOGGER, Enemy.TRIPLE_DIGDOGGER,
-           Enemy.SINGLE_DIGDOGGER, Enemy.TRIPLE_DIGDOGGER,
-            Enemy.AQUAMENTUS, Enemy.AQUAMENTUS,
-             Enemy.AQUAMENTUS, Enemy.AQUAMENTUS, Enemy.MOLDORM, Enemy.MOLDORM,
-       Enemy.MOLDORM, Enemy.MOLDORM,
-          Enemy.BLUE_GOHMA, Enemy.BLUE_GOHMA, 
-          Enemy.RED_GOHMA,  Enemy.RED_GOHMA,
-           Enemy.MANHANDALA, Enemy.MANHANDALA,
-            Enemy.MANHANDALA, Enemy.MANHANDALA,
-            Enemy.GLEEOK_1, Enemy.GLEEOK_2,
-          Enemy.GLEEOK_3, Enemy.GLEEOK_4
-      ])"""
-
     if boss_sprite_set == SpriteSet.DODONGO_SPRITE_SET:
       return random.choice([
           Enemy.SINGLE_DODONGO, Enemy.TRIPLE_DODONGO, Enemy.SINGLE_DIGDOGGER,

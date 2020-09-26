@@ -10,8 +10,10 @@ from .item import Item
 from .location import Location
 from .settings import Settings
 
+
 class NotAllItemsWereShuffledAndIDontKnowWhyException(Exception):
   pass
+
 
 class ItemRandomizer():
 
@@ -188,11 +190,11 @@ class ItemShuffler():
 
   def ShuffleItems(self) -> None:
     print("Shuffling items")
-#    print(self.item_num_list)
-#    print(len(self.item_num_list))
+    #    print(self.item_num_list)
+    #    print(len(self.item_num_list))
     shuffle(self.item_num_list)
- #   print()
- #   print(self.item_num_list)
+    #   print()
+    #   print(self.item_num_list)
     #input("...")
     for level_or_cave_num in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:
       # Levels 1-8 shuffle a triforce, heart container, and 1-2 stairway items.
@@ -211,6 +213,8 @@ class ItemShuffler():
 
       if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:  # Technically this could be for OW and caves too
         shuffle(self.per_level_item_lists[level_or_cave_num])
+
+
 #    print()
 #    print(self.item_num_list)
     if self.item_num_list:
