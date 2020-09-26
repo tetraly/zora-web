@@ -53,10 +53,10 @@ class ItemRandomizer():
     items.append(self.COAST_ITEM_LOCATION)
     items.append(self.ARMOS_ITEM_LOCATION)
     items.append(self.LETTER_LOCATION)
-    print("Current Shop contents:")
+    #print("Current Shop contents:")
     for shop in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C, CaveType.SHOP_D]:
       for pos in [1, 2, 3]:
-        print("Shop %s pos %d" % (shop, pos))
+        #print("Shop %s pos %d" % (shop, pos))
         loc = Location.CavePosition(shop, pos)
         print(self.data_table.GetCaveItem(loc))
     if self.settings.IsEnabled(flags.ShuffleShopItems):
@@ -67,13 +67,13 @@ class ItemRandomizer():
     return items
 
   def _ReadItemsAndLocationsForUndergroundLevel(self, level_num: LevelNum) -> None:
-    #logging.debug("Reading staircase room data for level %d " % level_num)
+    #debugging.debug("Reading staircase room data for level %d " % level_num)
     #for staircase_room_num in self.data_table.GetLevelStaircaseRoomNumberList(level_num):
-    print("level %d" % level_num)
+    #print("level %d" % level_num)
     level_start_room_num = self.data_table.GetLevelStartRoomNumber(level_num)
     level_entrance_direction = self.data_table.GetLevelEntranceDirection(level_num)
-    print("Traversing level %d.  Start room is %x. Dir is %s " %
-          (level_num, level_start_room_num, level_entrance_direction))
+    #print("Traversing level %d.  Start room is %x. Dir is %s " %
+    #      (level_num, level_start_room_num, level_entrance_direction))
     self._ReadItemsAndLocationsRecursively(level_num, level_start_room_num,
                                            level_entrance_direction)
 
@@ -175,21 +175,22 @@ class ItemShuffler():
       elif item == Item.MAGICAL_BOOMERANG:
         item = Item.BOOMERANG
     if item == Item.TRIFORCE:
-      print("Not adding Triforce")
+      pass
+      #print("Not adding Triforce")
     else:
-      print("Adding item %s" % item)
+      #print("Adding item %s" % item)
       self.item_num_list.append(item)
       self.item_counter += 1
     num_locations = 0
-    print("Num items/locations: %d/%d" % (self.item_counter, self.loc_counter))
+    #print("Num items/locations: %d/%d" % (self.item_counter, self.loc_counter))
 
   def ShuffleItems(self) -> None:
     print("Shuffling items")
-    print(self.item_num_list)
-    print(len(self.item_num_list))
+    #print(self.item_num_list)
+    #print(len(self.item_num_list))
     shuffle(self.item_num_list)
     print()
-    print(self.item_num_list)
+    #print(self.item_num_list)
     #input("...")
     for level_or_cave_num in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:
       # Levels 1-8 shuffle a triforce, heart container, and 1-2 stairway items.
@@ -208,8 +209,8 @@ class ItemShuffler():
 
       if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:  # Technically this could be for OW and caves too
         shuffle(self.per_level_item_lists[level_or_cave_num])
-    print()
-    print(self.item_num_list)
+    #print()
+    #print(self.item_num_list)
     assert not self.item_num_list
 
   def GetAllLocationAndItemData(self) -> Iterable[Tuple[Location, Item]]:

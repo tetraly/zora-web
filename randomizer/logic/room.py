@@ -208,6 +208,11 @@ class Room():
   def SetBossRoarSound(self, roar_sound: bool = True) -> None:
     self._SetRomBits(4, 0x20, 0x01 if roar_sound else 0x00)
 
+  def HasKillingTheBeastOpensShutterDoorsRoomAction(self) -> bool:
+
+    return (self._ReadRomBits(byte_num=3, read_bitmask=0x40) == 0x00 and
+            self._ReadRomBits(byte_num=5, read_bitmask=0x07) == 0x03)
+
   # TODO: This could be re-implemented using math on room_action's value more easily
   def SetRoomAction(self, room_action: RoomAction) -> None:
     if room_action == RoomAction.NO_ROOM_ACTION:

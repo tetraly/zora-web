@@ -26,6 +26,21 @@ class Validator():
     self.settings = settings
     self.inventory = Inventory()
 
+  def _HasInitialWeapon(self) -> bool:
+    #input("Checking for initial weapon")
+    for screen_number in Screen.POSSIBLE_FIRST_WEAPON_SCREENS:
+      level_num_or_cave_type = self.data_table.GetLevelNumberOrCaveType(screen_number)
+      if level_num_or_cave_type in Range.VALID_CAVE_TYPES:
+        cave_type = CaveType(level_num_or_cave_type)
+        if cave_type in [CaveType.WOOD_SWORD_CAVE, CaveType.LETTER_CAVE]:
+          #input("Found %s" % cave_type)
+          location = Location(cave_type=cave_type, position_num=2)
+          if self.data_table.GetCaveItem(location).IsSwordOrWand():
+            return True
+        # else:
+        #   input("Item is %s" % self.data_table.GetCaveItem(location) )
+    return False
+
   def IsSeedValid(self) -> bool:
     log.info("Starting check of whether the seed is valid or not")
     self.inventory.Reset()
@@ -37,6 +52,11 @@ class Validator():
     if self._IsAnIncrementalUpgradeItemAvaliableInAShop():
       print("Incremental upgrade item found in shop")
       return False
+
+    if not self._HasInitialWeapon():
+      print("No initial weapon")
+      return False
+
     while self.inventory.StillMakingProgress():
       num_iterations += 1
       log.info("")
@@ -46,7 +66,7 @@ class Validator():
       self._VisitAccessibleOverworldCaves()
       #print("Kidnapped check")
       #input("")
-      if self.inventory.Has(Item.RESCUED_KIDNAPPED_VIRTUAL_ITEM):
+      if self.inventory.Has(Item.KIDNAPPED_PLACEHOLDER_ITEM):
         log.info("Seed appears to be beatable. :)")
         return True
       if num_iterations > 10:
@@ -154,16 +174,14 @@ class Validator():
 
     if self._CanGetRoomItem(entry_direction, room) and room.HasItem():
       self.inventory.AddItem(room.GetItem(), current_location)
-    if room.GetEnemy() == Enemy.THE_BEAST:
-      if self.inventory.HasBowSilverArrowsAndSword() and self.inventory.Has(Item.LADDER):
-        # TODO: Doesn't address the case where ladder isn't obtained
-        log.info("Got the triforce of power!")
-        self.inventory.AddItem(Item.TRIFORCE_OF_POWER, current_location)
+    if room.GetEnemy() == Enemy.THE_BEAST and self.inventory.HasBowSilverArrowsAndSword():
+      log.info("Got the triforce of power!")
+      self.inventory.AddItem(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM, current_location)
     if room.GetEnemy() == Enemy.THE_KIDNAPPED:
       log.info("Found the kidnapped")
-      if self.inventory.Has(Item.TRIFORCE_OF_POWER):
-        log.info("And rescued the kidnapped! :)")
-        self.inventory.AddItem(Item.RESCUED_KIDNAPPED_VIRTUAL_ITEM, current_location)
+      assert self.inventory.Has(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM)
+      log.info("And rescued the kidnapped! :)")
+      self.inventory.AddItem(Item.KIDNAPPED_PLACEHOLDER_ITEM, current_location)
 
     for direction in (Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH):
       if direction == entry_direction:
@@ -180,15 +198,16 @@ class Validator():
 
   def _CanMove(self, entry_direction: Direction, exit_direction: Direction, level_num: LevelNum,
                room_num: RoomNum, room: Room) -> bool:
-    if not room.GetRoomType().AllowsDoorToDoorMovement(entry_direction, exit_direction,
-                                                       self.inventory.Has(Item.LADDER)):
-      return False
 
     # Hungry enemy's room doesn't have a closed shutter door. So need a special check to similate
     # how it's not possible to move up in the room until the goriya has been properly fed.
     if (exit_direction == Direction.NORTH and room.GetEnemy() == Enemy.HUNGRY_ENEMY and
         not self.inventory.Has(Item.BAIT)):
       log.info("Hungry goriya is still hungry :(")
+      return False
+
+    if not room.GetRoomType().AllowsDoorToDoorMovement(entry_direction, exit_direction,
+                                                       self.inventory.Has(Item.LADDER)):
       return False
 
     wall_type = room.GetWallType(exit_direction)
@@ -216,23 +235,34 @@ class Validator():
     if (room.GetRoomType() == RoomType.VERTICAL_CHUTE_ROOM and
         entry_direction in [Direction.EAST, Direction.WEST]):
       return False
-    if room.GetRoomType() == RoomType.T_ROOM:
+    if room.GetRoomType() in [RoomType.T_ROOM, RoomType.SECOND_QUEST_T_LIKE_ROOM]:
       return False
     return True
 
   def _CanDefeatEnemies(self, room: Room) -> bool:
+    #if room.HasKillingTheBeastOpensShutterDoorsRoomAction():
+      #input("Found a room with L9 room action")
     enemy = room.GetEnemy()
-    if enemy.HasNoEnemiesToKill():
-      return True
-    if enemy == Enemy.TRIFORCE_CHECKER_PLACEHOLDER_ELDER:
-      if self.inventory.GetTriforceCount() < 8:
-        #input("triforce check failed -- %d tringles" % self.inventory.GetTriforceCount())
-        return False
+    if enemy == Enemy.THE_BEAST:
+      if self.inventory.HasBowSilverArrowsAndSword():
+        print("HasBowSilverArrowsAndSword")
       else:
-        pass
-        #input("triforce check passed")
+        print("not HasBowSilverArrowsAndSword")
+      #input("Found the beast")
+    if (room.HasKillingTheBeastOpensShutterDoorsRoomAction() and
+        not self.inventory.Has(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM)):
+      return False
+    if (enemy == Enemy.TRIFORCE_CHECKER_PLACEHOLDER_ELDER and
+        self.inventory.GetTriforceCount() < 8):
+      print("triforce check failed -- %d tringles" % self.inventory.GetTriforceCount())
+      return False
+    #if (enemy == Enemy.TRIFORCE_CHECKER_PLACEHOLDER_ELDER and
+    #    self.inventory.GetTriforceCount() >= 8):
+      #input("YAY!")
     if enemy == Enemy.THE_BEAST and not self.inventory.HasBowSilverArrowsAndSword():
       return False
+    if enemy.HasNoEnemiesToKill():
+      return True
     if enemy.IsDigdogger() and not self.inventory.HasRecorderAndReusableWeapon():
       return False
     if enemy.IsGohma() and not self.inventory.HasBowAndArrows():

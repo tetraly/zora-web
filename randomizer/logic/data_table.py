@@ -28,6 +28,8 @@ class DataTable():
   RECORDER_SCREEN_NUMS_ADDRESS = 0x6010 + NES_FILE_OFFSET
   WHITE_SWORD_REQUIRED_HEARTS_ADDRESS = 0x48FD + NES_FILE_OFFSET
   MAGICAL_SWORD_REQUIRED_HEARTS_ADDRESS = 0x4906 + NES_FILE_OFFSET
+  FIRST_BOMB_UPGRADE_LEVEL_ADDRESS = 0x4AE0 + NES_FILE_OFFSET
+  SECOND_BOMB_UPGRADE_LEVEL_ADDRESS = 0x4AE4 + NES_FILE_OFFSET
 
   LEVEL_METADATA_ADDRESS = 0x19300 + NES_FILE_OFFSET
   LEVEL_METADATA_OFFSET = 0xFC
@@ -178,6 +180,8 @@ class DataTable():
     done = False
     while not done:
       price = random.randrange(75, 125)
+      if price == 100:
+        continue
       quantity = random.randrange(2, 6)
       if price not in range(110, 126) or quantity not in [2, 3]:
         done = True
@@ -195,8 +199,12 @@ class DataTable():
 
     self.misc_data_patch.AddData(0x1ED33, [0x00])
 
+  def SetBombUpgradeLevel(self, level_num: int, first_upgrader: bool) -> None:
+    address = self.FIRST_BOMB_UPGRADE_LEVEL_ADDRESS if first_upgrader else self.SECOND_BOMB_UPGRADE_LEVEL_ADDRESS
+    self.misc_data_patch.AddData(address, [level_num])
+
   def SetTextGroup(self, level_num: int, group_id: str) -> None:
-    assert level_num in range(1,10)
+    assert level_num in range(1, 10)
     assert group_id in ["a", "b"]
     self.misc_data_patch.AddData(self.TEXT_ASSIGNMENT_ADDRESS + 2 * level_num,
                                  [0x23, 0x8A] if group_id == "a" else [0x69, 0x8A])
@@ -312,10 +320,10 @@ class DataTable():
 
   def SetItemPositionsForLevel(self, level_num: LevelNum, item_positions: List[int]) -> None:
     enemy_quantities = []
-    enemy_quantities.append(random.randrange(1, 6))
-    enemy_quantities.append(random.randrange(2, 7))
-    enemy_quantities.append(random.randrange(3, 8))
-    enemy_quantities.append(random.randrange(4, 8))
+    enemy_quantities.append(random.randrange(0, 2))
+    enemy_quantities.append(random.randrange(2, 5))
+    enemy_quantities.append(random.randrange(4, 7))
+    enemy_quantities.append(random.randrange(5, 8))
     enemy_quantities.sort()
 
     assert item_positions[0] == 0x89

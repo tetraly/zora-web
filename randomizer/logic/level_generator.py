@@ -13,6 +13,34 @@ from .location import Location
 from .room import Room
 from .room_type import RoomType
 
+MAIN_THRESHOLD = 25
+
+THRESHOLD_1A = 25
+THRESHOLD_1B = 25
+
+THRESHOLD_2A = 50
+THRESHOLD_2B = 100
+
+THRESHOLD_3A = 25
+THRESHOLD_3B = 25
+
+THRESHOLD_4A = 25
+THRESHOLD_4B = 25
+
+MAIN_THRESHOLD = 500
+
+THRESHOLD_1A = 10
+THRESHOLD_1B = 100
+
+THRESHOLD_2A = 5
+THRESHOLD_2B = 100
+
+THRESHOLD_3A = 5
+THRESHOLD_3B = 100
+
+THRESHOLD_4A = 5
+THRESHOLD_4B = 100
+
 
 def GetNextRoomNum(room_num: RoomNum, direction: Direction) -> RoomNum:
   assert room_num in Range.VALID_ROOM_NUMBERS
@@ -217,10 +245,6 @@ class GridGenerator:
     self.data_table.SetMapData(level_num, map_bytes, thingies, offset)
 
 
-class TimeoutException(Exception):
-  pass
-
-
 class CheckResult(object):
 
   def __init__(self, message: str) -> None:
@@ -394,7 +418,8 @@ class LevelGenerator:
     boss_sprite_set_pool.extend(boss_sprite_sets)
     boss_sprite_set_pool.extend(boss_sprite_sets)
     for unused_counter in range(0, 3):
-      boss_sprite_set_pool.append(random.choice(boss_sprite_sets))
+      boss_sprite_set_pool.append(
+          random.choice([SpriteSet.DODONGO_SPRITE_SET, SpriteSet.GLEEOK_SPRITE_SET]))
     random.shuffle(boss_sprite_set_pool)
     while boss_sprite_set_pool[8] != SpriteSet.PATRA_SPRITE_SET:
       random.shuffle(boss_sprite_set_pool)
@@ -454,29 +479,30 @@ class LevelGenerator:
     assert self.level_position_dict[RoomType.AQUAMENTUS_ROOM] != 3
     assert self.level_position_dict[RoomType.DIAMOND_STAIR_ROOM] == 3
 
-  def _PickStartRoomForLevel(self, level_num: LevelNum  ) -> Tuple[RoomNum, Direction]:
+  def _PickStartRoomForLevel(self, level_num: LevelNum) -> Tuple[RoomNum, Direction]:
     possible_start_rooms: List[Tuple[RoomNum, Direction]] = []
     grid_id = GridId.GetGridIdForLevelNum(level_num)
 
     for room_num in Range.VALID_ROOM_NUMBERS:
-     for entrance_direction in Range.CARDINAL_DIRECTIONS:
-      if (room_num == 0x00 and entrance_direction == Direction.WEST or
-          room_num == 0x7F and entrance_direction == Direction.EAST):
-        continue
-      # Coming down into the top row seems to cause wonky graphical glitches.
-      if entrance_direction == Direction.NORTH and room_num < 0x10:
-        continue
-      if self._GetLevelNumForRoomNum(room_num, grid_id) == level_num:
-        potential_gateway = GetNextRoomNum(room_num, entrance_direction)
-        if (potential_gateway not in Range.VALID_ROOM_NUMBERS or
-            level_num != self._GetLevelNumForRoomNum(potential_gateway, grid_id)):
-          possible_start_rooms.append((room_num, entrance_direction))
+      for entrance_direction in Range.CARDINAL_DIRECTIONS:
+        if (room_num == 0x00 and entrance_direction == Direction.WEST or
+            room_num == 0x7F and entrance_direction == Direction.EAST):
+          continue
+        # Coming down into the top row seems to cause wonky graphical glitches.
+        if entrance_direction == Direction.NORTH and room_num < 0x10:
+          continue
+        if self._GetLevelNumForRoomNum(room_num, grid_id) == level_num:
+          potential_gateway = GetNextRoomNum(room_num, entrance_direction)
+          if (potential_gateway not in Range.VALID_ROOM_NUMBERS or
+              level_num != self._GetLevelNumForRoomNum(potential_gateway, grid_id)):
+            possible_start_rooms.append((room_num, entrance_direction))
     return random.choice(possible_start_rooms)
 
   def GenerateLevelStartRooms(self) -> None:
     for level_num in Range.VALID_LEVEL_NUMBERS:
       #entrance_direction = Direction.RandomCardinalDirection()
-      (start_room, entrance_direction) = self._PickStartRoomForLevel(level_num) #, entrance_direction)
+      (start_room,
+       entrance_direction) = self._PickStartRoomForLevel(level_num)  #, entrance_direction)
       print("Chose start room %x for level %d" % (start_room, level_num))
       print("Direction is %s" % entrance_direction)
       self.data_table.SetStartRoomDataForLevel(level_num, start_room, entrance_direction)
@@ -545,6 +571,11 @@ class LevelGenerator:
       elder_assignments[level_pool_b[n]].append(elder_group_b.pop(0))
     assert not elder_group_a and not elder_group_b
 
+    found_first_bomb_upgrader = False
+    for level_num in range(1, 9):
+      if Enemy.BOMB_UPGRADER in elder_assignments[level_num]:
+        self.data_table.SetBombUpgradeLevel(level_num, found_first_bomb_upgrader)
+        found_first_bomb_upgrader = True
     """
     for level_num in level_pool_a:
       self.data_table.SetTextGroup(level_num, "a")
@@ -554,9 +585,8 @@ class LevelGenerator:
       self.data_table.SetTextGroup(level_num, "b")
     """
     # For debugging bomb upgrades
-    for level_num in [1,2,3,4,5,6,7,8]:
+    for level_num in [1, 2, 3, 4, 5, 6, 7, 8]:
       self.data_table.SetTextGroup(level_num, "a")
-
 
     # 2) Items
     major_item_pool = [
@@ -598,7 +628,7 @@ class LevelGenerator:
       counter = 0
       while True:
         counter += 1
-        if counter > 15:
+        if counter > MAIN_THRESHOLD:
           print("Reached main counter timeout")
           exit()
         if not self.AddRoomTypes(level_num,
@@ -673,12 +703,12 @@ class LevelGenerator:
       counter += 1
       print()
       print("-- Level %d, Step 1 (Add RoomTypes), Iteration %d ---" % (level_num, counter))
-#      print()
-#      print(room_type_pool_template)
-#      print(transport_stairway_rooms_template)
-#      PrintListInHex(item_staircase_room_list)
-#      PrintListInHex(room_nums_template)
-#      print()
+      #      print()
+      #      print(room_type_pool_template)
+      #      print(transport_stairway_rooms_template)
+      #      PrintListInHex(item_staircase_room_list)
+      #      PrintListInHex(room_nums_template)
+      #      print()
       #input()
       random.shuffle(room_type_pool_template)
       random.shuffle(transport_stairway_rooms_template)
@@ -694,7 +724,7 @@ class LevelGenerator:
       ):
         print("---- Success after %d attempts ---" % counter)
         return True
-      if counter >= 100:
+      if counter >= THRESHOLD_1A:
         print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
@@ -717,7 +747,7 @@ class LevelGenerator:
 
         if self._RoomTypeChecksPass(level_num, room_num, room):
           break
-        if counter >= 200:
+        if counter >= THRESHOLD_1B:
           return False
 
       assert room_type == room_type_pool.pop(0)
@@ -769,9 +799,10 @@ class LevelGenerator:
         room.SetInnerPalette(DungeonPalette.WATER)
       elif room.HasStairs():
         room.SetInnerPalette(DungeonPalette.WATER)
-      elif room_type in [  RoomType.ELDER_PLACEHOLDER_ROOM_TYPE,
-  RoomType.HUNGRY_ENEMY_PLACEHOLDER_ROOM_TYPE ,
-  RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE ]:
+      elif room_type in [
+          RoomType.ELDER_PLACEHOLDER_ROOM_TYPE, RoomType.HUNGRY_ENEMY_PLACEHOLDER_ROOM_TYPE,
+          RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE
+      ]:
         room.SetInnerPalette(DungeonPalette.BLACK_AND_WHITE)
       else:
         room.SetInnerPalette(DungeonPalette.PRIMARY)
@@ -835,7 +866,7 @@ class LevelGenerator:
     for room_num in Range.VALID_ROOM_NUMBERS:
       if self._GetLevelNumForRoomNum(room_num, grid_id) == level_num:
         east_room = GetNextRoomNum(room_num, Direction.EAST)
-        if room_num % 0x10 != 0xF and self._GetLevelNumForRoomNum(east_room, grid_id) == level_num:              
+        if room_num % 0x10 != 0xF and self._GetLevelNumForRoomNum(east_room, grid_id) == level_num:
           interior_walls.append((room_num, Direction.EAST, east_room, Direction.WEST))
           self._GetRoom(room_num, grid_id).SetWallType(Direction.EAST, WallType.OPEN_DOOR)
           self._GetRoom(east_room, grid_id).SetWallType(Direction.WEST, WallType.OPEN_DOOR)
@@ -844,18 +875,16 @@ class LevelGenerator:
           interior_walls.append((room_num, Direction.SOUTH, south_room, Direction.NORTH))
           self._GetRoom(room_num, grid_id).SetWallType(Direction.SOUTH, WallType.OPEN_DOOR)
           self._GetRoom(south_room, grid_id).SetWallType(Direction.NORTH, WallType.OPEN_DOOR)
-                
-
 
     # 2) Decide on the number of interior walls should be non-open doors. Create a pool of walls
     #    with a random-ish number of each wall types.
     wall_type_pool_template: List[WallType] = []
     num_interior_walls = len(interior_walls)
-    num_bombholes = random.randrange(2, math.floor(num_interior_walls / 5)+1)
-    num_lockeddoors = random.randrange(2, math.floor(num_interior_walls / 5)+1)
-    num_shutterdoors = random.randrange(2, math.floor(num_interior_walls / 5)+1)
-    num_solidwalls = random.randrange(0, math.floor(num_interior_walls / 6)+1)
-    if level_num in [LevelNum.LEVEL_7, LevelNum.LEVEL_8]:
+    num_bombholes = random.randrange(2, math.floor(num_interior_walls / 5) + 1)
+    num_lockeddoors = random.randrange(2, math.floor(num_interior_walls / 5) + 1)
+    num_shutterdoors = random.randrange(2, math.floor(num_interior_walls / 5) + 1)
+    num_solidwalls = random.randrange(0, math.floor(num_interior_walls / 6) + 1)
+    if level_num in [LevelNum.LEVEL_7, LevelNum.LEVEL_8, LevelNum.LEVEL_9]:
       num_solidwalls = random.randrange(6, math.floor(num_interior_walls / 5) + 1)
     #if level_num == LevelNum.LEVEL_9:
     #  num_solidwalls = 40
@@ -885,7 +914,7 @@ class LevelGenerator:
                                      wall_type_pool_template.copy()):
         print("---- Success after %d attempts ---" % counter)
         return True
-      if counter >= 50:
+      if counter >= THRESHOLD_2A:
         print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
@@ -905,7 +934,7 @@ class LevelGenerator:
       counter = 0
       while True:
         counter += 1
-        if counter >= 100:
+        if counter >= THRESHOLD_2B:
           #print("---Inner counter timeout----")
           #print()
           return False
@@ -916,27 +945,27 @@ class LevelGenerator:
 
         #print("---")
         if level_num == LevelNum.LEVEL_9:
-         if room_1.GetRoomType() == RoomType.ENTRANCE_ROOM:
-          if room_2.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
-            if wall_type != WallType.OPEN_DOOR:
+          if room_1.GetRoomType() == RoomType.ENTRANCE_ROOM:
+            if room_2.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
+              if wall_type != WallType.OPEN_DOOR:
+                continue
+            elif wall_type != WallType.SHUTTER_DOOR:
               continue
-          elif wall_type != WallType.SHUTTER_DOOR:
+          if room_2.GetRoomType() == RoomType.ENTRANCE_ROOM:
+            if room_1.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
+              if wall_type != WallType.OPEN_DOOR:
+                continue
+            elif wall_type != WallType.SHUTTER_DOOR:
               continue
-         if room_2.GetRoomType() == RoomType.ENTRANCE_ROOM:
           if room_1.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
-            if wall_type != WallType.OPEN_DOOR:
-              continue
-          elif wall_type != WallType.SHUTTER_DOOR:
-              continue
-         if room_1.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
-          if room_2.GetRoomType() != RoomType.ENTRANCE_ROOM:
-            if wall_type not in [WallType.SHUTTER_DOOR, WallType.SOLID_WALL]:
-              continue
-         if room_2.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
-          if room_1.GetRoomType() != RoomType.ENTRANCE_ROOM:
-            if wall_type not in [WallType.SHUTTER_DOOR, WallType.SOLID_WALL]:
-              continue
-        
+            if room_2.GetRoomType() != RoomType.ENTRANCE_ROOM:
+              if wall_type not in [WallType.SHUTTER_DOOR, WallType.SOLID_WALL]:
+                continue
+          if room_2.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
+            if room_1.GetRoomType() != RoomType.ENTRANCE_ROOM:
+              if wall_type not in [WallType.SHUTTER_DOOR, WallType.SOLID_WALL]:
+                continue
+
         if (self._SingleWallTypeChecksPass(room_1.GetRoomType(), direction_1, wall_type,
                                            room_1.HasStairs()) and
             self._SingleWallTypeChecksPass(room_2.GetRoomType(), direction_2, wall_type,
@@ -1016,8 +1045,8 @@ class LevelGenerator:
 
     enemy_pool_template: List[Enemy] = []
     enemy_pool_template.extend(elders_list)
-    enemy_pool_template.append(Enemy.NOTHING)
-    enemy_pool_template.append(Enemy.NOTHING)
+    #    enemy_pool_template.append(Enemy.NOTHING)
+    #    enemy_pool_template.append(Enemy.NOTHING)
     enemy_pool_template.append(Enemy.NOTHING)
     enemy_pool_template.append(Enemy.NOTHING)
     if level_num == LevelNum.LEVEL_9:
@@ -1044,7 +1073,7 @@ class LevelGenerator:
         #input("sds")
         return True
       #input("sds")
-      if counter >= 100:
+      if counter >= THRESHOLD_3A:
         print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
@@ -1069,7 +1098,7 @@ class LevelGenerator:
 
 
 #       print("")
-        if counter >= 200:
+        if counter >= THRESHOLD_3B:
           return False
       assert enemy == enemy_pool.pop(0)
       #print("Enemies left to place: %d" % len(enemy_pool))
@@ -1077,7 +1106,7 @@ class LevelGenerator:
       #print("Placing %s in room 0x%x" % (enemy, room_num))
       room.SetEnemy(enemy)
       if enemy == [Enemy.SINGLE_DODONGO, Enemy.TRIPLE_DODONGO]:
-        room.SetEnemyQuantityCode(random.randrange(0, 1))
+        room.SetEnemyQuantityCode(0)
       elif enemy.HasBubbles():
         room.SetEnemyQuantityCode(random.randrange(2, 3))
       else:
@@ -1093,7 +1122,9 @@ class LevelGenerator:
     num_rooms = len(self._GetRoomNumsForLevel(level_num))
     num_keys = min(4, math.floor(num_rooms / 5))
     minor_item_pool_template = [Item.MAP, Item.COMPASS]
-    if level_num != 9:
+    if level_num == LevelNum.LEVEL_9:
+      minor_item_pool_template.extend([Item.NOTHING, Item.NOTHING])
+    else:
       minor_item_pool_template.extend([Item.TRIFORCE, Item.HEART_CONTAINER])
     for unused_counter in range(num_keys):
       minor_item_pool_template.append(Item.KEY)
@@ -1109,7 +1140,7 @@ class LevelGenerator:
                              minor_item_pool_template.copy()):
         print("\n---- Success after %d attempts\n" % counter)
         return True
-      if counter >= 100:
+      if counter >= THRESHOLD_4A:
         print("\n---- TIMEOUT after %d attempts\n" % counter)
         return False
 
@@ -1127,18 +1158,23 @@ class LevelGenerator:
         if self._ItemChecksPass(item, room):
           assert item == minor_item_pool.pop(0)
           break
-        if counter >= 100:
+        if counter >= THRESHOLD_4B:
           return False
 
       room.SetItem(item)
 
-      if item == Item.TRIFORCE:
+      if item == Item.TRIFORCE or room.GetEnemy() == Enemy.THE_KIDNAPPED:
         self.data_table.UpdateCompassPointer(Location(level_num=level_num, room_num=room_num))
-      #if item == Item.HEART_CONTAINER:
-      #  room.SetBossRoarSound(True)
-      #else:
-      #  room.SetBossRoarSound(False)
-        
+      if item == Item.HEART_CONTAINER:
+        room.SetBossRoarSound(False)
+        #room.SetBossRoarSound(True)
+        if (random.choice([True, False])):
+          room.SetOuterPalette(DungeonPalette.ACCENT_COLOR)
+        else:
+          room.SetInnerPalette(DungeonPalette.ACCENT_COLOR)
+      else:
+        room.SetBossRoarSound(False)
+      #room.SetBossRoarSound(False)
 
       if room.HasStairs():
         staircase_room_num = room.GetStairsDestination()
@@ -1150,7 +1186,6 @@ class LevelGenerator:
       room.SetRoomAction(self.GetRoomAction(room, item))
     for room_num in room_nums:
       if room.GetEnemy() == Enemy.THE_BEAST:
-        room.SetItem(Item.NOTHING)
         for direction in Range.CARDINAL_DIRECTIONS:
           if room.GetWallType(direction) in [
               WallType.OPEN_DOOR, WallType.LOCKED_DOOR_1, WallType.LOCKED_DOOR_2
@@ -1207,6 +1242,10 @@ class LevelGenerator:
   def _PerformItemChecks(self, item: Item, room: Room) -> CheckResult:
     enemy = room.GetEnemy()
     if item != Item.NOTHING:
+      if enemy == Enemy.THE_BEAST and item != Item.NOTHING:
+        return CheckResult("The beast needs their power!")
+      if enemy == Enemy.THE_KIDNAPPED and item != Item.NOTHING:
+        return CheckResult("No random bombs in the kidnapped's room!")
       if enemy.IsElderOrHungryEnemy() or enemy == Enemy.TRIFORCE_CHECKER_PLACEHOLDER_ELDER:
         return CheckResult("An Elder or Hungry Enemy can't have a room item")
       if room.GetRoomType() in [RoomType.ENTRANCE_ROOM, RoomType.TURNSTILE_ROOM]:
@@ -1231,12 +1270,20 @@ class LevelGenerator:
       if room.GetEnemy() == Enemy.THE_BEAST:
         room.SetDarkRoomBit(True)
         room.SetInnerPalette(DungeonPalette.WATER)
+        room.SetRoomAction(RoomAction.KILLING_THE_BEAST_OPENS_SHUTTER_DOORS)
         for direction in Range.CARDINAL_DIRECTIONS:
+          if room.GetWallType(direction) in [
+              WallType.OPEN_DOOR, WallType.LOCKED_DOOR_1, WallType.LOCKED_DOOR_2
+          ]:
+            room.SetWallType(direction, WallType.SHUTTER_DOOR)
           next_room_num = GetNextRoomNum(room_num, direction)
+          assert room.GetWallType(direction) != WallType.OPEN_DOOR
           if next_room_num in room_nums:
             self._GetRoom(next_room_num, grid_id).SetBossRoarSound(True)
+            self._GetRoom(next_room_num, grid_id).SetOuterPalette(DungeonPalette.ACCENT_COLOR)
       # Add shutter doors around the kidnapped
       if room.GetEnemy() == Enemy.THE_KIDNAPPED:
+        room.SetRoomAction(RoomAction.NO_ROOM_ACTION)
         for direction in Range.CARDINAL_DIRECTIONS:
           if room.GetWallType(direction) == WallType.SOLID_WALL:
             continue
@@ -1248,20 +1295,24 @@ class LevelGenerator:
             next_room.SetWallType(direction.Reverse(), WallType.SHUTTER_DOOR)
       if room.GetRoomType() == RoomType.TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE:
         triforce_check_room_num = room_num
-        input("Found tri check")
-    
-    # Make sure there isn't a way around the triforce check  
-    assert triforce_check_room_num in Range.VALID_ROOM_NUMBERS  
+        #input("Found tri check")
+
+    # Make sure there isn't a way around the triforce check
+    assert triforce_check_room_num in Range.VALID_ROOM_NUMBERS
     start_room = self._GetRoom(start_room_num, grid_id)
     check_diff = triforce_check_room_num - start_room_num
-    assert check_diff in [-0x1, 0x1, 0x10]
+    print(start_room_num)
+    print(triforce_check_room_num)
+    print()
+    print(check_diff)
+    print()
+    assert check_diff in [-0x10, -0x1, 0x1, 0x10]
     check_direction = Direction(check_diff)
     for direction in Range.CARDINAL_DIRECTIONS:
-      input(direction)
+      #input(direction)
       if direction == entrance_dir or direction == check_direction:
         assert start_room.GetWallType(direction) == WallType.OPEN_DOOR
       else:
-        assert start_room.GetWallType(direction) == WallType.SOLID_WALL
         start_room.SetWallType(direction, WallType.SOLID_WALL)
     return True
 
@@ -1343,8 +1394,13 @@ class LevelGenerator:
       return CheckResult("Lanmolas in rooms that are bad for them")
     if room_type.IsPartitionedByBlockWalls() and not enemy.CanMoveThroughBlockWalls():
       return CheckResult("Enemies that can't move block walls in partitioned rooms")
-    if (enemy.HasTraps() or enemy.HasRedWizzrobes() and room_type.IsBadForTraps()):
-      return CheckResult("Traps/red wizzies in a bad room for traps")
+    if room_type.CanHavePushBlock() and enemy.IsGleeok():
+      return CheckResult("Gleeoks don't fire in rooms with blocks, we think.")
+    if (enemy.HasTraps() and room_type.IsBadForTraps()):
+      print(enemy)
+      print(room_type)
+      #input()
+      return CheckResult("Traps in a bad room for traps")
     if (enemy.IsBoss() or enemy == Enemy.RUPEE_BOSS) and room_type.IsBadForBosses():
       return CheckResult("Boss in a room that's not 'open' enough for boss fights")
     if (enemy.HasBlueWizzrobes() or enemy.IsBoss()) and room_type.HasBeamoses():
@@ -1372,6 +1428,17 @@ class LevelGenerator:
 
   def _PerformRoomWideWallTypeChecks(self, room: Room) -> CheckResult:
     room_type = room.GetRoomType()
+    if room_type == RoomType.TURNSTILE_ROOM:
+      if (room.GetWallType(Direction.NORTH) == WallType.SOLID_WALL and
+          room.GetWallType(Direction.SOUTH) == WallType.SOLID_WALL and
+          room.GetWallType(Direction.EAST) != WallType.SOLID_WALL and
+          room.GetWallType(Direction.WEST) != WallType.SOLID_WALL):
+        return CheckResult("North-South only Turnstile room")
+      if (room.GetWallType(Direction.NORTH) != WallType.SOLID_WALL and
+          room.GetWallType(Direction.SOUTH) != WallType.SOLID_WALL and
+          room.GetWallType(Direction.EAST) == WallType.SOLID_WALL and
+          room.GetWallType(Direction.WEST) == WallType.SOLID_WALL):
+        return CheckResult("East-West only Turnstile room")
     if (room_type == RoomType.T_ROOM and
         room.GetWallType(Direction.NORTH) == WallType.SOLID_WALL and
         room.GetWallType(Direction.WEST) == WallType.SOLID_WALL and

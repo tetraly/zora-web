@@ -24,19 +24,28 @@ class ZoraRandomizer():
 
   def Randomize(self) -> None:
     random.seed(self.seed)
-    self.data_table.ResetToVanilla()
-    self.level_generator.Generate()
 
-    while True:
-      print()
-      print("Re-randomizing items")
-      print()
-      self.item_randomizer.Randomize()
-      print()
-      print("Back to Validating")
-      print()
-      if self.validator.IsSeedValid():
-        break
+    done = False
+    while not done:
+      self.data_table.ResetToVanilla()
+      self.level_generator = LevelGenerator(self.data_table)
+      self.level_generator.Generate()
+
+      counter = 0
+      while True:
+        counter += 1
+        print()
+        print("Re-randomizing items")
+        print()
+        self.item_randomizer.Randomize()
+        print()
+        print("Back to Validating")
+        print()
+        if self.validator.IsSeedValid():
+          done = True
+          break
+        if counter > 100:
+          break
 
   def GetPatch(self) -> Patch:
     patch = self.data_table.GetPatch()
@@ -62,7 +71,8 @@ class ZoraRandomizer():
       patch.AddData(0x6B49, [0x11, 0x12, 0x13])  # Swords
       patch.AddData(0x6B4E, [0x11, 0x12])  # Candles
       patch.AddData(0x6B50, [0x11, 0x12])  # Arrows
-     # patch.AddData(0x6B5A, [0x11, 0x12])  # Rings
+      # patch.AddData(0x6B5A, [0x11, 0x12])  # Rings
+      patch.AddData(0x6B65, [0x11, 0x12])  # Boomerangs
 
     # Change "no item" code from 0x03 (Mags) to 0x0E (Triforce of Power)
     patch.AddData(0x1785F, [0x0E])
@@ -93,7 +103,10 @@ class ZoraRandomizer():
     if self.settings.IsEnabled(flags.RandomizeLevelText) or self.settings.IsEnabled(
         flags.SpeedUpText):
       random_level_text = random.choice(
-          ['palace', 'house-', 'block-', 'random', 'cage_-', 'home_-', 'castle'])
+          [
+            #'palace', 'random',  'castle'
+           'house-', 'block-', '_cage-', '_home-', '_maze-', 'shape-', 'kitty-', 'vault-'
+           'thing-', 'world-', '_land-', 'puppy-', '_area-', 'roost-', '_hole-', '_cave-'])
       text_data_table = TextDataTable(
           "very_fast" if self.settings.IsEnabled(flags.SpeedUpText) else "normal",
           random_level_text if self.settings.IsEnabled(flags.RandomizeLevelText) else "level-")

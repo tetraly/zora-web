@@ -45,15 +45,20 @@ class Inventory():
         Item.FIVE_RUPEES, Item.RUPEE, Item.SINGLE_HEART
     ]:
       return
-    assert item in range(0, 0x21) or item in [0x40, 0x41]  # Includes red potion 0x20
+    assert item in range(0, 0x21) or item in [
+        Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM, Item.KIDNAPPED_PLACEHOLDER_ITEM
+    ]
     if item_location.GetUniqueIdentifier() in self.item_locations:
       return
     self.item_locations.add(item_location.GetUniqueIdentifier())
 
     self.SetStillMakingProgressBit()
 
-    if item == Item.TRIFORCE_OF_POWER:
+    if item == Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM:
       log.warning("Found Triforce of Power in L%d Room %x", item_location.GetLevelNum(),
+                  item_location.GetRoomNum())
+    elif item == Item.KIDNAPPED_PLACEHOLDER_ITEM:
+      log.warning("Found Kidnapped in L%d Room %x", item_location.GetLevelNum(),
                   item_location.GetRoomNum())
     elif item == Item.HEART_CONTAINER:
       self.num_heart_containers += 1

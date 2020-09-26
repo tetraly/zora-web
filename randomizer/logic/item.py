@@ -38,9 +38,9 @@ class Item(IntEnum):
   RED_POTION = 0x20
   SINGLE_HEART = 0x22
   OVERWORLD_NO_ITEM = 0x3F
-  # Not actual codes
-  TRIFORCE_OF_POWER = 0x40
-  RESCUED_KIDNAPPED_VIRTUAL_ITEM = 0x41
+  # Not actual codes -- only for Inventory class
+  TRIFORCE_OF_POWER_PLACEHOLDER_ITEM = 0x3D
+  KIDNAPPED_PLACEHOLDER_ITEM = 0x3E
 
   def IsMajorItem(self) -> bool:
     return self in [
@@ -57,3 +57,6 @@ class Item(IntEnum):
         Item.WOOD_ARROWS, Item.SILVER_ARROWS, Item.BLUE_RING, Item.RED_RING, Item.BOOMERANG,
         Item.MAGICAL_BOOMERANG
     ]
+
+  def IsSwordOrWand(self) -> bool:
+    return self in [Item.WOOD_SWORD, Item.WHITE_SWORD, Item.MAGICAL_SWORD, Item.WAND]

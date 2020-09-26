@@ -101,11 +101,21 @@ class RoomType(IntEnum):
 
   def CanHaveStairs(self) -> bool:
     return self in [
-        RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.DIAMOND_STAIR_ROOM, RoomType.DOUBLE_BLOCK,
-        RoomType.FIVE_PAIR_ROOM, RoomType.GOHMA_ROOM, RoomType.GRID_ROOM, RoomType.HORIZONTAL_LINES,
-        RoomType.MAZE_ROOM, RoomType.NARROW_STAIR_ROOM, RoomType.REVERSE_C,
-        RoomType.SINGLE_BLOCK_ROOM, RoomType.SPIKE_TRAP_ROOM, RoomType.SPIRAL_STAIR_ROOM,
-        RoomType.VERTICAL_LINES, RoomType.ZIGZAG_ROOM
+        #RoomType.CIRCLE_BLOCK_WALL_ROOM,
+        RoomType.DIAMOND_STAIR_ROOM,
+        RoomType.DOUBLE_BLOCK,
+        RoomType.FIVE_PAIR_ROOM,
+        RoomType.GOHMA_ROOM,
+        RoomType.GRID_ROOM,
+        RoomType.HORIZONTAL_LINES,
+        RoomType.MAZE_ROOM,
+        RoomType.NARROW_STAIR_ROOM,
+        RoomType.REVERSE_C,
+        RoomType.SINGLE_BLOCK_ROOM,
+        RoomType.SPIKE_TRAP_ROOM,
+        RoomType.SPIRAL_STAIR_ROOM,
+        RoomType.VERTICAL_LINES,
+        RoomType.ZIGZAG_ROOM
     ]
 
   def NeedsOffCenterStairReturnPosition(self) -> bool:
@@ -199,7 +209,7 @@ class RoomType(IntEnum):
         continue
       if room_type.IsBadForTraps() and random.choice([True, True, True, False]):
         continue
-      if room_type.IsBadForBosses() and random.choice([True, True, True, False]):
+      if room_type.IsBadForBosses() and random.choice([True, True, False]):
         continue
       return room_type
 

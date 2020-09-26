@@ -37,8 +37,11 @@ class TextDataTable():
     assert len(self.phrase) == 6, "The level prefix must be six characters long."
     if self.phrase.lower() == 'level-':
       return  # No need to replace the existing text with the same text.
+    assert len(self.__ascii_string_to_bytes(self.phrase))  == 6
+    print (self.phrase)
 
     self.patch.AddData(self.TEXT_LEVEL_ADDRESS, self.__ascii_string_to_bytes(self.phrase))
+    print(self.__ascii_string_to_bytes(self.phrase))
 
   def __ascii_string_to_bytes(self, phrase: str) -> List[int]:
     """Convert the string to a form the game can understand."""
