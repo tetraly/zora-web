@@ -3,6 +3,7 @@ from typing import Dict, List
 import math
 import random
 from .direction import Direction
+from .enemy import Enemy
 
 
 class RoomType(IntEnum):
@@ -53,6 +54,21 @@ class RoomType(IntEnum):
   TRIFORCE_CHECK_PLACEHOLDER_ROOM_TYPE = 0x33
   TRANSPORT_STAIRCASE = 0x3E
   ITEM_STAIRCASE = 0x3F
+
+  def ShortNameMap(self) -> Dict["RoomType", str]:
+    return {
+        RoomType.PLAIN_ROOM: "Empty Room",
+        RoomType.TRIFORCE_ROOM: "TriforceRm",
+        RoomType.ENTRANCE_ROOM: "EntranceRm",
+        RoomType.HORIZONTAL_MOAT_ROOM: "HorzMoat"
+    }
+
+  def GetShortName(self) -> str:
+    #assert self in self.SHORT_NAMES
+    try:
+      return self.ShortNameMap()[self]
+    except KeyError:
+      return self.name[0:8]
 
   def AllowsDoorToDoorMovement(self, from_direction: Direction, to_direction: Direction,
                                has_ladder: bool) -> bool:
@@ -189,6 +205,17 @@ class RoomType(IntEnum):
         continue
       if room_type.CanHaveStairs():
         return room_type
+
+  @classmethod
+  def RandomValueOkayForEnemy(cls, enemy: Enemy) -> "RoomType":
+    while True:
+      try:
+        room_type = cls(random.randrange(0x0, 0x29))
+      except ValueError:
+        continue
+      if enemy.IsBoss() and room_type.IsBadForBosses():
+        continue
+      return room_type
 
   @classmethod
   def RandomValue(cls, allow_hard_to_place: bool = True) -> "RoomType":

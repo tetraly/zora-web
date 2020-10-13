@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Dict
 import random
 
 
@@ -42,6 +43,15 @@ class Item(IntEnum):
   TRIFORCE_OF_POWER_PLACEHOLDER_ITEM = 0x3D
   KIDNAPPED_PLACEHOLDER_ITEM = 0x3E
 
+  def GetShortNameDict(self) -> Dict["Item", str]:
+    return {Item.NOTHING: "No Item"}
+
+  def GetShortName(self) -> str:
+    try:
+      return self.GetShortNameDict()[self]
+    except KeyError:
+      return self.name[0:10]
+
   def IsMajorItem(self) -> bool:
     return self in [
         Item.WOOD_SWORD, Item.WHITE_SWORD, Item.MAGICAL_SWORD, Item.RECORDER, Item.BLUE_CANDLE,
@@ -60,3 +70,30 @@ class Item(IntEnum):
 
   def IsSwordOrWand(self) -> bool:
     return self in [Item.WOOD_SWORD, Item.WHITE_SWORD, Item.MAGICAL_SWORD, Item.WAND]
+
+
+class BorderType(IntEnum):
+  #DIGDOGGER_RECORDER_BLOCK = 0x05
+  #GOHMA_BOW_BLOCK = 0x0A
+  #GLEEOK_WAND_BLOCK = 0x10
+  #POWER_BRACELET_PUSH_BLOCK = 0x14
+  #BURN_ONLY_ENEMY_CANDLE_BLOCK = 0x06
+  #STUN_ONLY_ENEMY_BOOMERANG_BLOCK = 0x1D
+  NO_BORDER_TYPE = 0x00
+  BOMB_HOLE = 0x16
+  ENEMY = 0x01
+  MINI_BOSS = 0x02
+  BOSS = 0x03
+  ENTRANCE = 0x04
+  LADDER_BLOCK = 0x0D
+  LOCKED_DOOR = 0x19
+  HUNGRY_ENEMY = 34
+  BAIT_BLOCK = 35
+  BOOMERANG_BLOCK = 36,
+  CANDLE_BLOCK = 37,
+  BOW_BLOCK = 38,
+  RECORDER_BLOCK = 39,
+  WAND_BLOCK = 40,
+  POWER_BRACELET_BLOCK = 41
+  TRIFORCE_CHECK = 9
+  TRIFORCE_ROOM = 123

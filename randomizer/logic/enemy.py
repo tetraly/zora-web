@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Dict
 import random
 from .constants import SpriteSet
 
@@ -94,6 +95,15 @@ class Enemy(IntEnum):
   BLUE_WIZZROBE_RED_WIZZROBE = 0x7B
   BLUE_WIZZROBE_LIKE_LIKE_BUBBLE = 0x7C
   TRIFORCE_CHECKER_PLACEHOLDER_ELDER = 0x7F
+
+  def GetShortNameDict(self) -> Dict["Enemy", str]:
+    return {Enemy.NOTHING: "No Enemies"}
+
+  def GetShortName(self) -> str:
+    try:
+      return self.GetShortNameDict()[self]
+    except KeyError:
+      return self.name[0:10]
 
   def IsInOverworldSpriteSet(self) -> bool:
     return self in [
@@ -266,7 +276,8 @@ class Enemy(IntEnum):
   @classmethod
   def RandomEnemyOkayForSpriteSet(cls,
                                   sprite_set: SpriteSet,
-                                  must_be_in_sprite_set: bool = False) -> "Enemy":
+                                  must_be_in_sprite_set: bool = False,
+                                  must_be_harder_enemy: bool = False) -> "Enemy":
     while True:
       try:
         enemy = cls(random.randrange(0x0, 0x7F))
@@ -274,16 +285,6 @@ class Enemy(IntEnum):
         continue
       if enemy.HasTraps() and random.choice([True, True, True, True, True, True, True, False]):
         continue
-        
-      """ Uncomment for mixey glitchy fun sprite enemies
-        if (enemy.IsInAllSpriteSets() or
-                enemy.IsInOverworldSpriteSet() or
-                enemy.IsInGoriyaSpriteSet() or
-                enemy.IsInDarknutSpriteSet() or
-                enemy.IsInWizzrobeSpriteSet()):
-                return enemy
-      continue
-      """
 
       if ((not must_be_in_sprite_set and enemy.IsInAllSpriteSets()) or
           (sprite_set == SpriteSet.GORIYA_SPRITE_SET and enemy.IsInGoriyaSpriteSet()) or
@@ -306,3 +307,28 @@ class Enemy(IntEnum):
       ])
     # boss_sprite_set == SpriteSet.PATRA_SPRITE_SET:
     return random.choice([Enemy.PATRA_1, Enemy.PATRA_2])
+
+  @classmethod
+  def RandomHardEnemyOrMiniBossOkayForSpriteSets(cls, enemy_sprite_set: SpriteSet,
+                                                 boss_sprite_set: SpriteSet) -> "Enemy":
+    while True:
+      try:
+        enemy = cls(random.randrange(0x0, 0x7F))
+      except ValueError:
+        continue
+      if (boss_sprite_set == SpriteSet.DODONGO_SPRITE_SET and
+          enemy in [Enemy.SINGLE_DODONGO, Enemy.AQUAMENTUS, Enemy.MOLDORM]):
+        return enemy
+      if boss_sprite_set == SpriteSet.GLEEOK_SPRITE_SET and enemy in [Enemy.GLEEOK_1]:
+        return enemy
+      if boss_sprite_set == SpriteSet.GORIYA_SPRITE_SET and enemy in [
+          Enemy.BLUE_GORIYA, Enemy.BLUE_GORIYA_KEESE_BUBBLE, Enemy.BLUE_GORIYA_RED_GORIYA
+      ]:
+        return enemy
+      if enemy_sprite_set == SpriteSet.DARKNUT_SPRITE_SET and enemy in [
+          Enemy.BLUE_DARKNUT, Enemy.BLUE_DARKNUT_RED_DARKNUT_GORIYA_BUBBLE,
+          Enemy.BLUE_DARKNUT_RED_DARKNUT_POLS_VOICE
+      ]:
+        return enemy
+      if enemy_sprite_set == SpriteSet.WIZZROBE_SPRITE_SET and enemy.HasBlueWizzrobes():
+        return enemy

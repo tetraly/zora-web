@@ -27,7 +27,7 @@ class Room():
 
   def __init__(self, rom_data: Optional[List[int]] = None) -> None:
     if not rom_data:
-      rom_data = [0x26, 0x26, 0x00, 0x00, 0x17, 0x00]
+      rom_data = [0x26, 0x26, 0x00, 0x00, 0x0E, 0x00]
     if rom_data[4] & 0x1F == 0x03:
       stuff_not_to_change = rom_data[4] & 0xE0
       rom_data[4] = stuff_not_to_change + 0x0E
@@ -36,6 +36,36 @@ class Room():
     self.marked_as_visited = False
     # -1 is used as a sentinal value indicating a lack of stairway room
     self.stairs_destination = RoomNum(-1)
+
+    # For Dungeon generation
+    self.lock_level: int = 9
+    self.parent_room_num: RoomNum = RoomNum(-1)
+    self.child_room_nums: List[RoomNum] = []
+    self.locking_direction: Direction = Direction.NO_DIRECTION
+
+  def SetLockingDirection(self, direction: Direction) -> None:
+    self.locking_direction = direction
+
+  def GetLockingDirection(self) -> Direction:
+    return self.locking_direction
+
+  def SetLockLevel(self, lock_level: int) -> None:
+    self.lock_level = lock_level
+
+  def GetLockLevel(self) -> int:
+    return self.lock_level
+
+  def AddChildRoomNum(self, child_room_num: RoomNum) -> None:
+    self.child_room_nums.append(child_room_num)
+
+  def GetChildRoomNums(self) -> List[RoomNum]:
+    return self.child_room_nums
+
+  def SetParentRoomNum(self, parent_room_num: RoomNum) -> None:
+    self.parent_room_num = parent_room_num
+
+  def GetParentRoomNum(self) -> RoomNum:
+    return self.parent_room_num
 
   def _ReadRomBits(self, byte_num: int, read_bitmask: int) -> int:
     assert byte_num in range(0, 6)

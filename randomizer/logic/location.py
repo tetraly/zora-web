@@ -9,7 +9,7 @@ class Location():
   def __init__(self,
                level_num: LevelNum = LevelNum.NO_LEVEL_NUM,
                cave_type: CaveType = CaveType.NO_CAVE_TYPE,
-               room_num: RoomNum = None,
+               room_num: Optional[RoomNum] = None,
                position_num: Optional[int] = None):
     self.level_num_or_cave_type: LevelNumOrCaveType
     self.sub_id: RoomOrPositionNum

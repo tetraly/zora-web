@@ -21,7 +21,7 @@ class RoomAction(IntEnum):
 
 
 class SpriteSet(IntEnum):
-  NO_SPRITE_SET = -1
+  NO_SPRITE_SET = 0
   GORIYA_SPRITE_SET = 1
   DARKNUT_SPRITE_SET = 2
   WIZZROBE_SPRITE_SET = 3
@@ -40,12 +40,37 @@ class DungeonPalette(IntEnum):
 class WallType(IntEnum):
   OPEN_DOOR = 0
   SOLID_WALL = 1
-  WALK_THROUGH_WALL_1 = 2
-  WALK_THROUGH_WALL_2 = 3
+  WALK_THROUGH_WALL = 2
+  ENTRANCE = 3  # really WALK_THROUGH_WALL_2
   BOMB_HOLE = 4
   LOCKED_DOOR_1 = 5
   LOCKED_DOOR_2 = 6
   SHUTTER_DOOR = 7
+
+  def ToChar(self, direction: Direction) -> str:
+    if self.value == WallType.OPEN_DOOR:
+      return ' '
+    elif self.value == WallType.SOLID_WALL:
+      if direction in [Direction.EAST, Direction.WEST]:
+        return '|'
+      elif direction == Direction.NORTH:
+        return 'ˉ'
+      return '_'
+    elif self.value == WallType.ENTRANCE:
+      if direction == Direction.EAST:
+        return '<'
+      elif direction == Direction.WEST:
+        return '>'
+      elif direction == Direction.SOUTH:
+        return '^'
+      return 'v'
+    elif self.value == WallType.BOMB_HOLE:
+      return 'O'
+    elif self.value == WallType.LOCKED_DOOR_1:
+      return 'k'
+    elif self.value == WallType.SHUTTER_DOOR:
+      return 'x'
+    return 'Q'
 
   @classmethod
   def RandomValue(cls) -> "WallType":

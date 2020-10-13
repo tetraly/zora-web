@@ -288,8 +288,6 @@ class DataTable():
 
   def SetStartRoomDataForLevel(self, level_num: LevelNum, start_room: RoomNum,
                                entrance_direction: Direction) -> None:
-    print("SetStartRoomDataForLevel: level %d, room 0x%x, %s " %
-          (level_num, start_room, entrance_direction))
     level_offset = level_num * self.LEVEL_METADATA_OFFSET
     if start_room:
       self.level_metadata[level_offset + self.START_ROOM_OFFSET] = start_room

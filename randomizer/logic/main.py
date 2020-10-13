@@ -1,6 +1,7 @@
 import random
 
 from .data_table import DataTable
+from .dungeon_generator import DungeonGenerator
 from .item_randomizer import ItemRandomizer, NotAllItemsWereShuffledAndIDontKnowWhyException
 from .level_generator import LevelGenerator
 from .patch import Patch
@@ -23,6 +24,12 @@ class ZoraRandomizer():
     self.validator = Validator(self.data_table, self.settings)
 
   def Randomize(self) -> None:
+    random.seed(self.seed)
+    self.data_table.ResetToVanilla()
+    self.dungeon_generator = DungeonGenerator(self.data_table)
+    self.dungeon_generator.Generate()
+
+  def OldRandomize(self) -> None:
     random.seed(self.seed)
 
     done = False
@@ -115,7 +122,7 @@ class ZoraRandomizer():
           '_maze-',
           'shape-',
           'kitty-',
-          'vault-'
+          'vault-',
           'thing-',
           'world-',
           '_land-',

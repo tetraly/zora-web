@@ -10,6 +10,19 @@ class Direction(IntEnum):
   WEST = -0x1
   EAST = 0x1
 
+  def GetShortName(self) -> str:
+    if self == Direction.NORTH:
+      return "North"
+    if self == Direction.SOUTH:
+      return "South"
+    if self == Direction.EAST:
+      return "East"
+    if self == Direction.WEST:
+      return "West"
+    if self == Direction.STAIRCASE:
+      return "Staircase"
+    return "No Dir'n"
+
   @classmethod
   def FromRomValue(cls, rom_value: int) -> "Direction":
     assert rom_value in range(1, 5)
