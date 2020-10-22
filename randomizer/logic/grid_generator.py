@@ -191,9 +191,4 @@ class GridGenerator:
         assert bar <= 3
         baz = ppu_code_lookup[bar]
         thingies.append(baz)
-    print("level_num %s" % level_num)
-    print("map bytes (%d) %s" % (len(map_bytes), map_bytes))
-    print("thingies (%d) %s" % (len(thingies), thingies))
-    print("offset %s" % offset)
-    input("")
     self.data_table.SetMapData(level_num, map_bytes, thingies, offset)

@@ -52,28 +52,20 @@ class Validator():
   def IsSeedValid(self) -> bool:
     print("Starting check of whether the seed is valid or not")
     self.inventory.Reset()
-    print("2")
     self.inventory.SetStillMakingProgressBit()
     num_iterations = 0
-    print("3")
     self.data_table.ClearAllVisitMarkers()
-    print("4")
 
     # TODO: Only check this if incremental upgrade flag is enabled
     if self._IsAnIncrementalUpgradeItemAvaliableInAShop():
-      print("Incremental upgrade item found in shop")
+      input("Incremental upgrade item found in shop -- shouldn't happen right?")
       return False
-    #print("5")
 
     if not self._HasInitialWeapon():
-      print("No initial weapon")
-      input("")
+      input("No initial weapon -- shouldn't happen right?")
       return False
-    #print("6")
     
-
     while self.inventory.StillMakingProgress():
-
       num_iterations += 1
       print("")
       print("Iteration #%d of checking" % num_iterations)
@@ -93,19 +85,7 @@ class Validator():
         return True
       if num_iterations > 10:
         return False
-      print()
-      print("End of iteration #%d" % num_iterations)
-      print("Current inventory is %s" % self.inventory.items)
-      for progression_item in [Item.WOOD_SWORD, Item.BOW, Item.WOOD_ARROWS, Item.SILVER_ARROWS, Item.RAFT,
-         Item.BLUE_CANDLE, Item.BAIT, Item.LADDER, Item.POWER_BRACELET, Item.WAND]:
-         if not self.inventory.Has(progression_item):
-           #print("Missing progression item: %s" % progression_item)
-      #print()
-      if self.inventory.GetTriforceCount() > 5:
-        #print("Triforce count is %d" % self.inventory.GetTriforceCount())
-
     print("Seed doesn't appear to be beatable. :(")
-    #input("")
     return False
 
   def _IsAnIncrementalUpgradeItemAvaliableInAShop(self) -> bool:
@@ -192,7 +172,7 @@ class Validator():
 
   def _RecursivelyTraverseLevel(self, level_num: LevelNum, room_num: RoomNum,
                                 entry_direction: Direction) -> None:
-    print("  Visiting level %d room %x" % (level_num, room_num))
+    #print("  Visiting level %d room %x" % (level_num, room_num))
     if not room_num in Range.VALID_ROOM_NUMBERS:
       return
     room = self.data_table.GetRoom(level_num, room_num)
@@ -222,12 +202,10 @@ class Validator():
           print("-- Room has %s but I can't get it. Enemy is %s" %(room.GetItem() ,room.GetEnemy()))
     if room.GetEnemy() == Enemy.THE_BEAST and self.inventory.HasBowSilverArrowsAndSword():
       print("Got the triforce of power!")
+      input()
       self.inventory.AddItem(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM, current_location)
     if room.GetEnemy() == Enemy.THE_KIDNAPPED:
       print("Found the kidnapped")
-      input("YAYAYAYAY")
-      #assert self.inventory.Has(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM)
-      #  print("And rescued the kidnapped! :)")
       self.inventory.AddItem(Item.KIDNAPPED_PLACEHOLDER_ITEM, current_location)
 
     for direction in (Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH):
@@ -246,7 +224,7 @@ class Validator():
         self._RecursivelyTraverseLevel(level_num, room.GetStairsDestination(), Direction.STAIRCASE)
 
     if room.HasStairs() and not self._CanDefeatEnemies(room):
-      print("Can't take a staircase. Enemy is %s" % room.GetEnemy())
+      print("!!! Can't take a staircase. Enemy is %s" % room.GetEnemy())
 
   def _CanMove(self, entry_direction: Direction, exit_direction: Direction, level_num: LevelNum,
                room_num: RoomNum, room: Room) -> bool:
@@ -274,7 +252,7 @@ class Validator():
       if self.inventory.HasKey():
         self.inventory.UseKey(level_num, room_num, exit_direction)
       else:
-        print("!!!  Found a locked door but don't have a key. :(")
+        print("????  Found a locked door but don't have a key. :(")
         return False
     return True
 
@@ -312,8 +290,8 @@ class Validator():
       return False
     if enemy.IsFireOnly() and not self.inventory.HasFireSource():
       return False
-   # if enemy.IsWandOnly() and not self.inventory.Has(Item.WAND):
-  #    return False
+    if enemy.IsWandOnly() and not self.inventory.Has(Item.WAND):
+      return False
     if room.HasPowerBraceletRoomAction() and not self.inventory.Has(Item.POWER_BRACELET):
       return False
     if (room.HasKillingTheBeastOpensShutterDoorsRoomAction() and

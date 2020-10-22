@@ -5,6 +5,7 @@ from enum import IntEnum
 from .constants import TextSpeed
 from .patch import Patch
 
+FRENCH_MODE = False
 
 class HintType(IntEnum):
   WOOD_SWORD = 0
@@ -87,7 +88,7 @@ COMMUNITY_HINTS = {
     ],
     HintType.DOOR_REPAIR: [
         "HELP TEMMIE PAY| FOR COOL LEG", "QUICK, PRESS UP|AND A BEFORE I|TAKE YOUR MONEY!",
-        "NOOOOOOOO!|I JUST GOT|THAT MONEY!", "THAT DOOR REALLY|TIED THE ROOM TOGETHER",
+        "THAT DOOR REALLY|TIED THE ROOM TOGETHER",
         "TOSS A RUPEE|TO YOUR WITCHER",
         "YOU ARE THE|WEAKEST LINK|GOODBYE!", "TIME BOMB SET|GET OUT FAST!",
         "0 DAYS SINCE|LAST BROKEN DOOR",
@@ -250,7 +251,7 @@ COMMUNITY_HINTS = {
       "Ganon se cache|dans le nord",
       "Tu devrais m'voir|dans la couronne",
       "Il dit qu'il a|plus de genou",
-      "Et la marmotte elle|met le chocolat|dans le papier alu",
+      "Et la marmotte,|elle met le chocolat|dans le papier alu",
       "ecouter,|repeter,|en francais",
       "je suis un ananas",
       "s'il vous plait,|dessine-moi|un mouton",
@@ -301,11 +302,12 @@ class TextDataTable():
 
   def _AddLevelNameToPatchIfNeeded(self) -> None:
     assert len(self.phrase) == 6, "The level prefix must be six characters long."
+    if FRENCH_MODE:
+      self.phrase = random.choice(["monde-", "terre-"]) #, "tempe-"])
     if self.phrase.lower() == 'level-':
       return  # No need to replace the existing text with the same text.
     assert len(self.__ascii_string_to_bytes(self.phrase)) == 6
     print(self.phrase)
-
     self.patch.AddData(self.TEXT_LEVEL_ADDRESS, self.__ascii_string_to_bytes(self.phrase))
     print(self.__ascii_string_to_bytes(self.phrase))
 
@@ -378,7 +380,6 @@ class TextDataTable():
       counter += 1
 
   def NewGenerateTestingString(self, num: int) -> List[int]:
-    en_francais = True
     hint_type = HintType(num)
     if hint_type == HintType.LETTER_CAVE:
       hint = self.letter_cave_text
@@ -388,12 +389,12 @@ class TextDataTable():
     elif hint_type not in COMMUNITY_HINTS:
       #return self.GenerateTestingString(num)
       input("Warning! nothing for %s" % hint_type)
-      hint_type = HintType.FRENCH if en_francais else HintType.OTHER
+      hint_type = HintType.FRENCH if FRENCH_MODE else HintType.OTHER
       hint = random.choice(COMMUNITY_HINTS[hint_type])
     else:
       print (":(")
       print(num)
-      if en_francais and random.choice([True,False]):
+      if FRENCH_MODE:
         hint_type = HintType.FRENCH
       hint = random.choice(COMMUNITY_HINTS[hint_type])
     lines = hint.split('|')

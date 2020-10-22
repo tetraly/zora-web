@@ -210,20 +210,7 @@ class RoomType(IntEnum):
       if room_type.CanHaveStairs():
         return room_type
 
-  """@classmethod
-  def RandomValueOkayForEnemy(cls, enemy: Enemy) -> "RoomType":
-    while True:
-      try:
-        room_type = cls(random.randrange(0x0, 0x29))
-      except ValueError:
-        continue
-      if (enemy.IsBoss() or enemy == Enemy.RUPEE_BOSS) and room_type.IsBadForBosses():
-        continue
-      if room_type.HasWater() or room_type.HasMovementConstraints():
-        continue
-      if room_type.HasOpenStairs():
-        continue
-      return room_type"""
+
 
   @classmethod
   def RandomValue(cls, allow_hard_to_place: bool = True, okay_for_enemy: Enemy =Enemy.NO_ENEMY) -> "RoomType":
@@ -260,12 +247,13 @@ class RoomType(IntEnum):
       position_code = random.randint(0x00, 0xFF)
       if (cls.IsValidPositionForRoomType(position_code, room_type_1) and
           cls.IsValidPositionForRoomType(position_code, room_type_2)):
+         # input("%x" %position_code)
           return position_code
 
   @classmethod
   def GetValidPositionForRoomType(cls, room_type: "RoomType") -> int:
     while True:
-      position_code = random.randint(0x00, 0xFF)
+      position_code = 0x10 * random.randint(0x3, 0xC) + random.randint(0x3, 0xC)
       if cls.IsValidPositionForRoomType(position_code, room_type):
           return position_code
 

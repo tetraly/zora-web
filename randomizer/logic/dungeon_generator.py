@@ -272,7 +272,6 @@ class LevelPlanGenerator:
       target_num_rooms = num_rooms_per_level[level_num]
 
       print()
-      #input('----')
       print(level_num)
       print("target num rooms: %d" % target_num_rooms)
       num_rooms: List[int] = []
@@ -379,42 +378,6 @@ class LevelPlanGenerator:
         print(a, ':', b)
     return level_plan
 
-  def GenerateRoomPositions(self) -> None:
-    # For each level, pick four random item drop positions such that at least one will be a valid
-    # and accessible tile (i.e. not on top of blocks, water, etc.). They get numbered 0-3.
-    # Then, create a dictionary for each level mapping each room type to the position number (0-3)
-    # that is valid for the room type.
-    positions = [
-          0x89,
-          RoomType.GetValidPositionForRoomType(RoomType.DIAMOND_STAIR_ROOM),
-          RoomType.GetValidPositionForRoomType(RoomType.VERTICAL_LINES),
-          RoomType.GetValidPositionForRoomType(RoomType.HORIZONTAL_LINES)]
-    values = [0, 1, 2, 3]
-    for level_num in Range.VALID_LEVEL_NUMBERS:
-      self.data_table.SetItemPositionsForLevel(level_num, positions)
-    for room_type in range(0x00, 0x2A):
-      room_type = RoomType(room_type)
-      random.shuffle(values)
-      for v in values:
-        #if room_type in [
-        #    RoomType.VERTICAL_CHUTE_ROOM, RoomType.HORIZONTAL_CHUTE_ROOM,
-        #    RoomType.HORIZONTAL_MOAT_ROOM, RoomType.DOUBLE_MOAT_ROOM
-        #]:
-        #  self.level_position_dict[room_type] = 0
-        #  break
-        #elif room_type in [RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.DIAMOND_STAIR_ROOM]:
-        #  self.level_position_dict[room_type] = 3
-        #  break
-        if RoomType.IsValidPositionForRoomType(positions[v], room_type):
-          self.level_position_dict[room_type] = v
-          break
-
-      assert room_type in self.level_position_dict
-    self.level_position_dict[RoomType(0x31)] = 0
-    self.level_position_dict[RoomType(0x32)] = 0
-    self.level_position_dict[RoomType(0x33)] = 0
-    self.level_position_dict[RoomType(0x3F)] = 0
-
 
 class DungeonGenerator:
 
@@ -437,6 +400,45 @@ class DungeonGenerator:
     self.level_rooms_b: List[List[RoomNum]] = []
     self.room_grid_a: List[Room] = []
     self.room_grid_b: List[Room] = []
+    self.item_position_dict : Dict[RoomType, int] = {}
+
+  def GenerateRoomPositions(self) -> None:
+    # For each level, pick four random item drop positions such that at least one will be a valid
+    # and accessible tile (i.e. not on top of blocks, water, etc.). They get numbered 0-3.
+    # Then, create a dictionary for each level mapping each room type to the position number (0-3)
+    # that is valid for the room type.
+    positions = [
+          0x89,
+          RoomType.GetValidPositionForRoomType(RoomType.CIRCLE_BLOCK_WALL_ROOM),
+          RoomType.GetValidPositionForRoomType(RoomType.VERTICAL_LINES),
+          RoomType.GetValidPositionForRoomTypes(RoomType.HORIZONTAL_LINES, RoomType.SPIRAL_STAIR_ROOM)]
+    values = [0, 1, 2, 3]
+    for level_num in Range.VALID_LEVEL_NUMBERS:
+      self.data_table.SetItemPositionsForLevel(level_num, positions)
+    for room_type in range(0x00, 0x2A):
+      if room_type  == RoomType.TURNSTILE_ROOM:
+        continue
+      room_type = RoomType(room_type)
+      random.shuffle(values)
+      for v in values:
+        #if room_type in [
+        #    RoomType.VERTICAL_CHUTE_ROOM, RoomType.HORIZONTAL_CHUTE_ROOM,
+        #    RoomType.HORIZONTAL_MOAT_ROOM, RoomType.DOUBLE_MOAT_ROOM
+        #]:
+        #  self.level_position_dict[room_type] = 0
+        #  break
+        #elif room_type in [RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.DIAMOND_STAIR_ROOM]:
+        #  self.level_position_dict[room_type] = 3
+        #  break
+        if RoomType.IsValidPositionForRoomType(positions[v], room_type):
+          self.item_position_dict[room_type] = v
+          break
+      print(room_type)
+      assert room_type in self.item_position_dict
+    self.item_position_dict[RoomType(0x31)] = 0
+    self.item_position_dict[RoomType(0x32)] = 0
+    self.item_position_dict[RoomType(0x33)] = 0
+    self.item_position_dict[RoomType(0x3F)] = 0
 
   ## Helper methods ##
   def _GetLevelNumForRoomNum(self, room_num: RoomNum, grid_id: GridId) -> LevelNum:
@@ -506,7 +508,7 @@ class DungeonGenerator:
     self.grid_generator_b.GenerateMapData(is_7_to_9=True)
     self.grid_generator_b.Print()
     self.level_rooms_b = self.grid_generator_b.GetLevelRoomNumbers()
-
+    self.GenerateRoomPositions()
     self.level_plan = self.level_plan_generator.GenerateLevelPlan(
         self._GetNumberOfRoomsPerLevel(), self._GetStairwayRoomsForGrid(GridId.GRID_A),
         self._GetStairwayRoomsForGrid(GridId.GRID_B))
@@ -660,7 +662,7 @@ class DungeonGenerator:
       for stairway_room_num in self.level_plan[level_num]['transport_stairway_room_nums']:
         print("Adding transport staircase %x for level %d" % (stairway_room_num, level_num))
         self.data_table.AddStaircaseRoomNumberForLevel(level_num, stairway_room_num)
-      self.data_table.SetItemPositionsForLevel(level_num, [0x89, 0x69, 0x89, 0x42])
+      #self.data_table.SetItemPositionsForLevel(level_num, [0x89, 0x69, 0x89, 0x42])
       self.Print(level_num)
       #input()
 
@@ -937,8 +939,11 @@ class DungeonGenerator:
       for item in items_to_place:
         item_room_num = good_item_room_nums.pop()
         item_room = self._GetRoom(item_room_num, level_num)
-        if item == Item.BOOK:
-          input("BOOOK!")
+        enemy = Enemy.RandomHardEnemyOrMiniBossOkayForSpriteSets(
+          self.level_plan[level_num]['boss_sprite_set'],
+          self.level_plan[level_num]['enemy_sprite_set'])
+        item_room.SetEnemy(enemy)
+        item_room.SetEnemyQuantityCode(random.randrange(2,3))
         if item.IsMajorItem():
           stairway_room_num = item_stairway_room_nums.pop(0)
           print("MAJOR ITEM TO PLACE: %s. Item room %x -> Stairway %x" %
@@ -947,7 +952,7 @@ class DungeonGenerator:
           stairway_room.SetRoomType(RoomType.ITEM_STAIRCASE)
           stairway_room.SetStairwayRoomExit(room_num=item_room_num, is_right_side=True)
           stairway_room.SetStairwayRoomExit(room_num=item_room_num, is_right_side=False)
-          stairway_room.SetItemPositionCode(2)
+          stairway_room.SetItemPositionCode(0)
           stairway_room.SetItem(item)
           item_room.SetStairsDestination(stairway_room_num)
           item_room.SetInnerPalette(DungeonPalette.WATER)
@@ -959,14 +964,13 @@ class DungeonGenerator:
               0x85 if room_type.NeedsOffCenterStairReturnPosition() else 0x89)
           item_room.SetDebugString("S %s" % item.name)
         else:
+          room_type = RoomType.RandomValue(okay_for_enemy=enemy)
+          item_room.SetRoomType(room_type)
           item_room.SetItem(item)
-          item_room.SetItemPositionCode(2)
+          item_room.SetItemPositionCode(self.item_position_dict[room_type])
           item_room.SetDebugString("F %s" % item.name)
-        item_room.SetEnemy(Enemy.RandomHardEnemyOrMiniBossOkayForSpriteSets(
-          self.level_plan[level_num]['boss_sprite_set'],
-          self.level_plan[level_num]['enemy_sprite_set']
-        ))
-        item_room.SetEnemyQuantityCode(random.randrange(2,3))
+          item_room.SetRoomAction(random.choice([RoomAction.NO_ROOM_ACTION, RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_AND_DROPS_ITEM]))
+          
     return True
 
   def PlaceBorders(self, level_num: LevelNum) -> None:
@@ -1046,7 +1050,7 @@ class DungeonGenerator:
       elif border_type == BorderType.TRIFORCE_ROOM:
         border_room.SetRoomType(RoomType.TRIFORCE_ROOM)
         border_room.SetItem(Item.TRIFORCE)
-        room.SetItemPositionCode(2)
+        room.SetItemPositionCode(0)
         border_room.SetEnemy(Enemy.NO_ENEMY)
         self.data_table.UpdateCompassPointer(Location(level_num=level_num,
                                                       room_num=border_room_num))
@@ -1067,6 +1071,7 @@ class DungeonGenerator:
       elif border_type == BorderType.POWER_BRACELET_BLOCK:
         border_room.SetRoomAction(RoomAction.EXPERIMENTAL_6)
         border_room.SetRoomType(RoomType.SINGLE_BLOCK_ROOM)
+        border_room.SetInnerPalette(DungeonPalette.ACCENT_COLOR)
       elif border_type in [BorderType.TRIFORCE_CHECK]:
         border_room.SetEnemy(Enemy.ELDER)
         border_room.SetRoomType(RoomType.BLACK_ROOM)
