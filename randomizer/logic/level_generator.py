@@ -197,7 +197,10 @@ class LevelGenerator:
     random.shuffle(screen_nums)
     for screen_num in Screen.ALL_SCREENS_WITH_1Q_CAVES:
       destination = screen_nums.pop()
-      self.data_table.SetCaveDestination(screen_num, destination)
+      try:
+        self.data_table.SetCaveDestination(screen_num, LevelNum(destination))
+      except ValueError:
+        self.data_table.SetCaveDestination(screen_num, CaveType(destination))
       if destination == CaveType.ANY_ROAD_CAVE:
         any_road_screen_nums.append(screen_num)
       elif destination in range(1, 9):  # Levels 1-8
@@ -367,7 +370,7 @@ class LevelGenerator:
     level_pool_b.sort(reverse=True)
 
     elder_group_a: List[Enemy] = [
-        Enemy.BOMB_UPGRADER, Enemy.BOMB_UPGRADER, Enemy.HUNGRY_ENEMY, Enemy.ELDER_5
+        Enemy.BOMB_UPGRADER, Enemy.BOMB_UPGRADER, Enemy.HUNGRY_ENEMY, Enemy.ELDER_6
     ]
     elder_group_b: List[Enemy] = [Enemy.ELDER, Enemy.ELDER_2, Enemy.ELDER_3, Enemy.ELDER_4]
     random.shuffle(elder_group_a)
@@ -828,10 +831,10 @@ class LevelGenerator:
 
     enemy_pool_template: List[Enemy] = []
     enemy_pool_template.extend(elders_list)
-    #    enemy_pool_template.append(Enemy.NOTHING)
-    #    enemy_pool_template.append(Enemy.NOTHING)
-    enemy_pool_template.append(Enemy.NOTHING)
-    enemy_pool_template.append(Enemy.NOTHING)
+    #    enemy_pool_template.append(Enemy.NO_ENEMY)
+    #    enemy_pool_template.append(Enemy.NO_ENEMY)
+    enemy_pool_template.append(Enemy.NO_ENEMY)
+    enemy_pool_template.append(Enemy.NO_ENEMY)
     if level_num == LevelNum.LEVEL_9:
       enemy_pool_template.append(Enemy.THE_BEAST)
       enemy_pool_template.append(Enemy.THE_KIDNAPPED)
@@ -1172,7 +1175,7 @@ class LevelGenerator:
       return CheckResult("Elder not in elder room")
     if not enemy.IsElder() and room_type == RoomType.ELDER_PLACEHOLDER_ROOM_TYPE:
       return CheckResult("Elder room without elder")
-    if enemy != Enemy.NOTHING and room_type == RoomType.ENTRANCE_ROOM:
+    if enemy != Enemy.NO_ENEMY and room_type == RoomType.ENTRANCE_ROOM:
       return CheckResult("Enemies in entrance room, which is a no-no")
     if enemy in [Enemy.BLUE_LANMOLA, Enemy.RED_LANMOLA] and room_type.IsBadForLanmola():
       return CheckResult("Lanmolas in rooms that are bad for them")
@@ -1189,7 +1192,7 @@ class LevelGenerator:
       return CheckResult("Boss in a room that's not 'open' enough for boss fights")
     if (enemy.HasBlueWizzrobes() or enemy.IsBoss()) and room_type.HasBeamoses():
       return CheckResult("Bosses/Blue wizzrobes in room with beamoses")
-    if enemy != Enemy.NOTHING and room_type == RoomType.TURNSTILE_ROOM:
+    if enemy != Enemy.NO_ENEMY and room_type == RoomType.TURNSTILE_ROOM:
       return CheckResult("Enemies in a turnstile/four-way block room")
     if enemy in [Enemy.PATRA_1, Enemy.PATRA_2] and room_type.IsBadForPatra():
       return CheckResult("Patra in a room that's bad for Patra")

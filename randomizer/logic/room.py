@@ -25,7 +25,10 @@ def NumBitsToShiftForBitmask(bitmask: int) -> int:
 
 class Room():
 
-  def __init__(self, rom_data: Optional[List[int]] = None) -> None:
+  def __init__(self, rom_data: List[int] = []) -> None:
+    self.ResetRoomState(rom_data)    
+    
+  def ResetRoomState(self, rom_data: List[int] = []) -> None:  
     if not rom_data:
       rom_data = [0x26, 0x26, 0x00, 0x00, 0x0E, 0x00]
     if rom_data[4] & 0x1F == 0x03:
@@ -38,10 +41,18 @@ class Room():
     self.stairs_destination = RoomNum(-1)
 
     # For Dungeon generation
-    self.lock_level: int = 9
+    self.lock_level: int = 0
     self.parent_room_num: RoomNum = RoomNum(-1)
     self.child_room_nums: List[RoomNum] = []
     self.locking_direction: Direction = Direction.NO_DIRECTION
+    self.room_action = RoomAction.NO_ROOM_ACTION
+    self.debug_string = ""
+    
+  def SetDebugString(self, debug_string: str) -> None:
+    self.debug_string = debug_string
+
+  def GetDebugString(self) -> str:
+    return self.debug_string
 
   def SetLockingDirection(self, direction: Direction) -> None:
     self.locking_direction = direction
@@ -112,11 +123,12 @@ class Room():
         return True
     return False
 
-  def GetWallType(self, direction: Direction) -> WallType:
-    assert self.GetRoomType() not in [RoomType.ITEM_STAIRCASE, RoomType.TRANSPORT_STAIRCASE]
+  def GetWallType(self, direction: Direction, return_solid_if_stairway: bool = False) -> WallType:
+    if self.IsStairwayRoom():
+      return WallType.SOLID_WALL
+
     byte_num = 1 if direction in [Direction.EAST, Direction.WEST] else 0
     read_bitmask = 0xE0 if direction in [Direction.NORTH, Direction.WEST] else 0x1C
-
     return WallType(self._ReadRomBits(byte_num, read_bitmask))
 
   # According to http://www.bwass.org/romhack/zelda1/zelda1bank6.txt:
@@ -185,7 +197,8 @@ class Room():
 
   # Byte 2
   def GetEnemy(self) -> Enemy:
-    assert not self.IsStairwayRoom()
+    if self.IsStairwayRoom():
+      return Enemy.BLUE_KEESE
     lower_bits = self._ReadRomBits(byte_num=2, read_bitmask=0x3F)
     upper_bit = self._ReadRomBits(byte_num=3, read_bitmask=0x80)
     return Enemy(lower_bits + 0x40 if upper_bit > 0 else lower_bits)
@@ -243,8 +256,12 @@ class Room():
     return (self._ReadRomBits(byte_num=3, read_bitmask=0x40) == 0x00 and
             self._ReadRomBits(byte_num=5, read_bitmask=0x07) == 0x03)
 
+  def HasPowerBraceletRoomAction(self) -> bool:
+    return (self._ReadRomBits(3, 0x40) == 0 and self._ReadRomBits(5, 0x07) == 0x06)
+
   # TODO: This could be re-implemented using math on room_action's value more easily
   def SetRoomAction(self, room_action: RoomAction) -> None:
+    self.room_action = room_action
     if room_action == RoomAction.NO_ROOM_ACTION:
       self._SetRomBits(3, 0x40, 0x00)
       self._SetRomBits(5, 0x07, 0x00)
@@ -272,6 +289,11 @@ class Room():
     elif room_action == RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_DROPS_ITEM_AND_MAKES_BLOCK_PUSHABLE:
       self._SetRomBits(3, 0x40, 0x01)
       self._SetRomBits(5, 0x07, 0x07)
+    elif room_action == RoomAction.EXPERIMENTAL_6:
+      self._SetRomBits(3, 0x40, 0x00)
+      self._SetRomBits(5, 0x07, 0x06)
     else:
       log.error("Found undefined room action code: %d" % int(room_action))
       sys.exit(1)
+  def GetRoomAction(self) -> int:
+    return self.room_action.value

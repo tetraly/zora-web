@@ -5,7 +5,7 @@ from .constants import SpriteSet
 
 
 class Enemy(IntEnum):
-  NOTHING = 0x00
+  NO_ENEMY = 0x00
   BLUE_GORIYA = 0x05
   RED_GORIYA = 0x06
   RED_DARKNUT = 0x0B
@@ -75,9 +75,9 @@ class Enemy(IntEnum):
   ELDER_3 = 0x4D
   ELDER_4 = 0x4E
   BOMB_UPGRADER = 0x4F
-  ELDER_5 = 0x50
+  ELDER_6 = 0x50
   MUGGER = 0x51
-  ELDER_6 = 0x52
+  ELDER_8 = 0x52
   ZOL_TRAPS = 0x6D
   ZOL_KEESE = 0x6F
   KEESE_TRAPS = 0x6E
@@ -94,10 +94,11 @@ class Enemy(IntEnum):
   BLUE_GORIYA_RED_GORIYA = 0x7A
   BLUE_WIZZROBE_RED_WIZZROBE = 0x7B
   BLUE_WIZZROBE_LIKE_LIKE_BUBBLE = 0x7C
+  # DEPRECATED -- DO NOT USE
   TRIFORCE_CHECKER_PLACEHOLDER_ELDER = 0x7F
 
   def GetShortNameDict(self) -> Dict["Enemy", str]:
-    return {Enemy.NOTHING: "No Enemies"}
+    return {Enemy.NO_ENEMY: "No Enemies"}
 
   def GetShortName(self) -> str:
     try:
@@ -132,7 +133,7 @@ class Enemy(IntEnum):
 
   def CanMoveThroughBlockWalls(self) -> bool:
     return self in [
-        Enemy.NOTHING, Enemy.VIRE, Enemy.POLS_VOICE, Enemy.BLUE_KEESE, Enemy.RED_KEESE,
+        Enemy.NO_ENEMY, Enemy.VIRE, Enemy.POLS_VOICE, Enemy.BLUE_KEESE, Enemy.RED_KEESE,
         Enemy.DARK_KEESE, Enemy.RED_WIZZROBE, Enemy.WALLMASTER, Enemy.BUBBLE, Enemy.CORNER_TRAPS,
         Enemy.KEESE_TRAPS, Enemy.VIRE_BUBBLE, Enemy.WALLMASTER_BUBBLE
     ]
@@ -186,8 +187,7 @@ class Enemy(IntEnum):
   #TODO: Need to add more other ELDERs here
   def HasNoEnemiesToKill(self) -> bool:
     return self in [
-        Enemy.BUBBLE, Enemy.THREE_PAIRS_OF_TRAPS, Enemy.CORNER_TRAPS, Enemy.ELDER,
-        Enemy.THE_KIDNAPPED, Enemy.NOTHING
+        Enemy.BUBBLE, Enemy.THREE_PAIRS_OF_TRAPS, Enemy.CORNER_TRAPS, Enemy.THE_KIDNAPPED, Enemy.NO_ENEMY
     ]
 
   def IsInGoriyaSpriteSet(self) -> bool:
@@ -239,7 +239,7 @@ class Enemy(IntEnum):
   def IsElder(self) -> bool:
     return self in [
         Enemy.ELDER, Enemy.ELDER_2, Enemy.ELDER_3, Enemy.ELDER_4, Enemy.BOMB_UPGRADER,
-        Enemy.ELDER_5, Enemy.MUGGER, Enemy.ELDER_6
+        Enemy.ELDER_6, Enemy.MUGGER, Enemy.ELDER_8
     ]
 
   def IsElderOrHungryEnemy(self) -> bool:
@@ -272,6 +272,15 @@ class Enemy(IntEnum):
         Enemy.GEL_1, Enemy.GEL_2, Enemy.BLUE_KEESE, Enemy.RED_KEESE, Enemy.DARK_KEESE, Enemy.BUBBLE,
         Enemy.RUPEE_BOSS, Enemy.THREE_PAIRS_OF_TRAPS, Enemy.CORNER_TRAPS, Enemy.KEESE_TRAPS
     ]
+
+  def IsWandOnly(self) -> bool:
+    return self == Enemy.MANHANDALA
+
+  def IsFireOnly(self) -> bool:
+    return self in [Enemy.ROPE]
+
+  def IsBoomerangOnly(self) -> bool:
+    return self in [Enemy.RED_KEESE, Enemy.DARK_KEESE]
 
   @classmethod
   def RandomEnemyOkayForSpriteSet(cls,
@@ -309,19 +318,29 @@ class Enemy(IntEnum):
     return random.choice([Enemy.PATRA_1, Enemy.PATRA_2])
 
   @classmethod
-  def RandomHardEnemyOrMiniBossOkayForSpriteSets(cls, enemy_sprite_set: SpriteSet,
-                                                 boss_sprite_set: SpriteSet) -> "Enemy":
+  def RandomHardEnemyOrMiniBossOkayForSpriteSets(cls, boss_sprite_set: SpriteSet,
+                                                 enemy_sprite_set: SpriteSet) -> "Enemy":
+    assert boss_sprite_set in [
+        SpriteSet.DODONGO_SPRITE_SET, SpriteSet.GLEEOK_SPRITE_SET, SpriteSet.PATRA_SPRITE_SET
+    ]
+    assert enemy_sprite_set in [
+        SpriteSet.GORIYA_SPRITE_SET, SpriteSet.DARKNUT_SPRITE_SET, SpriteSet.WIZZROBE_SPRITE_SET
+    ]
+    print(boss_sprite_set)
+    print(enemy_sprite_set)
     while True:
       try:
         enemy = cls(random.randrange(0x0, 0x7F))
       except ValueError:
         continue
+
+      #input(enemy)
       if (boss_sprite_set == SpriteSet.DODONGO_SPRITE_SET and
           enemy in [Enemy.SINGLE_DODONGO, Enemy.AQUAMENTUS, Enemy.MOLDORM]):
         return enemy
       if boss_sprite_set == SpriteSet.GLEEOK_SPRITE_SET and enemy in [Enemy.GLEEOK_1]:
         return enemy
-      if boss_sprite_set == SpriteSet.GORIYA_SPRITE_SET and enemy in [
+      if enemy_sprite_set == SpriteSet.GORIYA_SPRITE_SET and enemy in [
           Enemy.BLUE_GORIYA, Enemy.BLUE_GORIYA_KEESE_BUBBLE, Enemy.BLUE_GORIYA_RED_GORIYA
       ]:
         return enemy

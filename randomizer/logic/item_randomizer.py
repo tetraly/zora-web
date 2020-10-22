@@ -1,14 +1,15 @@
 from typing import DefaultDict, List, Tuple, Iterable
 from collections import defaultdict
-from random import shuffle
 
-from .constants import CaveType, LevelNum, LevelNumOrCaveType, Range, RoomNum, WallType
+from .constants import CaveType, LevelNum, Range, RoomNum, WallType
 from .data_table import DataTable
 from .direction import Direction
+from .enemy import Enemy
 from . import flags
 from .item import Item
 from .location import Location
 from .settings import Settings
+import random
 
 
 class NotAllItemsWereShuffledAndIDontKnowWhyException(Exception):
@@ -21,6 +22,8 @@ class ItemRandomizer():
     self.data_table = data_table
     self.settings = settings
     self.item_shuffler = ItemShuffler(settings)
+    self.hints: List[str] = []
+    self.letter_cave_text: str = ""
 
   WOOD_SWORD_LOCATION = Location.CavePosition(CaveType.WOOD_SWORD_CAVE, 2)
   WHITE_SWORD_LOCATION = Location.CavePosition(CaveType.WHITE_SWORD_CAVE, 2)
@@ -38,20 +41,45 @@ class ItemRandomizer():
     self.data_table.ClearAllVisitMarkers()
 
   def Randomize(self) -> None:
+    print("A")
+    found_bad_thing = False
+    found_good_thing = False
     self.ResetState()
     self.ReadItemsAndLocationsFromTable()
     self.ShuffleItems()
+    """while found_bad_thing or not found_good_thing:
+      found_good_thing = True
+      for (location, item) in self.item_shuffler.GetAllLocationAndItemData():
+        if (location.IsCavePosition() and
+            location.GetCaveType() in [CaveType.SHOP_A, CaveType.SHOP_B,
+          CaveType.SHOP_C, CaveType.SHOP_D] and
+            item.IsAnIncrementalUpgradeItem()):
+              found_bad_thing = True
+              print("Found Bad thing  %s %s " % (item, location.GetCaveType()))
+              
+        if (location.IsCavePosition() and 
+            location.GetCaveType() in [CaveType.WOOD_SWORD_CAVE, CaveType.LETTER_CAVE] and
+            item in [Item.WOOD_SWORD, Item.WAND]):
+          found_good_thing = True
+          print("Found good thing")
+      
+    input("!")"""
     self.WriteItemsAndLocationsToTable()
 
   def ReadItemsAndLocationsFromTable(self) -> None:
     for level_num in Range.VALID_LEVEL_NUMBERS:
+      print("level %d" % level_num)
       self._ReadItemsAndLocationsForUndergroundLevel(level_num)
+      #input("level")
     for location in self._GetOverworldItemLocationsToShuffle():
+      print("OW")
       item_num = self.data_table.GetCaveItem(location)
       self.item_shuffler.AddLocationAndItem(location, item_num)
+      #input("Overworld")
 
   def _GetOverworldItemLocationsToShuffle(self) -> List[Location]:
     items: List[Location] = []
+    items.append(self.WOOD_SWORD_LOCATION)
     items.append(self.WHITE_SWORD_LOCATION)
     items.append(self.MAGICAL_SWORD_LOCATION)
     items.append(self.COAST_ITEM_LOCATION)
@@ -76,16 +104,16 @@ class ItemRandomizer():
     #print("level %d" % level_num)
     level_start_room_num = self.data_table.GetLevelStartRoomNumber(level_num)
     level_entrance_direction = self.data_table.GetLevelEntranceDirection(level_num)
-    #print("Traversing level %d.  Start room is %x. Dir is %s " %
-    #      (level_num, level_start_room_num, level_entrance_direction))
+    print("Traversing level %d.  Start room is %x. Dir is %s " %
+          (level_num, level_start_room_num, level_entrance_direction))
     self._ReadItemsAndLocationsRecursively(level_num, level_start_room_num,
                                            level_entrance_direction)
 
   def _ReadItemsAndLocationsRecursively(self, level_num: LevelNum, room_num: RoomNum,
                                         entrance_direction: Direction) -> None:
-    #print("Reading room %x" % room_num)
+    #print("I'm in room %x" % room_num)
     if room_num not in Range.VALID_ROOM_NUMBERS:
-      #print("Invalid room num")
+      print("Invalid room num")
       return  # No escaping back into the overworld! :)
     room = self.data_table.GetRoom(level_num, room_num)
     if room.IsMarkedAsVisited():
@@ -94,15 +122,18 @@ class ItemRandomizer():
     room.MarkAsVisited()
 
     item = room.GetItem()
+    #print("Item is %s" % item)
     if item.IsMajorItem() or item == Item.TRIFORCE:
+      print("---------------------------------- Found %s --------------------------" % item)
       self.item_shuffler.AddLocationAndItem(Location.LevelRoom(level_num, room_num), item)
 
     # Stair cases (bad pun intended)
     if room.IsItemStaircase():
-      #print("Item staircase -- dead end")
+#      print("Item staircase -- my item is %s" % item)
+#      print()
       return  # Dead end, no need to traverse further.
     if room.IsTransportStairway():
-      #print("transport stair")
+ #     print("transport stair")
       for upstairs_room in [room.GetStairwayRoomLeftExit(), room.GetStairwayRoomRightExit()]:
         self._ReadItemsAndLocationsRecursively(level_num, upstairs_room, Direction.STAIRCASE)
       return
@@ -110,17 +141,17 @@ class ItemRandomizer():
     for direction in (Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH):
       #print("Trying to walk %s to another room" % direction)
       if direction == entrance_direction:
-        #print("Nope, that's where I came from")
+        #print("... which is where I came from")
         continue
       elif room.GetWallType(direction) != WallType.SOLID_WALL:
-        #print("Oooh, not a solid wall!")
+        #print("I can walk %s to room %x!" % (direction, RoomNum(room_num + direction)))
         self._ReadItemsAndLocationsRecursively(level_num, RoomNum(room_num + direction),
                                                direction.Reverse())
         continue
       else:
-        pass  #print("Bumped up against a solid wall.")
+        #print("Bumped into a solid wall going %s." % direction)
+        pass
     if room.HasStairs():
-      #print("I have a stairway. I'm going in!")
       self._ReadItemsAndLocationsRecursively(level_num, room.GetStairsDestination(),
                                              Direction.STAIRCASE)
 
@@ -128,13 +159,57 @@ class ItemRandomizer():
     self.item_shuffler.ShuffleItems()
 
   def WriteItemsAndLocationsToTable(self) -> None:
-    for (location, item_num) in self.item_shuffler.GetAllLocationAndItemData():
+    self.hints = []
+    for (location, item) in self.item_shuffler.GetAllLocationAndItemData():
       if location.IsLevelRoom():
-        self.data_table.SetRoomItem(item_num, location)
+        self.data_table.SetRoomItem(item, location)
         #if item_num == Item.TRIFORCE:
         #  self.data_table.UpdateTriforceLocation(location)
+        if item not in [Item.TRIFORCE, Item.HEART_CONTAINER]:
+          self.GenerateHint(location, item)
       elif location.IsCavePosition():
-        self.data_table.SetCaveItem(item_num, location)
+        self.data_table.SetCaveItem(item, location)
+        print ("Putting in %s, %s" % (location.GetCaveType(), item))
+        #input("")
+        if item not in [Item.TRIFORCE, Item.HEART_CONTAINER]:
+          self.GenerateHint(location, item)
+        if location.GetCaveType() == CaveType.LETTER_CAVE:
+          self.letter_cave_text = item.GetLetterCaveText()
+   # input("")
+
+  def GenerateHint(self, location: Location, item: Item) -> None:
+    tbr = ""
+    if location.IsLevelRoom():
+      level_num = location.GetLevelNum()
+      if level_num == LevelNum.LEVEL_7:
+        tbr += "IN LEVEL SEVEN"
+      else:
+        tbr += random.choice(["OFF", "DOWN", "DEEP"])
+        tbr += " IN LEVEL %d" % level_num.value
+    else:
+      tbr += "IN THE OVERWORLD"
+    tbr += '|'
+    if location.IsLevelRoom():
+      room = self.data_table.GetRoom(location.GetLevelNum(), location.GetRoomNum()) 
+      if room.IsItemStaircase():
+        tbr += "AN ITEM STAIRWAY HAS A"
+      elif       room.GetEnemy() == Enemy.NO_ENEMY:
+        tbr += "A COMPASS BECKONS TO A"
+      else:
+        tbr += "A MAJOR BOSS DEFENDS A"
+    else:
+      if location.GetCaveType() in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C, CaveType.SHOP_D ]:
+        tbr += "A VENDOR IS SELLING A"
+      elif location.GetCaveType() == CaveType.ARMOS_ITEM_VIRTUAL_CAVE:
+        tbr += "AN ARMOS STANDS UPON A"
+      elif location.GetCaveType() == CaveType.COAST_ITEM_VIRTUAL_CAVE:
+        tbr += "A BLUE OCEAN HARBORS A"
+      else:
+        tbr += "AN ELDER HAS FOR YOU A"
+    tbr += '|'    
+    tbr += item.GetHintText()
+    print (tbr)
+    self.hints.append(tbr)
 
 
 class ItemShuffler():
@@ -159,7 +234,7 @@ class ItemShuffler():
     self.loc_counter = 0
 
   def AddLocationAndItem(self, location: Location, item: Item) -> None:
-    if item in [Item.MAP, Item.COMPASS, Item.KEY, Item.BOMBS, Item.FIVE_RUPEES, Item.NOTHING]:
+    if item in [Item.MAP, Item.COMPASS, Item.KEY, Item.BOMBS, Item.FIVE_RUPEES, Item.FAIRY, Item.NOTHING]:
       return
     level_or_cave_num = location.GetLevelOrCaveNum()
     self.per_level_item_location_lists[level_or_cave_num].append(location)
@@ -180,23 +255,44 @@ class ItemShuffler():
         item = Item.BOOMERANG
     if item == Item.TRIFORCE:
       pass
-      #print("Not adding Triforce")
+      print("Not adding Triforce")
     else:
-      #print("Adding item %s" % item)
+      print("Adding item %s" % item)
       self.item_num_list.append(item)
       self.item_counter += 1
     num_locations = 0
-    #print("Num items/locations: %d/%d" % (self.item_counter, self.loc_counter))
+    print("Num items/locations: %d/%d" % (self.item_counter, self.loc_counter))
 
   def ShuffleItems(self) -> None:
     print("Shuffling items")
-    #    print(self.item_num_list)
-    #    print(len(self.item_num_list))
-    shuffle(self.item_num_list)
-    #   print()
-    #   print(self.item_num_list)
+    print(self.item_num_list)
+    print(len(self.item_num_list))
+    random.shuffle(self.item_num_list)
+    """passes_basic_checks = False
+    while not passes_basic_checks:      
+      print("iterating ...")
+      passes_basic_checks = True
+      random.shuffle(self.item_num_list)
+      print(self.item_num_list)
+      input()
+      for n in [20, 21]:
+        if self.item_num_list[n] in [Item.WOOD_ARROWS, Item.WOOD_SWORD, Item.BOOMERANG, Item.BLUE_CANDLE]:
+          passes_basic_checks = False
+          break
+      if not passes_basic_checks:
+        continue
+      for n in [-7, -11]:
+        if self.item_num_list[n] in [Item.WOOD_SWORD, Item.WAND, Item.BLUE_CANDLE]: 
+          passes_basic_checks = True
+    """
     #input("...")
-    for level_or_cave_num in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:
+    for level_or_cave_num in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES_WITH_SHOPS_FIRST:
+      if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:
+        print(LevelNum(level_or_cave_num))
+      else:
+        print(CaveType(level_or_cave_num))
+      print(len(self.item_num_list))
+      print()
       # Levels 1-8 shuffle a triforce, heart container, and 1-2 stairway items.
       # Level 9 shuffles only its 2 stairway items
       if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:
@@ -206,19 +302,42 @@ class ItemShuffler():
       num_locations_needing_an_item = len(
           self.per_level_item_location_lists[level_or_cave_num]) - len(
               self.per_level_item_lists[level_or_cave_num])
-
+      try:
+       #print("Okay, cave type is %s" %CaveType(level_or_cave_num))
+       #print("Item is currently ")
+       while (CaveType(level_or_cave_num) in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C, CaveType.SHOP_D ] and 
+          self.item_num_list[0] in [Item.WOOD_ARROWS, Item.WOOD_SWORD, Item.BOOMERANG, Item.BLUE_CANDLE]):
+          print("Shufflin!")
+          random.shuffle(self.item_num_list)
+       while (CaveType(level_or_cave_num) == CaveType.WOOD_SWORD_CAVE and 
+          self.item_num_list[0] not in [Item.WOOD_SWORD, Item.WAND]):
+            print("Shufflin!")
+            random.shuffle(self.item_num_list)
+      except ValueError:
+        pass    
+        #try:
+        #  print("I'm putting %s in %s" % (self.item_num_list[0], CaveType(level_or_cave_num)))
+        #except ValueError:
+        #  continue"""
+      
       while num_locations_needing_an_item > 0:
-        self.per_level_item_lists[level_or_cave_num].append(self.item_num_list.pop())
+        self.per_level_item_lists[level_or_cave_num].append(self.item_num_list.pop(0))
         num_locations_needing_an_item = num_locations_needing_an_item - 1
 
       if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:  # Technically this could be for OW and caves too
-        shuffle(self.per_level_item_lists[level_or_cave_num])
+        random.shuffle(self.per_level_item_lists[level_or_cave_num])
 
 
-#    print()
-#    print(self.item_num_list)
+# A. -6 and -12
+# B -5
+    print("--")
+    print(self.item_num_list)
+    print("--")
+    print(self.per_level_item_lists)
+    #input("!!")
     if self.item_num_list:
       raise NotAllItemsWereShuffledAndIDontKnowWhyException()
+    #input("!!!!")
 
   def GetAllLocationAndItemData(self) -> Iterable[Tuple[Location, Item]]:
     for level_num_or_cave_type in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:

@@ -4,6 +4,8 @@ from .constants import LevelNum, Range, RoomNum, WallType
 from .direction import Direction
 from .data_table import DataTable
 
+import math
+
 
 def GetNextRoomNum(room_num: RoomNum, direction: Direction) -> RoomNum:
   assert room_num in Range.VALID_ROOM_NUMBERS
@@ -75,8 +77,18 @@ class GridGenerator:
         expand_result = self._ExpandLevel(level_num)
         if not expand_result:
           counter += 1
-        if counter > 900:
+        if counter > 500:
           return False
+
+
+#      if num_levels == 6:
+#        for row in range(0, 8):
+#          n = 0
+#          for a in self.level_room_numbers[level_num]:
+#            if math.floor(a / 16) == row:
+#              n += 1
+#            if n >= 8:
+#              return False
     return True
 
   def _ExpandLevel(self, level_num: LevelNum) -> bool:
@@ -112,6 +124,7 @@ class GridGenerator:
     for a in self.level_room_numbers[level_num]:
       if abs(a % 16 - new_room_num % 16) >= 8:
         return False
+
     return self._ClaimRoomForLevel(level_num, new_room_num)
 
   def _ClaimRoomForLevel(self, level_num: LevelNum, room_num: RoomNum) -> bool:
@@ -178,4 +191,9 @@ class GridGenerator:
         assert bar <= 3
         baz = ppu_code_lookup[bar]
         thingies.append(baz)
+    print("level_num %s" % level_num)
+    print("map bytes (%d) %s" % (len(map_bytes), map_bytes))
+    print("thingies (%d) %s" % (len(thingies), thingies))
+    print("offset %s" % offset)
+    input("")
     self.data_table.SetMapData(level_num, map_bytes, thingies, offset)

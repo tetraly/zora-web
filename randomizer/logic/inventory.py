@@ -42,7 +42,7 @@ class Inventory():
   def AddItem(self, item: Item, item_location: Location) -> None:
     if item in [
         Item.OVERWORLD_NO_ITEM, Item.MAP, Item.COMPASS, Item.MAGICAL_SHIELD, Item.BOMBS,
-        Item.FIVE_RUPEES, Item.RUPEE, Item.SINGLE_HEART
+        Item.FIVE_RUPEES, Item.RUPEE, Item.SINGLE_HEART, Item.FAIRY
     ]:
       return
     assert item in range(0, 0x21) or item in [
@@ -55,10 +55,10 @@ class Inventory():
     self.SetStillMakingProgressBit()
 
     if item == Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM:
-      log.warning("Found Triforce of Power in L%d Room %x", item_location.GetLevelNum(),
+      log.warning("   Found Triforce of Power in L%d Room %x", item_location.GetLevelNum(),
                   item_location.GetRoomNum())
     elif item == Item.KIDNAPPED_PLACEHOLDER_ITEM:
-      log.warning("Found Kidnapped in L%d Room %x", item_location.GetLevelNum(),
+      log.warning("    Found Kidnapped in L%d Room %x", item_location.GetLevelNum(),
                   item_location.GetRoomNum())
     elif item == Item.HEART_CONTAINER:
       self.num_heart_containers += 1
@@ -66,14 +66,15 @@ class Inventory():
       return
     elif item == Item.TRIFORCE:
       self.num_triforce_pieces += 1
-      log.warning("Found %s.  Now have %d tringles", item, self.num_triforce_pieces)
+      log.warning("   Found %s.  Now have %d tringles", item, self.num_triforce_pieces)
       assert self.num_triforce_pieces <= 8
       return
     elif item == Item.KEY:
       self.num_keys += 1
+      print(" Got a key!  Currently have %d keys" % self.num_keys)
       return
 
-    log.warning("Found %s", item)
+    log.warning("    Found %s", item)
 
     if item == Item.WOOD_SWORD and Item.WOOD_SWORD in self.items:
       self.items.add(Item.WHITE_SWORD)
@@ -101,9 +102,12 @@ class Inventory():
     assert self.HasKey()
     if self.Has(Item.MAGICAL_KEY):
       return
-    if (level_num, room_num) in self.locations_where_keys_were_used:
+    if (level_num, room_num, exit_direction) in self.locations_where_keys_were_used:
+      print("Going through an already opened door")
+      input()
       return
     self.num_keys -= 1
+    print("Using a key. Currently have %d keys" % self.num_keys)
     self.locations_where_keys_were_used.add((level_num, room_num, exit_direction))
 
   # Methods to check what's in the inventory
@@ -135,6 +139,9 @@ class Inventory():
 
   def HasCandle(self) -> bool:
     return Item.BLUE_CANDLE in self.items or Item.RED_CANDLE in self.items
+
+  def HasFireSource(self) -> bool:
+    return self.HasCandle() or (self.Has(Item.WAND) and self.Has(Item.BOOK))
 
   def HasBoomerang(self) -> bool:
     return Item.BOOMERANG in self.items or Item.MAGICAL_BOOMERANG in self.items

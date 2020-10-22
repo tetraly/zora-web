@@ -1,6 +1,7 @@
+import math
 import random
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 from absl import logging
 from .cave import Cave
 from .constants import CaveType, GridId, LevelNum, LevelNumOrCaveType, Range, RoomNum, SpriteSet
@@ -23,9 +24,12 @@ class DataTable():
   CAVE_TYPE_CAVE_NUM_OFFSET = 0x10
   BOMB_UPGRADE_PRICE_ADDRESS = 0x4B72 + NES_FILE_OFFSET
   BOMB_UPGRADE_QUANTITY_ADDRESS = 0x4B8B + NES_FILE_OFFSET
+  BOMB_UPGRADE_DISPLAY_PRICE_ADDRESS = 0x1A2A2 + NES_FILE_OFFSET
+  HUNGRY_ENEMY_SPRITE_CODE_ADDRESS = 0x6F2E + NES_FILE_OFFSET
   TEXT_ASSIGNMENT_ADDRESS = 0x4A07 + NES_FILE_OFFSET
   ANY_ROAD_SCREEN_NUMS_ADDRESS = 0x19334 + NES_FILE_OFFSET
   RECORDER_SCREEN_NUMS_ADDRESS = 0x6010 + NES_FILE_OFFSET
+  RECORDER_Y_COORDS_ADDRESS = 0x6119 + NES_FILE_OFFSET
   WHITE_SWORD_REQUIRED_HEARTS_ADDRESS = 0x48FD + NES_FILE_OFFSET
   MAGICAL_SWORD_REQUIRED_HEARTS_ADDRESS = 0x4906 + NES_FILE_OFFSET
   FIRST_BOMB_UPGRADE_LEVEL_ADDRESS = 0x4AE0 + NES_FILE_OFFSET
@@ -75,20 +79,23 @@ class DataTable():
     self.sprite_set_patch = Patch()
     self.misc_data_patch = Patch()
 
-  def GetCaveDestination(self, screen_num: int) -> int:
+  def GetCaveDestination(self, screen_num: int) -> Union[LevelNum, CaveType]:
     foo = self.overworld_raw_data[0x80 + screen_num]
     bar = foo >> 2
     #bar -= 0x10
-    return bar
+    try: 
+      return LevelNum(bar)
+    except ValueError:
+      return CaveType(bar)
 
-  def SetCaveDestination(self, screen_num: int, level_num_or_cave_type: int) -> None:
+  def SetCaveDestination(self, screen_num: int, level_num_or_cave_type: Union[LevelNum, CaveType]) -> None:
     foo = self.overworld_raw_data[0x80 + screen_num]
     bits_to_keep = foo & 0x03
 
     #foo = level_num_or_cave_type + 0x10
     #bits_to_write = foo << 2
 
-    bits_to_write = level_num_or_cave_type << 2
+    bits_to_write = level_num_or_cave_type.value << 2
     self.overworld_raw_data[0x80 + screen_num] = bits_to_keep + bits_to_write
 
   def SetLevelGrid(self, grid_id: GridId, level_grid: List[Room]) -> None:
@@ -113,8 +120,13 @@ class DataTable():
       rooms.append(Room(room_data))
     return rooms
 
-  def GetLevelNumberOrCaveType(self, screen_num: int) -> int:
-    return (self.overworld_raw_data[0x80 + screen_num] & 0xFC) >> 2
+  def GetLevelNumberOrCaveType(self, screen_num: int) -> Union[LevelNum, CaveType]:
+    level_num_or_cave_type = (self.overworld_raw_data[0x80 + screen_num] & 0xFC) >> 2
+    try:
+      return LevelNum(level_num_or_cave_type)
+    except ValueError:
+      return CaveType(level_num_or_cave_type)
+       
 
   def _GetOverworldCaveDataIndex(self, cave_type: CaveType, position_num: int,
                                  is_second_byte: bool) -> int:
@@ -176,6 +188,16 @@ class DataTable():
     assert location.IsCavePosition()
     self.overworld_caves[location.GetCaveNum()].SetPriceAtPosition(price, location.GetPositionNum())
 
+  def AdjustHungryEnemyForSpriteSet(self, sprite_set: SpriteSet) -> None:
+    sprite_code = 0xB2 # Wizzrobe
+    #if sprite_set == SpriteSet.WIZZROBE_SPRITE_SET:
+    #  code = 0xB4
+    if sprite_set == SpriteSet.DARKNUT_SPRITE_SET:
+      sprite_code = random.choice([0xAA, 0xB0]) # Gibdo, Darknut
+    elif sprite_set == SpriteSet.GORIYA_SPRITE_SET:
+      sprite_code = random.choice([0xAA, 0xAC, 0xAE, 0xB0]) # Rope, Stalfos, Wallmaster, Goriya
+    self.misc_data_patch.AddData(self.HUNGRY_ENEMY_SPRITE_CODE_ADDRESS, [sprite_code])
+
   def RandomizeBombUpgrades(self) -> None:
     done = False
     while not done:
@@ -187,17 +209,24 @@ class DataTable():
         done = True
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_PRICE_ADDRESS, [price])
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_QUANTITY_ADDRESS, [quantity])
-
+    
+    #ones_digit = price % 10
+    #tens_digit = math.floor((price % 100) / 10))
+    print(price)
+    bomb_upgrade_price_text: List[int] = [
+      0x01 if price >= 100 else 0x24,
+       math.floor((price % 100) / 10),
+       price % 10
+    ]
+    print (bomb_upgrade_price_text)
+    input("BOMB!")
+    
     # Change white and magical sword heart container requirements.
     # Note that it's stored in the upper 4 bits, not the lower 4 bits, of that byte
     self.misc_data_patch.AddData(self.WHITE_SWORD_REQUIRED_HEARTS_ADDRESS,
                                  [random.randrange(4, 6) * 0x10])
     self.misc_data_patch.AddData(self.MAGICAL_SWORD_REQUIRED_HEARTS_ADDRESS,
                                  [random.randrange(8, 12) * 0x10])
-
-    # Turn off low health warning
-
-    self.misc_data_patch.AddData(0x1ED33, [0x00])
 
   def SetBombUpgradeLevel(self, level_num: int, first_upgrader: bool) -> None:
     address = self.FIRST_BOMB_UPGRADE_LEVEL_ADDRESS if first_upgrader else self.SECOND_BOMB_UPGRADE_LEVEL_ADDRESS
@@ -215,7 +244,30 @@ class DataTable():
     assert len(recorder_screen_nums) == 8
     self.misc_data_patch.AddData(self.ANY_ROAD_SCREEN_NUMS_ADDRESS, any_road_screen_nums)
     self.misc_data_patch.AddData(self.RECORDER_SCREEN_NUMS_ADDRESS, recorder_screen_nums)
-
+    
+    recorder_y_coords = [0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D]
+    screens_needing_custom_recorder_y_coords = {
+      0x05 - 1: 0xAD, # Vanilla 9
+      0x0A - 1: 0x5D, # Vanilla WS
+      0x21 - 1: 0x9D, # Vanilla Mags
+      0x23 - 1: 0xAD, # Grave any road
+      0x2C - 1: 0xAD, # Monocle rock
+      0x42 - 1: 0xAD, # Vanilla 7
+      0x6D - 1: 0x5D, # Vanilla 8
+      0x79 - 1: 0xAD, # Near start any road
+    }
+    for i in range(8):
+      if recorder_screen_nums[i] in screens_needing_custom_recorder_y_coords:
+        recorder_y_coords[i] = screens_needing_custom_recorder_y_coords[recorder_screen_nums[i]]
+    self.misc_data_patch.AddData(self.RECORDER_Y_COORDS_ADDRESS, recorder_y_coords)  
+    
+    # Set the stair position code to 3 for any roads.
+    for screen_num in any_road_screen_nums:
+      foo = self.overworld_raw_data[0x280 + screen_num]
+      bits_to_keep = foo & 0xCF
+      bits_to_write = 0x03 * 0x10
+      self.overworld_raw_data[0x280 + screen_num] = bits_to_keep + bits_to_write
+      
   def ClearAllVisitMarkers(self) -> None:
     logging.debug("Clearing Visit markers")
     for room in self.level_1_to_6_rooms:
@@ -224,20 +276,24 @@ class DataTable():
       room.ClearVisitMark()
 
   def ClearStaircaseRoomNumbersForLevel(self, level_num: LevelNum) -> None:
-    assert level_num in range(1, 10)
+    print("CLEAR!  level %s" % level_num)
+    assert level_num in Range.VALID_LEVEL_NUMBERS
     offset = level_num * self.LEVEL_METADATA_OFFSET + self.STAIRCASE_LIST_OFFSET
     for counter in range(0, 9):
       self.level_metadata[offset + counter] = 0xFF
 
   def AddStaircaseRoomNumberForLevel(self, level_num: LevelNum, room_num: RoomNum) -> None:
+    print("ADD!  level %s" % level_num)
+    assert level_num in Range.VALID_LEVEL_NUMBERS
     offset = level_num * self.LEVEL_METADATA_OFFSET + self.STAIRCASE_LIST_OFFSET
     assert room_num in range(0, 0x80)
     for counter in range(0, 9):
       if self.level_metadata[offset + counter] == 0xFF:
+        print("Found a FF")
         self.level_metadata[offset + counter] = room_num
         return
     print("This should never happen! (AddStaircaseRoomNumberForLevel)")
-    sys.exit()
+    assert (1 == 2)
 
   def UpdateCompassPointer(self, location: Location) -> None:
     assert location.IsLevelRoom()

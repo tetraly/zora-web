@@ -25,9 +25,32 @@ class ZoraRandomizer():
 
   def Randomize(self) -> None:
     random.seed(self.seed)
-    self.data_table.ResetToVanilla()
-    self.dungeon_generator = DungeonGenerator(self.data_table)
-    self.dungeon_generator.Generate()
+
+    done = False
+    while not done:
+      self.data_table.ResetToVanilla()
+      self.dungeon_generator = DungeonGenerator(self.data_table)
+      self.dungeon_generator.Generate()
+      random.seed(12345)
+      counter = 0
+      while True:
+        counter += 1
+        print()
+        print("Re-randomizing items")
+        print()
+        try:
+          self.item_randomizer.Randomize()
+        except NotAllItemsWereShuffledAndIDontKnowWhyException:
+          print("NotAllItemsWereShuffledAndIDontKnowWhyException")
+          break
+        print()
+        print("Back to Validating")
+        print()
+        if self.validator.IsSeedValid():
+          done = True
+          break
+        if counter > 1000:
+          break
 
   def OldRandomize(self) -> None:
     random.seed(self.seed)
@@ -60,6 +83,28 @@ class ZoraRandomizer():
 
   def GetPatch(self) -> Patch:
     patch = self.data_table.GetPatch()
+
+    # Turn off low health warning
+    patch.AddData(0x1ED33, [0x00])
+
+    # Randomize secret prices
+    patch.AddData(0x18680, [random.randrange(25, 40)])
+    patch.AddData(0x18683, [random.randrange(80, 125)])
+    patch.AddData(0x18686, [random.randrange(5, 24)])
+    # Door repair
+    patch.AddData(0x48A0, [random.randrange(15, 25)])
+
+    # L2 Power bracelet I think?
+    patch.AddData(0x112D3, [
+        0xDF, 0x9D, 0xB2, 0x04, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA,
+        0xEA
+    ])
+
+    #Either rope fire or keese boomerang
+    #patch.AddData(0x112D3, [0x65, 0x06, 0xD0])
+    #Either rope fire or keese boomerang
+    #patch.AddData(0x10449, [0xFD, 0x9D, 0xB2])
+
     patch.AddData(0x16fd8, [
         0xFF, 0xA5, 0xEC, 0x30, 0x0B, 0x49, 0x80, 0xCD, 0xA1, 0x6B, 0xD0, 0x09, 0xA4, 0x10, 0xF0,
         0x05, 0x85, 0xEC, 0x4C, 0x47, 0xB5, 0x4C, 0x59, 0xB5, 0xAC, 0xBB, 0x6B, 0xB9, 0xF1, 0xAF,
@@ -71,7 +116,7 @@ class ZoraRandomizer():
     patch.AddData(0x178D0, [0xAD, 0x22, 0x05, 0xC9, 0x01, 0xF0, 0x03, 0x4C, 0x2F, 0x75, 0x60])
     patch.AddData(0x1934D, [0x00])
 
-    # Fix for ring/tunic colors
+    # Fix for ganon triforce
     patch.AddData(0x6BFB, [0x20, 0xE4, 0xFF])
     patch.AddData(0x1FFF4, [0x8E, 0x02, 0x06, 0x8E, 0x72, 0x06, 0xEE, 0x4F, 0x03, 0x60])
     self._AddExtras(patch)
@@ -99,6 +144,10 @@ class ZoraRandomizer():
         0x60, 0xFF, 0xFF, 0x1E, 0x0A, 0x06, 0x01
     ])
 
+    #Ring fix (TODO)
+    #  patch.AddData(0x6C71, [0x4C, 0xD8, 0xFF])
+    #  patch.AddData(0x1FFE8, [0x4C, 0xB5, 0x73])
+
     # What does this do?
     patch.AddData(
         0x1A129,
@@ -116,6 +165,7 @@ class ZoraRandomizer():
       random_level_text = random.choice([
           #'palace', 'random',  'castle'
           'house-',
+          'abode-',
           'block-',
           '_cage-',
           '_home-',
@@ -134,5 +184,7 @@ class ZoraRandomizer():
       ])
       text_data_table = TextDataTable(
           "very_fast" if self.settings.IsEnabled(flags.SpeedUpText) else "normal",
-          random_level_text if self.settings.IsEnabled(flags.RandomizeLevelText) else "level-")
+          random_level_text if self.settings.IsEnabled(flags.RandomizeLevelText) else "level-",
+          self.item_randomizer.hints,
+          self.item_randomizer.letter_cave_text)
       patch += text_data_table.GetPatch()
