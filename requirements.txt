@@ -5,4 +5,3 @@ Markdown
 absl-py
 urllib3
 gunicorn
-django-heroku
