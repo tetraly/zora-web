@@ -3,7 +3,6 @@ from typing import Dict
 import random
 
 
-
 class Item(IntEnum):
   BOMBS = 0x00
   WOOD_SWORD = 0x01
@@ -48,49 +47,49 @@ class Item(IntEnum):
 
   def GetHintText(self) -> str:
     return {
-      Item.BLUE_CANDLE: "FIRE IGNITER",
-      Item.RECORDER: "MELODY MAKER",
-      Item.BOOK: "LOVELY BOOK TO READ",
-      Item.BOW: "TOOL FOR ARCHERY",
-      Item.WOOD_ARROWS: "POINTY PROJECTILE",
-      Item.SILVER_ARROWS: "POINTY PROJECTILE",
-      Item.MAGICAL_KEY: "LOCKED DOOR OPENER",
-      Item.LETTER: "POTION PRESCRIPTION",
-      Item.WAND: "MAGICAL WEAPON",
-      Item.RAFT: "FLOATATION DEVICE",
-      Item.LADDER: "WATER STEPPING TOOL",
-      Item.WOOD_SWORD: "NEW FENCING WEAPON",
-      Item.POWER_BRACELET: "STRENGTHENING DEVICE",
-      Item.BLUE_RING: "JEWEL OF PROTECTION",
-      Item.RED_RING: "JEWEL OF PROTECTION",
-      Item.BOOMERANG: "MIGHTY BANANA",
-      Item.MAGICAL_BOOMERANG: "MIGHTY BANANA",
-      Item.BAIT: "GORIYA'S LIGHT SNACK",
-      Item.MAGICAL_SHIELD: "WIZZROBE BEAM DEFLECTOR"
+        Item.BLUE_CANDLE: "FIRE IGNITER",
+        Item.RECORDER: "MELODY MAKER",
+        Item.BOOK: "LOVELY BOOK TO READ",
+        Item.BOW: "TOOL FOR ARCHERY",
+        Item.WOOD_ARROWS: "POINTY PROJECTILE",
+        Item.SILVER_ARROWS: "POINTY PROJECTILE",
+        Item.MAGICAL_KEY: "LOCKED DOOR OPENER",
+        Item.LETTER: "POTION PRESCRIPTION",
+        Item.WAND: "MAGICAL WEAPON",
+        Item.RAFT: "FLOATATION DEVICE",
+        Item.LADDER: "WATER STEPPING TOOL",
+        Item.WOOD_SWORD: "NEW FENCING WEAPON",
+        Item.POWER_BRACELET: "STRENGTHENING DEVICE",
+        Item.BLUE_RING: "JEWEL OF PROTECTION",
+        Item.RED_RING: "JEWEL OF PROTECTION",
+        Item.BOOMERANG: "MIGHTY BANANA",
+        Item.MAGICAL_BOOMERANG: "MIGHTY BANANA",
+        Item.BAIT: "GORIYA'S LIGHT SNACK",
+        Item.MAGICAL_SHIELD: "HARDENED BARRIER",
     }[self]
-    
+
   def GetLetterCaveText(self) -> str:
     return {
-      Item.BLUE_CANDLE: "ONLY YOU|CAN PREVENT|FOREST FIRES",
-      Item.RECORDER: "ONE TOOT ON THIS|WHISTLE WILL TAKE YOU|TO A FAR AWAY LAND",
-      Item.BOOK: "PLEASE RETURN THIS|TO YOUR LOCAL LIBRARY",
-      Item.BOW: "Archers give|gifts tied|with a bow.",
-      Item.WOOD_ARROWS: "THIS ONE IS FREE|BUT THE REST|WILL COST YA",
-      Item.MAGICAL_KEY: "THIS SHOULD|NEVER HAPPEN",
-      Item.LETTER: "HEY EVERYONE!|I GOT PAPER!",
-      Item.WAND: "WANDERFUL",
-      Item.RAFT: "SAIL AWAY|SAIL AWAY|SAIL AWAY",
-      Item.LADDER: "MIND THE GAP!",
-      Item.WOOD_SWORD: "DID SOMEBODY SAY ...|WOOD?",
-      Item.POWER_BRACELET: "DO YOU EVEN LIFT?",
-      Item.BLUE_RING: "IF YOU LIKED IT|THEN YOU SHOULD HAVE|PUT A RING ON IT|",
-      Item.RED_RING: "IF YOU LIKED IT|THEN YOU SHOULD HAVE|PUT A RING ON IT|",
-      Item.BOOMERANG: "RING RING RING|RING RING ...|BANANAPHONE!",
-      Item.BAIT: "MEAT ON A STICK!|GET IT WHILE IT'S|STILL ON A STICK!",
-      Item.MAGICAL_SHIELD: "BE CAREFUL!|LIKE LIKES REALLY,|LIKE, LIKE THIS",
-      Item.HEART_CONTAINER: "YOU GOTTA|HAVE HEART"
+        Item.BLUE_CANDLE: "ONLY YOU|CAN PREVENT|FOREST FIRES",
+        Item.RECORDER: "ONE TOOT ON THIS|WHISTLE WILL TAKE YOU|TO A FAR AWAY LAND",
+        Item.BOOK: "PLEASE RETURN THIS|TO YOUR LOCAL LIBRARY",
+        Item.BOW: "Archers give|gifts tied|with a bow.",
+        Item.WOOD_ARROWS: "THIS ONE IS FREE|BUT THE REST|WILL COST YA",
+        Item.MAGICAL_KEY: "THIS SHOULD|NEVER HAPPEN",
+        Item.LETTER: "HEY EVERYONE!|I GOT PAPER!",
+        Item.WAND: "WANDERFUL",
+        Item.RAFT: "SAIL AWAY|SAIL AWAY|SAIL AWAY",
+        Item.LADDER: "MIND THE GAP!",
+        Item.WOOD_SWORD: "DID SOMEBODY SAY ...|WOOD?",
+        Item.POWER_BRACELET: "DO YOU EVEN LIFT?",
+        Item.BLUE_RING: "IF YOU LIKED IT|THEN YOU SHOULD HAVE|PUT A RING ON IT|",
+        Item.RED_RING: "IF YOU LIKED IT|THEN YOU SHOULD HAVE|PUT A RING ON IT|",
+        Item.BOOMERANG: "RING RING RING|RING RING ...|BANANAPHONE!",
+        Item.BAIT: "MEAT ON A STICK!|GET IT WHILE IT'S|STILL ON A STICK!",
+        Item.MAGICAL_SHIELD: "BE CAREFUL!|LIKE LIKES REALLY,|LIKE, LIKE THIS",
+        Item.HEART_CONTAINER: "YOU GOTTA|HAVE HEART",
     }[self]
-    
+
   def GetShortNameDict(self) -> Dict["Item", str]:
     return {Item.NOTHING: "No Item"}
 
@@ -102,22 +101,42 @@ class Item(IntEnum):
 
   def IsMajorItem(self) -> bool:
     return self in [
-        Item.WOOD_SWORD, Item.WHITE_SWORD, Item.MAGICAL_SWORD, 
+        Item.WOOD_SWORD,
+        Item.WHITE_SWORD,
+        Item.MAGICAL_SWORD,
         Item.BLUE_CANDLE,
-         Item.WOOD_ARROWS,
-        Item.RAFT, Item.LADDER, 
-        Item.RECORDER, Item.WAND,
-        Item.RED_CANDLE, Item.SILVER_ARROWS, Item.BOW, Item.MAGICAL_KEY,
-          Item.BOOK, Item.BLUE_RING, Item.RED_RING,
-        Item.POWER_BRACELET, Item.LETTER, Item.HEART_CONTAINER, Item.BOOMERANG,
-        Item.MAGICAL_BOOMERANG, Item.BAIT, Item.MAGICAL_SHIELD,
+        Item.WOOD_ARROWS,
+        Item.RAFT,
+        Item.LADDER,
+        Item.RECORDER,
+        Item.WAND,
+        Item.RED_CANDLE,
+        Item.SILVER_ARROWS,
+        Item.BOW,
+        Item.MAGICAL_KEY,
+        Item.BOOK,
+        Item.BLUE_RING,
+        Item.RED_RING,
+        Item.POWER_BRACELET,
+        Item.LETTER,
+        Item.HEART_CONTAINER,
+        Item.BOOMERANG,
+        Item.MAGICAL_BOOMERANG,
+        Item.BAIT,
+        Item.MAGICAL_SHIELD,
     ]
 
   def IsAnIncrementalUpgradeItem(self) -> bool:
     return self in [
-        Item.WOOD_SWORD, Item.WHITE_SWORD, Item.MAGICAL_SWORD, Item.BLUE_CANDLE, Item.RED_CANDLE,
-        Item.WOOD_ARROWS, Item.SILVER_ARROWS,# Item.BLUE_RING, Item.RED_RING, 
-        Item.BOOMERANG, Item.MAGICAL_BOOMERANG
+        Item.WOOD_SWORD,
+        Item.WHITE_SWORD,
+        Item.MAGICAL_SWORD,
+        Item.BLUE_CANDLE,
+        Item.RED_CANDLE,
+        Item.WOOD_ARROWS,
+        Item.SILVER_ARROWS,  # Item.BLUE_RING, Item.RED_RING, 
+        Item.BOOMERANG,
+        Item.MAGICAL_BOOMERANG
     ]
 
   def IsSwordOrWand(self) -> bool:

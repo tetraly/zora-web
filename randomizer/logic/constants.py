@@ -97,10 +97,11 @@ class LevelNumOrCaveType(IntEnum):
 
   def IsCaveType(self) -> bool:
     return self.value in Range.VALID_CAVE_TYPES
-    
+
   def CastToCaveType(self) -> "CaveType":
     return CaveType(self.value)
- 
+
+
 class LevelNum(LevelNumOrCaveType):
   NO_LEVEL_NUM = 0x00
   LEVEL_1 = 0x01
@@ -171,25 +172,19 @@ class Range():
   VALID_LEVEL_NUMS_AND_CAVE_TYPES = ([int(n) for n in VALID_LEVEL_NUMBERS] +
                                      [int(n) for n in VALID_CAVE_TYPES])
   VALID_CAVE_TYPES_WITH_ITEMS = [
-    CaveType.SHOP_A ,
-    CaveType.SHOP_B ,
-    CaveType.SHOP_C ,
-    CaveType.SHOP_D ,
-    CaveType.WOOD_SWORD_CAVE,
-    CaveType.WHITE_SWORD_CAVE,
-    CaveType.MAGICAL_SWORD_CAVE,
-    CaveType.LETTER_CAVE,
-    CaveType.ARMOS_ITEM_VIRTUAL_CAVE,
-    CaveType.COAST_ITEM_VIRTUAL_CAVE
+      CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C, CaveType.SHOP_D, CaveType.WOOD_SWORD_CAVE,
+      CaveType.WHITE_SWORD_CAVE, CaveType.MAGICAL_SWORD_CAVE, CaveType.LETTER_CAVE,
+      CaveType.ARMOS_ITEM_VIRTUAL_CAVE, CaveType.COAST_ITEM_VIRTUAL_CAVE
   ]
-  FOO = ( [
-    CaveType.SHOP_A ,
-    CaveType.SHOP_B ,
-    CaveType.SHOP_C ,
-    CaveType.SHOP_D ,
-  ] + [CaveType(n) for n in range(0x10, 0x1C)] +  [CaveType(n) for n in range(0x21, 0x26)])
+  FOO = ([
+      CaveType.SHOP_A,
+      CaveType.SHOP_B,
+      CaveType.SHOP_C,
+      CaveType.SHOP_D,
+  ] + [CaveType(n) for n in range(0x10, 0x1C)] + [CaveType(n) for n in range(0x21, 0x26)])
   VALID_LEVEL_NUMS_AND_CAVE_TYPES_WITH_SHOPS_FIRST = ([int(n) for n in FOO] +
-                                     [int(n) for n in VALID_LEVEL_NUMBERS])
+                                                      [int(n) for n in VALID_LEVEL_NUMBERS])
+
 
 class Screen():
   POSSIBLE_FIRST_WEAPON_SCREENS = [

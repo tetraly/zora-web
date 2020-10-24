@@ -1,4 +1,5 @@
 import random
+from typing import List
 
 from .data_table import DataTable
 from .dungeon_generator import DungeonGenerator
@@ -87,6 +88,17 @@ class ZoraRandomizer():
     # Turn off low health warning
     patch.AddData(0x1ED33, [0x00])
 
+    # Make rare (vanilla blue ring) shop single purchase only
+    patch.AddData(0x45F3, [0x7A])
+
+    # Disable triforce flashing
+    patch.AddData(0x1A283, [0x18])
+    # Disable bomb explosion flashing
+    patch.AddData(0x6A3B, [0x60])
+
+    # Auto-"use" the letter the first time entering a potion shop
+    patch.AddData(0x4708, [0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xAD, 0x66, 0x06, 0xC9, 0x01, 0xF0])
+
     # Randomize secret prices
     patch.AddData(0x18680, [random.randrange(25, 40)])
     patch.AddData(0x18683, [random.randrange(80, 125)])
@@ -95,9 +107,7 @@ class ZoraRandomizer():
     patch.AddData(0x48A0, [random.randrange(15, 25)])
 
     # Ropes.  DF = Burn only. Overwrite 2nd quest stuff w/ NOPs
-    patch.AddData(0x112D7, [
-        0xA9, 0xDF, 0x99, 0xB3, 0x04, 
-        0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA])
+    # patch.AddData(0x112D7, [0xA9, 0xDF, 0x99, 0xB3, 0x04, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA])
 
     # Make red/black keese boomerang-only
     patch.AddData(0x10448, [0xA9, 0xFD, 0x99, 0xB3, 0x04])
@@ -108,14 +118,17 @@ class ZoraRandomizer():
     # Manhandala's damage type bit. Vanilla E2. Make wand only
     patch.AddData(0x12138, [0xEF])
 
-    # Temporary L2 PB change 
+    # Temporary L2 PB change
     patch.AddData(0x14C90, [0xAD, 0x65, 0x06, 0xD0, 0xA4])
+
+    # For fast scrolling. Puts NOPs instead of branching based on dungeon vs. Level 0 (OW)
+    for addr in [0x141F3, 0x1426B, 0x1446B, 0x14478, 0x144AD]:
+      patch.AddData(addr, [0xEA, 0xEA])
 
     zeros: List[int] = []
     for unused_counter in range(0x26):
       zeros.append(0x00)
     patch.AddData(0x1FB5E, zeros)
-
 
     patch.AddData(0x16fd8, [
         0xFF, 0xA5, 0xEC, 0x30, 0x0B, 0x49, 0x80, 0xCD, 0xA1, 0x6B, 0xD0, 0x09, 0xA4, 0x10, 0xF0,
@@ -129,8 +142,9 @@ class ZoraRandomizer():
     patch.AddData(0x1934D, [0x00])
 
     # Fix for ganon triforce
-    patch.AddData(0x6BFB, [0x20, 0xE4, 0xFF])
-    patch.AddData(0x1FFF4, [0x8E, 0x02, 0x06, 0x8E, 0x72, 0x06, 0xEE, 0x4F, 0x03, 0x60])
+    #patch.AddData(0x6BFB, [0x20, 0xE4, 0xFF])
+    #patch.AddData(0x1FFF4, [0x8E, 0x02, 0x06, 0x8E, 0x72, 0x06, 0xEE, 0x4F, 0x03, 0x60])
+
     self._AddExtras(patch)
     return patch
 
@@ -197,6 +211,5 @@ class ZoraRandomizer():
       text_data_table = TextDataTable(
           "very_fast" if self.settings.IsEnabled(flags.SpeedUpText) else "normal",
           random_level_text if self.settings.IsEnabled(flags.RandomizeLevelText) else "level-",
-          self.item_randomizer.hints,
-          self.item_randomizer.letter_cave_text)
+          self.data_table.hints, self.data_table.letter_cave_text)
       patch += text_data_table.GetPatch()

@@ -65,11 +65,19 @@ class LevelPlanGenerator:
     random.shuffle(stairway_item_pool)
 
     return [
-        Item.BOW, Item.MAGICAL_BOOMERANG, Item.RAFT, Item.LADDER, Item.RECORDER, Item.WAND,
-        Item.RED_CANDLE, Item.BOOMERANG, Item.BOOK, Item.MAGICAL_SHIELD, 
-         #Item.MAGICAL_KEY,
-         Item.RED_RING, Item.SILVER_ARROWS
-        
+        Item.BOW,
+        Item.MAGICAL_BOOMERANG,
+        Item.RAFT,
+        Item.LADDER,
+        Item.RECORDER,
+        Item.WAND,
+        Item.RED_CANDLE,
+        Item.BOOMERANG,
+        Item.BOOK,
+        Item.MAGICAL_SHIELD,
+        #Item.MAGICAL_KEY,
+        Item.RED_RING,
+        Item.SILVER_ARROWS
     ]
 
   def _GenerateEnemySpriteSetAssignments(self) -> List[SpriteSet]:
@@ -147,8 +155,8 @@ class LevelPlanGenerator:
         Enemy.ELDER_4, Enemy.ELDER_6, Enemy.ELDER_8
     ]
     elder_group_b: List[Enemy] = [
-        Enemy.ELDER, Enemy.ELDER_2, Enemy.ELDER_3, Enemy.ELDER_4, Enemy.RUPEE_BOSS,
-        Enemy.ELDER_6, Enemy.ELDER_8, Enemy.RUPEE_BOSS
+        Enemy.ELDER, Enemy.ELDER_2, Enemy.ELDER_3, Enemy.ELDER_4, Enemy.RUPEE_BOSS, Enemy.ELDER_6,
+        Enemy.ELDER_8, Enemy.RUPEE_BOSS
     ]
     random.shuffle(level_group_assignments)
     random.shuffle(elder_group_a)
@@ -173,8 +181,6 @@ class LevelPlanGenerator:
           level_num - 1] == 'a':
         self.data_table.SetBombUpgradeLevel(level_num, found_first_bomb_upgrader)
         found_first_bomb_upgrader = True
-      if Enemy.HUNGRY_ENEMY in level_plan[level_num]['elders']:
-        self.data_table.AdjustHungryEnemyForSpriteSet( level_plan[level_num]['enemy_sprite_set'])
 
     # Staircase room assignments
     stairway_rooms_a = grid_a_stairway_room_nums.copy()
@@ -235,7 +241,12 @@ class LevelPlanGenerator:
       stairway_rooms_to_assign = level_plan[level_num]['transport_stairway_room_nums'].copy()
 
       border_pool.append(random.choice(minor_border_types))
-      border_pool.append(blocking_border_type_pool.pop(0))
+      blocking_border_type = blocking_border_type_pool.pop(0)
+      border_pool.append(blocking_border_type)
+
+      if blocking_border_type == BorderType.BAIT_BLOCK:
+        self.data_table.AdjustHungryEnemyForSpriteSet(level_plan[level_num]['enemy_sprite_set'])
+        input("HUNGRY ENEMY CHANGE to %s" % level_plan[level_num]['enemy_sprite_set'])
 
       item_pool.append(stairway_item_pool.pop(0))
       item_pool.append(Item.COMPASS)
@@ -287,18 +298,17 @@ class LevelPlanGenerator:
           break
       print()
 
-
       level_plan[level_num]['1'] = {
           'border_type': border_pool.pop(0),
           'items': [item_pool.pop(0)],
-#          'min_num_rooms': 4,
-#          'max_num_rooms': 4 + level_num
+          #          'min_num_rooms': 4,
+          #          'max_num_rooms': 4 + level_num
       }
       level_plan[level_num]['2'] = {
           'border_type': border_pool.pop(0),
           'items': [item_pool.pop(0)],
-#          'min_num_rooms': 3,
-#          'max_num_rooms': 8 + level_num
+          #          'min_num_rooms': 3,
+          #          'max_num_rooms': 8 + level_num
       }
       n = 0
       if level_num > 3:
@@ -306,38 +316,38 @@ class LevelPlanGenerator:
         level_plan[level_num]['3'] = {
             'border_type': border_pool.pop(0),
             'items': [item_pool.pop(0)],
- #           'min_num_rooms': 3,
- #            'max_num_rooms': 8 + level_num
+            #           'min_num_rooms': 3,
+            #            'max_num_rooms': 8 + level_num
         }
       if level_num > 6:
         n = 2
         level_plan[level_num]['4'] = {
             'border_type': border_pool.pop(0),
             'items': [item_pool.pop(0)],
-  #          'min_num_rooms': 3,
-   #         'max_num_rooms': 10 + level_num
+            #          'min_num_rooms': 3,
+            #         'max_num_rooms': 10 + level_num
         }
       level_plan[level_num][str(3 + n)] = {
           'border_type': BorderType.LOCKED_DOOR,
           'items': [Item.KEY, item_pool.pop(0)],
-    #      'min_num_rooms': 3,
-     #     'max_num_rooms': 8 + level_num
+          #      'min_num_rooms': 3,
+          #     'max_num_rooms': 8 + level_num
       }
       level_plan[level_num][str(4 + n)] = {
           'border_type': BorderType.THE_BEAST if level_num == LevelNum.LEVEL_9 else BorderType.BOSS,
           'items': [Item.NOTHING] if level_num == LevelNum.LEVEL_9 else [Item.HEART_CONTAINER],
-  #        'min_num_rooms': 1,
-  #        'max_num_rooms': 4
+          #        'min_num_rooms': 1,
+          #        'max_num_rooms': 4
       }
       level_plan[level_num][str(5 + n)] = {
           'border_type':
               BorderType.THE_KIDNAPPED
               if level_num == LevelNum.LEVEL_9 else BorderType.TRIFORCE_ROOM,
           'items': [Item.BLUE_POTION] if level_num == LevelNum.LEVEL_9 else [Item.TRIFORCE],
-   #       'min_num_rooms':
-  #            1,
-  #        'max_num_rooms':
-  #            1
+          #       'min_num_rooms':
+          #            1,
+          #        'max_num_rooms':
+          #            1
       }
       for area_num in range(num_areas):
         if num_rooms[area_num] != 1:
@@ -345,10 +355,12 @@ class LevelPlanGenerator:
           level_plan[level_num][str(area_num + 1)]['path_length'] = random.randrange(
               2, path_length_max)
           level_plan[level_num][str(area_num + 1)]['stairway_border'] = False
-   #       level_plan[level_num][str(area_num + 1)]['min_num_rooms'] = num_rooms[area_num]
+
+  #       level_plan[level_num][str(area_num + 1)]['min_num_rooms'] = num_rooms[area_num]
+
   #        level_plan[level_num][str(area_num + 1)]['max_num_rooms'] = num_rooms[area_num] + 2
-   #       if num_rooms[area_num] == 3:
-    #        level_plan[level_num][str(area_num + 1)]['min_num_rooms'] = 3
+  #       if num_rooms[area_num] == 3:
+  #        level_plan[level_num][str(area_num + 1)]['min_num_rooms'] = 3
         else:
           level_plan[level_num][str(area_num + 1)]['path_length'] = 1
           level_plan[level_num][str(area_num + 1)]['min_num_rooms'] = 1
@@ -400,23 +412,27 @@ class DungeonGenerator:
     self.level_rooms_b: List[List[RoomNum]] = []
     self.room_grid_a: List[Room] = []
     self.room_grid_b: List[Room] = []
-    self.item_position_dict : Dict[RoomType, int] = {}
+    self.item_position_dict: Dict[RoomType, int] = {}
 
-  def GenerateRoomPositions(self) -> None:
+  def GenerateItemPositions(self) -> None:
     # For each level, pick four random item drop positions such that at least one will be a valid
     # and accessible tile (i.e. not on top of blocks, water, etc.). They get numbered 0-3.
     # Then, create a dictionary for each level mapping each room type to the position number (0-3)
     # that is valid for the room type.
     positions = [
-          0x89,
-          RoomType.GetValidPositionForRoomType(RoomType.CIRCLE_BLOCK_WALL_ROOM),
-          RoomType.GetValidPositionForRoomType(RoomType.VERTICAL_LINES),
-          RoomType.GetValidPositionForRoomTypes(RoomType.HORIZONTAL_LINES, RoomType.SPIRAL_STAIR_ROOM)]
+        0x89,
+        RoomType.GetValidPositionForRoomType(RoomType.CIRCLE_BLOCK_WALL_ROOM,
+                                             is_item_position=True),
+        RoomType.GetValidPositionForRoomType(RoomType.VERTICAL_LINES, is_item_position=True),
+        RoomType.GetValidPositionForRoomTypes(RoomType.HORIZONTAL_LINES,
+                                              RoomType.SPIRAL_STAIR_ROOM,
+                                              is_item_position=True)
+    ]
     values = [0, 1, 2, 3]
     for level_num in Range.VALID_LEVEL_NUMBERS:
       self.data_table.SetItemPositionsForLevel(level_num, positions)
     for room_type in range(0x00, 0x2A):
-      if room_type  == RoomType.TURNSTILE_ROOM:
+      if room_type == RoomType.TURNSTILE_ROOM:
         continue
       room_type = RoomType(room_type)
       random.shuffle(values)
@@ -430,7 +446,7 @@ class DungeonGenerator:
         #elif room_type in [RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.DIAMOND_STAIR_ROOM]:
         #  self.level_position_dict[room_type] = 3
         #  break
-        if RoomType.IsValidPositionForRoomType(positions[v], room_type):
+        if RoomType.IsValidPositionForRoomType(positions[v], room_type, is_item_position=True):
           self.item_position_dict[room_type] = v
           break
       print(room_type)
@@ -508,7 +524,7 @@ class DungeonGenerator:
     self.grid_generator_b.GenerateMapData(is_7_to_9=True)
     self.grid_generator_b.Print()
     self.level_rooms_b = self.grid_generator_b.GetLevelRoomNumbers()
-    self.GenerateRoomPositions()
+    self.GenerateItemPositions()
     self.level_plan = self.level_plan_generator.GenerateLevelPlan(
         self._GetNumberOfRoomsPerLevel(), self._GetStairwayRoomsForGrid(GridId.GRID_A),
         self._GetStairwayRoomsForGrid(GridId.GRID_B))
@@ -609,7 +625,7 @@ class DungeonGenerator:
       for col in range(col_min, col_max + 1):
         room = self._GetRoom(RoomNum(16 * row + col), level_num)
         print(self._GetColorForPrinting(RoomNum(16 * row + col), level_num), end='')
-#        print('| %10s |' % room.GetRoomType().GetShortName(), end='')
+        #        print('| %10s |' % room.GetRoomType().GetShortName(), end='')
         #print('| %10s |' % (room.GetLockingDirection().GetShortName()
         #                    if room.GetLockingDirection().GetShortName() != "No Dir'n" else "  "),
         #      end='')
@@ -675,7 +691,7 @@ class DungeonGenerator:
       self.ResetRooms(level_num)
       self._GenerateLevelStartRoom(level_num)
       if not self.TryCreateRoomTree(level_num):
-         continue
+        continue
       if not self.PlaceItems(level_num):
         continue
       self.PlaceBorders(level_num)
@@ -686,6 +702,8 @@ class DungeonGenerator:
   def ResetRooms(self, level_num: LevelNum) -> None:
     for room_num in self._GetRoomNumsForLevel(level_num):
       self._GetRoom(room_num, level_num).ResetRoomState()
+
+
 #      room = self._GetRoom(room_num, level_num)
 #  room.SetEnemy(Enemy.NO_ENEMY)
 #  room.SetItem(Item.NOTHING)
@@ -696,7 +714,6 @@ class DungeonGenerator:
 #  room.SetDebugString("")
 #  for direction in Range.CARDINAL_DIRECTIONS:
 #    room.SetWallType(direction, WallType.SOLID_WALL)
-    
 
   def TryCreateRoomTree(self, level_num: LevelNum) -> bool:
     print("TryCreateRoomTree")
@@ -718,8 +735,7 @@ class DungeonGenerator:
     if level_num > 6:
       actual_num_rooms[7] = 0
     #print("Resetting TSRN")
-    transport_stairway_room_nums = self.level_plan[level_num][
-          'transport_stairway_room_nums'].copy()
+    transport_stairway_room_nums = self.level_plan[level_num]['transport_stairway_room_nums'].copy()
 
     current_room_num = entrance_room_num
     while True:
@@ -762,12 +778,10 @@ class DungeonGenerator:
         next_room_type = RoomType.RandomValueOkayForStairs()
         current_room.SetRoomType(current_room_type)
         next_room.SetRoomType(next_room_type)
-        if not current_room_type.HasOpenStairs():
-          current_room.SetRoomAction(RoomAction.PUSHABLE_BLOCK_MAKES_STAIRS_APPEAR)
-        if not next_room_type.HasOpenStairs():
-          next_room.SetRoomAction(RoomAction.PUSHABLE_BLOCK_MAKES_STAIRS_APPEAR)
+        current_room.SetRoomAction(current_room_type.GetRoomActionIfHasStairs())
+        next_room.SetRoomAction(next_room_type.GetRoomActionIfHasStairs())
         stairway_room.SetReturnPosition(
-          RoomType.GetValidPositionForRoomTypes(current_room_type, next_room_type))
+            RoomType.GetValidPositionForRoomTypes(current_room_type, next_room_type))
         current_room.SetLockingDirection(Direction.STAIRCASE)
         next_room.SetLockLevel(current_room.GetLockLevel() + 1)
         current_room.AddChildRoomNum(next_room_num)
@@ -791,12 +805,14 @@ class DungeonGenerator:
         for maybe_next_dir in maybe_next_dirs:
 
           if is_expanding:
-             if border_type in [BorderType.BAIT_BLOCK, BorderType.MUGGER] and maybe_next_dir != Direction.NORTH:
-                continue
-             if border_type in [BorderType.TRIFORCE_CHECK, BorderType.BOSS] and maybe_next_dir == Direction.SOUTH:
-                continue
-             if border_type == BorderType.THE_BEAST and maybe_next_dir == Direction.SOUTH:
-                continue
+            if border_type in [BorderType.BAIT_BLOCK, BorderType.MUGGER
+                              ] and maybe_next_dir != Direction.NORTH:
+              continue
+            if border_type in [BorderType.TRIFORCE_CHECK, BorderType.BOSS
+                              ] and maybe_next_dir == Direction.SOUTH:
+              continue
+            if border_type == BorderType.THE_BEAST and maybe_next_dir == Direction.SOUTH:
+              continue
 
           maybe_next_room_num = GetNextRoomNum(current_room_num, maybe_next_dir)
           if maybe_next_room_num in level_room_nums:
@@ -940,14 +956,14 @@ class DungeonGenerator:
         item_room_num = good_item_room_nums.pop()
         item_room = self._GetRoom(item_room_num, level_num)
         enemy = Enemy.RandomHardEnemyOrMiniBossOkayForSpriteSets(
-          self.level_plan[level_num]['boss_sprite_set'],
-          self.level_plan[level_num]['enemy_sprite_set'])
+            self.level_plan[level_num]['boss_sprite_set'],
+            self.level_plan[level_num]['enemy_sprite_set'])
         item_room.SetEnemy(enemy)
-        item_room.SetEnemyQuantityCode(random.randrange(2,3))
+        item_room.SetEnemyQuantityCode(random.randrange(2, 3))
         if item.IsMajorItem():
           stairway_room_num = item_stairway_room_nums.pop(0)
           print("MAJOR ITEM TO PLACE: %s. Item room %x -> Stairway %x" %
-              (item, item_room_num, stairway_room_num))
+                (item, item_room_num, stairway_room_num))
           stairway_room = self._GetRoom(stairway_room_num, level_num)
           stairway_room.SetRoomType(RoomType.ITEM_STAIRCASE)
           stairway_room.SetStairwayRoomExit(room_num=item_room_num, is_right_side=True)
@@ -957,11 +973,9 @@ class DungeonGenerator:
           item_room.SetStairsDestination(stairway_room_num)
           item_room.SetInnerPalette(DungeonPalette.WATER)
           room_type = RoomType.RandomValueOkayForStairs()
-          if not room_type.HasOpenStairs():
-            item_room.SetRoomAction(RoomAction.PUSHABLE_BLOCK_MAKES_STAIRS_APPEAR)
+          item_room.SetRoomAction(room_type.GetRoomActionIfHasStairs())
           item_room.SetRoomType(room_type)
-          stairway_room.SetReturnPosition(
-              0x85 if room_type.NeedsOffCenterStairReturnPosition() else 0x89)
+          stairway_room.SetReturnPosition(RoomType.GetValidPositionForRoomType(room_type))
           item_room.SetDebugString("S %s" % item.name)
         else:
           room_type = RoomType.RandomValue(okay_for_enemy=enemy)
@@ -969,8 +983,11 @@ class DungeonGenerator:
           item_room.SetItem(item)
           item_room.SetItemPositionCode(self.item_position_dict[room_type])
           item_room.SetDebugString("F %s" % item.name)
-          item_room.SetRoomAction(random.choice([RoomAction.NO_ROOM_ACTION, RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_AND_DROPS_ITEM]))
-          
+          item_room.SetRoomAction(
+              random.choice([
+                  RoomAction.NO_ROOM_ACTION,
+                  RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_AND_DROPS_ITEM
+              ]))
     return True
 
   def PlaceBorders(self, level_num: LevelNum) -> None:
@@ -1037,10 +1054,11 @@ class DungeonGenerator:
         enemy = random.choice(okay_enemies[border_type])
         border_room.SetEnemy(enemy)
         border_room.SetEnemyQuantityCode(0)
-        if border_room.GetLockingDirection() == Direction.STAIRCASE:
-          #input("Stairs in border method")
-          border_room.SetRoomAction(RoomAction.PUSHABLE_BLOCK_MAKES_STAIRS_APPEAR)
-        else:
+        if border_room.GetLockingDirection() != Direction.STAIRCASE:
+          #pass
+          # Not needed I think because the room action is set when creating the staircase
+          #border_room.SetRoomAction(RoomAction.PUSHABLE_BLOCK_MAKES_STAIRS_APPEAR)
+          #else:
           border_room.SetWallType(border_dir, WallType.SHUTTER_DOOR)
           border_room.SetRoomAction(RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS)
         if border_type == BorderType.BOSS:
@@ -1060,14 +1078,26 @@ class DungeonGenerator:
         border_room.SetEnemy(Enemy.THE_KIDNAPPED)
         self.data_table.UpdateCompassPointer(Location(level_num=level_num,
                                                       room_num=border_room_num))
+        border_room.SetBossRoarSound(False)
       elif border_type == BorderType.THE_BEAST:
         border_room.SetEnemy(Enemy.THE_BEAST)
         border_room.SetDarkRoomBit(True)
         border_room.SetRoomType(RoomType.BEAST_ROOM)
         border_room.SetRoomAction(RoomAction.KILLING_THE_BEAST_OPENS_SHUTTER_DOORS)
+        border_room.SetOuterPalette(DungeonPalette.PRIMARY)
+        border_room.SetInnerPalette(DungeonPalette.PRIMARY)
+        border_room.SetEnemyQuantityCode(0)
+
         for direction in Range.CARDINAL_DIRECTIONS:
           if border_room.GetWallType(direction) != WallType.SOLID_WALL:
             border_room.SetWallType(direction, WallType.SHUTTER_DOOR)
+          next_room_num = GetNextRoomNum(border_room_num, direction)
+          assert border_room.GetWallType(direction) != WallType.OPEN_DOOR
+          if next_room_num in self._GetRoomNumsForLevel(level_num):
+            next_room = self._GetRoom(next_room_num, level_num)
+            if next_room.GetEnemy() != Enemy.THE_KIDNAPPED:
+              next_room.SetBossRoarSound(True)
+
       elif border_type == BorderType.POWER_BRACELET_BLOCK:
         border_room.SetRoomAction(RoomAction.EXPERIMENTAL_6)
         border_room.SetRoomType(RoomType.SINGLE_BLOCK_ROOM)
@@ -1139,20 +1169,23 @@ class DungeonGenerator:
     level_room_nums = self._GetRoomNumsForLevel(level_num)
     for room_num in level_room_nums:
       room = self._GetRoom(room_num, level_num)
-      if (room.GetEnemy() == Enemy.NO_ENEMY and
-          room.GetRoomType() == RoomType.PLAIN_ROOM and
+      if (room.GetEnemy() == Enemy.NO_ENEMY and room.GetRoomType() == RoomType.PLAIN_ROOM and
           room.GetItem() == Item.NOTHING):
-        enemy = Enemy.RandomEnemyOkayForSpriteSet(sprite_set=self.level_plan[level_num]['enemy_sprite_set'] )
+        enemy = Enemy.RandomEnemyOkayForSpriteSet(
+            sprite_set=self.level_plan[level_num]['enemy_sprite_set'])
         room_type = RoomType.RandomValue(okay_for_enemy=enemy)
         room.SetEnemy(enemy)
-        room.SetEnemyQuantityCode(random.randrange(1,2))
+        room.SetEnemyQuantityCode(random.randrange(1, 2))
         room.SetRoomType(room_type)
         item = random.choice([Item.BOMBS, Item.FIVE_RUPEES, Item.RUPEE, Item.NOTHING, Item.NOTHING])
         room.SetItem(item)
-        
-        if item != Item.NOTHING:
-          room.SetRoomAction(random.choice([ RoomAction.NO_ROOM_ACTION, RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_AND_DROPS_ITEM]))
 
+        if item != Item.NOTHING:
+          room.SetRoomAction(
+              random.choice([
+                  RoomAction.NO_ROOM_ACTION,
+                  RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_AND_DROPS_ITEM
+              ]))
 
   def LinkUpRooms(self, level_num: LevelNum) -> None:
     level_room_nums = self._GetRoomNumsForLevel(level_num)
@@ -1189,14 +1222,82 @@ class DungeonGenerator:
           bottom_room.GetParentRoomNum() == room_num or
           top_room.GetLockLevel() != bottom_room.GetLockLevel()):
         continue
+      if bottom_room.GetEnemy() in [
+          Enemy.ELDER, Enemy.ELDER_2, Enemy.ELDER_3, Enemy.ELDER_4, Enemy.BOMB_UPGRADER,
+          Enemy.ELDER_6, Enemy.ELDER_8
+      ]:
+        continue
       wall_type = random.choice([WallType.OPEN_DOOR, WallType.BOMB_HOLE])
       wall_type = WallType.BOMB_HOLE
       self._GetRoom(room_num, level_num).SetWallType(Direction.SOUTH, wall_type)
       self._GetRoom(bottom_room_num, level_num).SetWallType(Direction.NORTH, wall_type)
 
   def RandomizeShops(self) -> None:
-    minor_items: List[Tuple[Item, int]] = []
+    minor_items = [(Item.BOMBS, random.randrange(5, 20)), (Item.BOMBS, random.randrange(20, 35)),
+                   (Item.MAGICAL_SHIELD, random.randrange(125, 160)),
+                   (Item.SINGLE_HEART, random.randrange(1, 20)),
+                   (Item.KEY, random.randrange(230, 255)), (Item.FAIRY, random.randrange(20, 35)),
+                   (Item.BLUE_POTION, random.randrange(30, 55)),
+                   (Item.RED_POTION, random.randrange(55, 85))]
+    major_items = [
+        (Item.BLUE_CANDLE, random.randrange(50, 80)),
+        (Item.WOOD_ARROWS, random.randrange(60, 100)),
+        (Item.BAIT, random.randrange(60, 100)),
+        (Item.BLUE_RING, random.randrange(125, 175)),
+        (Item.OVERWORLD_NO_ITEM, 0),
+    ]
 
+    while True:
+      random.shuffle(major_items)
+      random.shuffle(minor_items)
+      if (minor_items[0][0] == minor_items[1][0] or minor_items[2][0] == minor_items[3][0] or
+          minor_items[4][0] == minor_items[5][0] or minor_items[6][0] == minor_items[7][0]):
+        continue
+      if major_items[3][0] == Item.OVERWORLD_NO_ITEM:
+        continue
+      break
+    shop_item_data = [
+        [minor_items[0][0], major_items[0][0], minor_items[1][0]],
+        [minor_items[2][0], major_items[1][0], minor_items[3][0]],
+        [minor_items[4][0], major_items[2][0], minor_items[5][0]],
+        [Item.OVERWORLD_NO_ITEM, major_items[3][0], Item.OVERWORLD_NO_ITEM],
+        [minor_items[6][0], major_items[4][0], minor_items[7][0]],
+    ]
+    shop_price_data = [
+        [minor_items[0][1], major_items[0][1], minor_items[1][1]],
+        [minor_items[2][1], major_items[1][1], minor_items[3][1]],
+        [minor_items[4][1], major_items[2][1], minor_items[5][1]],
+        [0, major_items[3][1], 0],
+        [minor_items[6][1], major_items[4][1], minor_items[7][1]],
+    ]
+
+    for shop_num in range(5):
+      for position_num in range(3):
+        cave_type = CaveType(0x1D + shop_num) if shop_num != 4 else CaveType.POTION_SHOP
+        location = Location(cave_type=cave_type, position_num=position_num + 1)
+        self.data_table.SetCaveItem(shop_item_data[shop_num][position_num], location)
+        self.data_table.SetCavePrice(shop_price_data[shop_num][position_num], location)
+
+    #location = Location(cave_type=CaveType.POTION_SHOP, position_num=1)
+    #self.data_table.SetCavePrice(random.randrange(30, 55), location)
+    #location = Location(cave_type=CaveType.POTION_SHOP, position_num=3)
+    #self.data_table.SetCavePrice(random.randrange(50, 75), location)
+    """# 7 minor items?
+# bombs, shield, heart, key, fairy, potion, potion
+# + bombs
+2 (pot shop)
+3
+3
+3
+1
+--
+12
+-4
+8
+"""
+
+  def OldRandomizeShops(self) -> None:
+    minor_items: List[Tuple[Item, int]] = []
     is_done = False
     while not is_done:
       minor_items = [(Item.BOMBS, random.randrange(5, 20)), (Item.BOMBS, random.randrange(20, 35)),
@@ -1244,7 +1345,7 @@ class DungeonGenerator:
       dest = self.data_table.GetCaveDestination(screen_num)
       destinations.append(dest)
     random.shuffle(destinations)
-    
+
     # Assign Wood Sword cave to an open cave
     wood_sword_cave_screen_num = random.choice(Screen.POSSIBLE_FIRST_WEAPON_SCREENS)
     self.data_table.SetCaveDestination(wood_sword_cave_screen_num, CaveType.WOOD_SWORD_CAVE)
@@ -1253,14 +1354,43 @@ class DungeonGenerator:
     screen_nums.remove(wood_sword_cave_screen_num)
     destinations.remove(CaveType.WOOD_SWORD_CAVE)
     assert len(destinations) == len(screen_nums)
-    
+
+    while len(any_road_screen_nums) < 4:
+      random.shuffle(screen_nums)
+      if screen_nums[0] not in [0x03, 0x07, 0x0A, 0x1E, 0x6D]:  # From Sinistral's research
+        any_road_screen_nums.append(screen_nums.pop(0))
+        destinations.remove(CaveType.ANY_ROAD_CAVE)
+    assert len(destinations) == len(screen_nums)
+
     for screen_num in screen_nums:
       print(destinations[0])
       destination = destinations.pop(0)
       self.data_table.SetCaveDestination(screen_num, destination)
-      if destination == CaveType.ANY_ROAD_CAVE:
-        any_road_screen_nums.append(screen_num)
-      elif destination in range(1, 9):  # Levels 1-8
+      if destination in range(1, 9):  # Levels 1-8
         recorder_screen_nums[destination - 1] = screen_num - 1
+        hint_text: str = ""
+        if destination == 7:
+          hint_text += "FIND LEVEL SEVEN"
+        else:
+          hint_text += "LOOK FOR LEVEL %d" % destination
+        hint_text += "|IN THE "
+        hint_text += "N" if screen_num < 0x40 else "S"
+        hint_text += "W" if screen_num % 16 < 8 else "E"
+        hint_text += " OF HYRULE|"
+        if screen_num in Screen.OPEN_CAVE_SCREENS:
+          hint_text += "IN AN OPEN CAVE"
+        elif screen_num in Screen.BOMB_BLOCKED_CAVE_SCREENS:
+          hint_text += "IN A HIDDEN CAVE"
+        elif screen_num in Screen.CANDLE_BLOCKED_CAVE_SCREENS:
+          hint_text += "UNDERNEATH A BUSH"
+        elif screen_num in Screen.POWER_BRACELET_BLOCKED_CAVE_SCREENS:
+          hint_text += "BY MOVING A BLOCK"
+        elif screen_num in Screen.RAFT_BLOCKED_CAVE_SCREENS:
+          hint_text += "ON A SMALL ISLAND"
+        elif screen_num in Screen.RECORDER_BLOCKED_CAVE_SCREENS:
+          hint_text += "UNDERNEATH A LAKE"
+        self.data_table.hints.append(hint_text)
+        input(hint_text)
     assert -1 not in recorder_screen_nums
     self.data_table.UpdateAnyRoadAndRecorderScreensNums(any_road_screen_nums, recorder_screen_nums)
+    

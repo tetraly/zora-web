@@ -29,20 +29,21 @@ class Validator():
   def _HasInitialWeapon(self) -> bool:
     for screen_num in Screen.POSSIBLE_FIRST_WEAPON_SCREENS:
       cave_type = self.data_table.GetLevelNumberOrCaveType(screen_num)
-      print("Screen %x has cave type %s" %(screen_num, cave_type))
+      print("Screen %x has cave type %s" % (screen_num, cave_type))
       if not isinstance(cave_type, CaveType):
         print("Not a cave -- ignoring")
         continue
-      print ("Checking %s" % cave_type)
-      if cave_type  != CaveType.WOOD_SWORD_CAVE:
+      print("Checking %s" % cave_type)
+      if cave_type != CaveType.WOOD_SWORD_CAVE:
         print("Not wood sword cave, ignoring")
         continue
       #input("...")
       location = Location(cave_type=cave_type, position_num=2)
-      print (self.data_table.GetCaveItem(location))
+      print(self.data_table.GetCaveItem(location))
       #input("?????")
       if self.data_table.GetCaveItem(location).IsSwordOrWand():
-        print("screen %x has cave %s with %s" % (screen_num, cave_type, self.data_table.GetCaveItem(location)))
+        print("screen %x has cave %s with %s" %
+              (screen_num, cave_type, self.data_table.GetCaveItem(location)))
         #input("YAY!")
         return True
         # else:
@@ -64,7 +65,7 @@ class Validator():
     if not self._HasInitialWeapon():
       input("No initial weapon -- shouldn't happen right?")
       return False
-    
+
     while self.inventory.StillMakingProgress():
       num_iterations += 1
       print("")
@@ -72,14 +73,12 @@ class Validator():
       self.inventory.ClearMakingProgressBit()
       self.data_table.ClearAllVisitMarkers()
       self._VisitAccessibleOverworldCaves()
-      if self.inventory.Has(Item.KIDNAPPED_PLACEHOLDER_ITEM): 
-        assert (self.inventory.Has(Item.SILVER_ARROWS) and
-          self.inventory.Has(Item.LADDER) and
-          self.inventory.Has(Item.BOW) and 
-          self.inventory.Has(Item.RAFT) and 
-          self.inventory.Has(Item.RECORDER) and 
-          self.inventory.Has(Item.POWER_BRACELET) and 
-          self.inventory.GetTriforceCount() == 8)
+      if self.inventory.Has(Item.KIDNAPPED_PLACEHOLDER_ITEM):
+        if not (self.inventory.Has(Item.SILVER_ARROWS) and self.inventory.Has(Item.LADDER) and
+                self.inventory.Has(Item.BOW) and self.inventory.Has(Item.RAFT) and
+                self.inventory.Has(Item.RECORDER) and self.inventory.Has(Item.POWER_BRACELET) and
+                self.inventory.GetTriforceCount() == 8):
+          input("WARNING: Missing a key item")
         print("Seed appears to be beatable. :)")
         input()
         return True
@@ -89,14 +88,13 @@ class Validator():
     return False
 
   def _IsAnIncrementalUpgradeItemAvaliableInAShop(self) -> bool:
-    for cave_type in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C, CaveType.SHOP_D]:
+    for cave_type in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C]:
       for position_num in [1, 2, 3]:
         location = Location(cave_type=cave_type, position_num=position_num)
         if self.data_table.GetCaveItem(location).IsAnIncrementalUpgradeItem():
           print("  Found %s in %s" % (self.data_table.GetCaveItem(location), cave_type))
           return True
     return False
-
 
   def _VisitAccessibleOverworldCaves(self) -> None:
     print("Visiting open caves ...")
@@ -128,14 +126,13 @@ class Validator():
       level_num_or_cave_type = self.data_table.GetLevelNumberOrCaveType(screen_number)
       if level_num_or_cave_type in Range.VALID_LEVEL_NUMBERS:
         level_num = LevelNum(level_num_or_cave_type)
-        print("Entering level %s (at screen %x)" %
-                 (level_num, screen_number))
+        print("Entering level %s (at screen %x)" % (level_num, screen_number))
         self._RecursivelyTraverseLevel(level_num,
                                        self.data_table.GetLevelStartRoomNumber(level_num),
                                        self.data_table.GetLevelEntranceDirection(level_num))
         print("Exiting level %s" % level_num)
       elif level_num_or_cave_type in Range.VALID_CAVE_TYPES_WITH_ITEMS:
-#        print("  Found cave %s at screen %x Visiting it." % (CaveType(level_num_or_cave_type, screen_number)))
+        #        print("  Found cave %s at screen %x Visiting it." % (CaveType(level_num_or_cave_type, screen_number)))
         cave_type = CaveType(level_num_or_cave_type)
         self._VisitCave(cave_type)
         #print("  Done with cave.")
@@ -168,7 +165,7 @@ class Validator():
         print("Found %s in %s" % (item, cave_type))
         self.inventory.AddItem(item, location)
       else:
-        pass #print("    Found minor item %s in %s" % (item, cave_type) )
+        pass  #print("    Found minor item %s in %s" % (item, cave_type) )
 
   def _RecursivelyTraverseLevel(self, level_num: LevelNum, room_num: RoomNum,
                                 entry_direction: Direction) -> None:
@@ -196,10 +193,10 @@ class Validator():
 
     if room.HasItem():
       if self._CanGetRoomItem(entry_direction, room):
-        print ("-- Room has item %s. Got it!" % room.GetItem())
+        print("-- Room has item %s. Got it!" % room.GetItem())
         self.inventory.AddItem(room.GetItem(), current_location)
       else:
-          print("-- Room has %s but I can't get it. Enemy is %s" %(room.GetItem() ,room.GetEnemy()))
+        print("-- Room has %s but I can't get it. Enemy is %s" % (room.GetItem(), room.GetEnemy()))
     if room.GetEnemy() == Enemy.THE_BEAST and self.inventory.HasBowSilverArrowsAndSword():
       print("Got the triforce of power!")
       input()
@@ -243,7 +240,7 @@ class Validator():
 
     wall_type = room.GetWallType(exit_direction)
     if wall_type == WallType.SOLID_WALL:
-       return False
+      return False
     if wall_type == WallType.SHUTTER_DOOR and not self._CanDefeatEnemies(room):
       print("!!!!! Can't proceed through shutter door. Enemy is %s" % room.GetEnemy())
       return False
@@ -263,7 +260,7 @@ class Validator():
       print("!!!!! Ladder block")
       return False
     if room.HasDropBitSet() and not self._CanDefeatEnemies(room):
-      print("!!!!! Can't get drop item %s because of enemy %s" %(room.GetItem(), room.GetEnemy()))
+      print("!!!!! Can't get drop item %s because of enemy %s" % (room.GetItem(), room.GetEnemy()))
       return False
     if (room.GetRoomType() == RoomType.HORIZONTAL_CHUTE_ROOM and
         entry_direction in [Direction.NORTH, Direction.SOUTH]):

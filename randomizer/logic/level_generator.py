@@ -277,7 +277,7 @@ class LevelGenerator:
         elif room_type in [RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.DIAMOND_STAIR_ROOM]:
           self.level_position_dict[room_type] = 3
           break
-        elif RoomType.IsValidPositionForRoomType(positions[v], room_type):
+        elif RoomType.IsValidPositionForRoomType(positions[v], room_type, is_item_position=True):
           self.level_position_dict[room_type] = v
           break
 

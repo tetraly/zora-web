@@ -78,17 +78,20 @@ class DataTable():
     self.level_7_to_9_rooms: List[Room] = []
     self.sprite_set_patch = Patch()
     self.misc_data_patch = Patch()
+    self.hints: List[str] = []
+    self.letter_cave_text = ""
 
   def GetCaveDestination(self, screen_num: int) -> Union[LevelNum, CaveType]:
     foo = self.overworld_raw_data[0x80 + screen_num]
     bar = foo >> 2
     #bar -= 0x10
-    try: 
+    try:
       return LevelNum(bar)
     except ValueError:
       return CaveType(bar)
 
-  def SetCaveDestination(self, screen_num: int, level_num_or_cave_type: Union[LevelNum, CaveType]) -> None:
+  def SetCaveDestination(self, screen_num: int, level_num_or_cave_type: Union[LevelNum,
+                                                                              CaveType]) -> None:
     foo = self.overworld_raw_data[0x80 + screen_num]
     bits_to_keep = foo & 0x03
 
@@ -126,7 +129,6 @@ class DataTable():
       return LevelNum(level_num_or_cave_type)
     except ValueError:
       return CaveType(level_num_or_cave_type)
-       
 
   def _GetOverworldCaveDataIndex(self, cave_type: CaveType, position_num: int,
                                  is_second_byte: bool) -> int:
@@ -189,13 +191,13 @@ class DataTable():
     self.overworld_caves[location.GetCaveNum()].SetPriceAtPosition(price, location.GetPositionNum())
 
   def AdjustHungryEnemyForSpriteSet(self, sprite_set: SpriteSet) -> None:
-    sprite_code = 0xB2 # Wizzrobe
+    sprite_code = 0xB4  # Wizzrobe
     #if sprite_set == SpriteSet.WIZZROBE_SPRITE_SET:
     #  code = 0xB4
     if sprite_set == SpriteSet.DARKNUT_SPRITE_SET:
-      sprite_code = random.choice([0xAA, 0xB0]) # Gibdo, Darknut
+      sprite_code = random.choice([0xAA, 0xB0])  # Gibdo, Darknut
     elif sprite_set == SpriteSet.GORIYA_SPRITE_SET:
-      sprite_code = random.choice([0xAA, 0xAC, 0xAE, 0xB0]) # Rope, Stalfos, Wallmaster, Goriya
+      sprite_code = random.choice([0xAA, 0xAC, 0xAE, 0xB0])  # Rope, Stalfos, Wallmaster, Goriya
     self.misc_data_patch.AddData(self.HUNGRY_ENEMY_SPRITE_CODE_ADDRESS, [sprite_code])
 
   def RandomizeBombUpgrades(self) -> None:
@@ -209,18 +211,14 @@ class DataTable():
         done = True
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_PRICE_ADDRESS, [price])
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_QUANTITY_ADDRESS, [quantity])
-    
-    #ones_digit = price % 10
-    #tens_digit = math.floor((price % 100) / 10))
+
     print(price)
     bomb_upgrade_price_text: List[int] = [
-      0x01 if price >= 100 else 0x24,
-       math.floor((price % 100) / 10),
-       price % 10
+        0x01 if price >= 100 else 0x24,
+        math.floor((price % 100) / 10), price % 10
     ]
-    print (bomb_upgrade_price_text)
-    input("BOMB!")
-    
+    self.misc_data_patch.AddData(self.BOMB_UPGRADE_DISPLAY_PRICE_ADDRESS, bomb_upgrade_price_text)
+
     # Change white and magical sword heart container requirements.
     # Note that it's stored in the upper 4 bits, not the lower 4 bits, of that byte
     self.misc_data_patch.AddData(self.WHITE_SWORD_REQUIRED_HEARTS_ADDRESS,
@@ -244,30 +242,30 @@ class DataTable():
     assert len(recorder_screen_nums) == 8
     self.misc_data_patch.AddData(self.ANY_ROAD_SCREEN_NUMS_ADDRESS, any_road_screen_nums)
     self.misc_data_patch.AddData(self.RECORDER_SCREEN_NUMS_ADDRESS, recorder_screen_nums)
-    
+
     recorder_y_coords = [0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D]
     screens_needing_custom_recorder_y_coords = {
-      0x05 - 1: 0xAD, # Vanilla 9
-      0x0A - 1: 0x5D, # Vanilla WS
-      0x21 - 1: 0x9D, # Vanilla Mags
-      0x23 - 1: 0xAD, # Grave any road
-      0x2C - 1: 0xAD, # Monocle rock
-      0x42 - 1: 0xAD, # Vanilla 7
-      0x6D - 1: 0x5D, # Vanilla 8
-      0x79 - 1: 0xAD, # Near start any road
+        0x05 - 1: 0xAD,  # Vanilla 9
+        0x0A - 1: 0x5D,  # Vanilla WS
+        0x21 - 1: 0x9D,  # Vanilla Mags
+        0x23 - 1: 0xAD,  # Grave any road
+        0x2C - 1: 0xAD,  # Monocle rock
+        0x42 - 1: 0xAD,  # Vanilla 7
+        0x6D - 1: 0x5D,  # Vanilla 8
+        0x79 - 1: 0xAD,  # Near start any road
     }
     for i in range(8):
       if recorder_screen_nums[i] in screens_needing_custom_recorder_y_coords:
         recorder_y_coords[i] = screens_needing_custom_recorder_y_coords[recorder_screen_nums[i]]
-    self.misc_data_patch.AddData(self.RECORDER_Y_COORDS_ADDRESS, recorder_y_coords)  
-    
+    self.misc_data_patch.AddData(self.RECORDER_Y_COORDS_ADDRESS, recorder_y_coords)
+
     # Set the stair position code to 3 for any roads.
     for screen_num in any_road_screen_nums:
       foo = self.overworld_raw_data[0x280 + screen_num]
       bits_to_keep = foo & 0xCF
       bits_to_write = 0x03 * 0x10
       self.overworld_raw_data[0x280 + screen_num] = bits_to_keep + bits_to_write
-      
+
   def ClearAllVisitMarkers(self) -> None:
     logging.debug("Clearing Visit markers")
     for room in self.level_1_to_6_rooms:
@@ -388,6 +386,46 @@ class DataTable():
       assert enemy_quantities[counter] in range(0, 0x100)
       self.level_metadata[offset + self.ITEM_POSITIONS_OFFSET] = item_positions[counter]
       self.level_metadata[offset + self.ENEMY_QUANTITIES_OFFSET] = enemy_quantities[counter]
+
+
+  def RandomizeHPValue(self, value: int) -> int:
+    setting = "minus4"
+    assert value in range(0x10)
+    assert setting in ["0hp","plusminus2", "plusminus4", "minus4" ,"minus2" ]
+    if setting == "0hp":
+      return 0
+    if setting in ["plusminus2", "minus2"]:
+      lower_modifier = -2
+    elif setting in [ "plusminus4", "minus4"]:
+      lower_modifier = -4
+    if setting in ["minus2", "minus4"]:
+      upper_modifier = 0
+    elif setting == "plusminus2":
+      upper_modifier = 2
+    elif setting == "plusminus4":
+      upper_modifier = 4      
+    new_value = random.randrange(value + lower_modifier, value + upper_modifier)
+    if new_value > 0xF:
+        return 0xF
+    elif new_value < 0x0:
+        return 0x0
+    return new_value
+
+  def RandomizeHPByte(self,  hp_byte: int) -> int:
+    (hp_1, hp_2) = (math.floor (hp_byte / 0x10), hp_byte % 0x10)
+    (new_hp_1, new_hp_2) = (self.RandomizeHPValue(hp_1),self.RandomizeHPValue(hp_1) )
+    assert new_hp_1 in range(0x10) and new_hp_2 in range(0x10)
+    return 0x10 * new_hp_1 + new_hp_2  
+
+  def RandomizeHP(self) -> None:
+    vanilla_hp_bytes = [0x06, 0x43, 0x25, 0x31 , 0x12, 0x24, 0x81, 0x14, 0x22, 0x42,
+       0x00, 0xA9, 0x8F, 0x20, 0x00, 0x3F, 0xF9, 0xFA, 0x46, 0x62, 0x11, 0x2F, 0xFF,
+       0xFF , 0x7F, 0xF6, 0x2F, 0xFF , 0xFF, 0x22, 0x46,
+      0xF1 , 0xF2, 0xAA, 0xAA, 0xFB , 0xBF, 0xF0]
+    new_hp_bytes: List[int] = []
+    for vanilla_hp_byte in vanilla_hp_bytes:
+      new_hp_bytes.append(self.RandomizeHPByte(vanilla_hp_byte))
+    self.misc_data_patch.AddData(0x1FB5E, new_hp_bytes)
 
   def GetPatch(self) -> Patch:
     patch = Patch()

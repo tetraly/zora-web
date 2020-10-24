@@ -26,9 +26,9 @@ def NumBitsToShiftForBitmask(bitmask: int) -> int:
 class Room():
 
   def __init__(self, rom_data: List[int] = []) -> None:
-    self.ResetRoomState(rom_data)    
-    
-  def ResetRoomState(self, rom_data: List[int] = []) -> None:  
+    self.ResetRoomState(rom_data)
+
+  def ResetRoomState(self, rom_data: List[int] = []) -> None:
     if not rom_data:
       rom_data = [0x26, 0x26, 0x00, 0x00, 0x0E, 0x00]
     if rom_data[4] & 0x1F == 0x03:
@@ -47,7 +47,7 @@ class Room():
     self.locking_direction: Direction = Direction.NO_DIRECTION
     self.room_action = RoomAction.NO_ROOM_ACTION
     self.debug_string = ""
-    
+
   def SetDebugString(self, debug_string: str) -> None:
     self.debug_string = debug_string
 
@@ -295,5 +295,6 @@ class Room():
     else:
       log.error("Found undefined room action code: %d" % int(room_action))
       sys.exit(1)
+
   def GetRoomAction(self) -> int:
     return self.room_action.value

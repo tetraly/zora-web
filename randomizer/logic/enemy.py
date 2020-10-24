@@ -187,7 +187,8 @@ class Enemy(IntEnum):
   #TODO: Need to add more other ELDERs here
   def HasNoEnemiesToKill(self) -> bool:
     return self in [
-        Enemy.BUBBLE, Enemy.THREE_PAIRS_OF_TRAPS, Enemy.CORNER_TRAPS, Enemy.THE_KIDNAPPED, Enemy.NO_ENEMY
+        Enemy.BUBBLE, Enemy.THREE_PAIRS_OF_TRAPS, Enemy.CORNER_TRAPS, Enemy.THE_KIDNAPPED,
+        Enemy.NO_ENEMY
     ]
 
   def IsInGoriyaSpriteSet(self) -> bool:

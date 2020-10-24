@@ -104,7 +104,7 @@ class Inventory():
       return
     if (level_num, room_num, exit_direction) in self.locations_where_keys_were_used:
       print("Going through an already opened door")
-#      input()
+      #      input()
       return
     self.num_keys -= 1
     print("Using a key. Currently have %d keys" % self.num_keys)

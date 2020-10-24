@@ -2,11 +2,13 @@ from enum import IntEnum
 from typing import Dict, List
 import math
 import random
+from .constants import RoomAction
 from .direction import Direction
 from .enemy import Enemy
 
 
 class RoomType(IntEnum):
+  NO_ROOM_TYPE = -0x01
   PLAIN_ROOM = 0x00
   SPIKE_TRAP_ROOM = 0x01
   FOUR_SHORT_ROOM = 0x02
@@ -99,7 +101,9 @@ class RoomType(IntEnum):
     return self in VALID_TRAVEL_DIRECTIONS_IN_WATER_ROOMS.keys()
 
   def HasMovementConstraints(self) -> bool:
-    return self in VALID_TRAVEL_DIRECTIONS_IN_MOVEMENT_RESTRICTED_ROOMS.keys() or self in [RoomType.TURNSTILE_ROOM, RoomType.KIDNAPPED_ROOM]
+    return self in VALID_TRAVEL_DIRECTIONS_IN_MOVEMENT_RESTRICTED_ROOMS.keys() or self in [
+        RoomType.TURNSTILE_ROOM, RoomType.KIDNAPPED_ROOM
+    ]
 
   def HasOpenStairs(self) -> bool:
     return self in [
@@ -195,11 +199,19 @@ class RoomType(IntEnum):
         RoomType.SECOND_QUEST_T_LIKE_ROOM
     ]
 
+  def GetRoomActionIfHasStairs(self) -> RoomAction:
+    assert self.CanHaveStairs()
+    if self == RoomType.DIAMOND_STAIR_ROOM:
+      return RoomAction.PUSHABLE_BLOCK_OPENS_SHUTTER_DOORS
+    elif self in [RoomType.NARROW_STAIR_ROOM, RoomType.SPIRAL_STAIR_ROOM]:
+      return RoomAction.NO_ROOM_ACTION
+    return RoomAction.PUSHABLE_BLOCK_MAKES_STAIRS_APPEAR
+
   def HasBeamoses(self) -> bool:
     return self.value in [RoomType.TWO_BEAMOS_ROOM, RoomType.FOUR_BEAMOS_ROOM]
 
   @classmethod
-  def RandomValueOkayForStairs(cls, narrow_stair_room_okay:bool=False ) -> "RoomType":
+  def RandomValueOkayForStairs(cls, narrow_stair_room_okay: bool = False) -> "RoomType":
     while True:
       try:
         room_type = cls(random.randrange(0x0, 0x29))
@@ -210,10 +222,10 @@ class RoomType(IntEnum):
       if room_type.CanHaveStairs():
         return room_type
 
-
-
   @classmethod
-  def RandomValue(cls, allow_hard_to_place: bool = True, okay_for_enemy: Enemy =Enemy.NO_ENEMY) -> "RoomType":
+  def RandomValue(cls,
+                  allow_hard_to_place: bool = True,
+                  okay_for_enemy: Enemy = Enemy.NO_ENEMY) -> "RoomType":
     while True:
       try:
         room_type = cls(random.randrange(0x0, 0x29))
@@ -224,75 +236,88 @@ class RoomType(IntEnum):
         continue
       if room_type.HasWater() or room_type.HasMovementConstraints():
         continue
-        
+
       if room_type.HasOpenStairs():
         continue
-      if room_type in [RoomType.KIDNAPPED_ROOM, RoomType.TURNSTILE_ROOM, RoomType.ENTRANCE_ROOM, RoomType.BEAST_ROOM]:
+      if room_type in [
+          RoomType.KIDNAPPED_ROOM, RoomType.TURNSTILE_ROOM, RoomType.ENTRANCE_ROOM,
+          RoomType.BEAST_ROOM
+      ]:
         continue
       if not allow_hard_to_place and room_type.IsHardToPlace():
         continue
-      if room_type.HasBeamoses() and random.choice([True, False]):
+      if room_type.IsBadForLanmola() and okay_for_enemy in [Enemy.RED_LANMOLA, Enemy.BLUE_LANMOLA]:
         continue
+#      if room_type.HasBeamoses() and random.choice([True, False]):
+#        continue
       if room_type.HasWater() and random.choice([True, True, True, False]):
         continue
-      if room_type.IsBadForTraps() and random.choice([True, True, True, False]):
+      if room_type.IsBadForTraps() and random.choice([True, False]):
         continue
-      if room_type.IsBadForBosses() and random.choice([True, True, False]):
+#      if room_type.IsBadForBosses() and random.choice([True, True, False]):
+#        continue
+      if room_type.IsBadForTraps() and okay_for_enemy.HasTraps():
         continue
       return room_type
 
   @classmethod
-  def GetValidPositionForRoomTypes(cls, room_type_1: "RoomType", room_type_2: "RoomType") -> int:
-    while True:
-      position_code = random.randint(0x00, 0xFF)
-      if (cls.IsValidPositionForRoomType(position_code, room_type_1) and
-          cls.IsValidPositionForRoomType(position_code, room_type_2)):
-         # input("%x" %position_code)
-          return position_code
+  def GetValidPositionForRoomType(cls,
+                                  room_type_1: "RoomType",
+                                  is_item_position: bool = False) -> int:
+    return cls.GetValidPositionForRoomTypes(room_type_1, RoomType.NO_ROOM_TYPE, is_item_position)
 
   @classmethod
-  def GetValidPositionForRoomType(cls, room_type: "RoomType") -> int:
+  def GetValidPositionForRoomTypes(cls,
+                                   room_type_1: "RoomType",
+                                   room_type_2: "RoomType",
+                                   is_item_position: bool = False) -> int:
+    #    x_offset = 2
+    #    y_offset = 6 if is_item_position else 5
     while True:
-      position_code = 0x10 * random.randint(0x3, 0xC) + random.randint(0x3, 0xC)
-      if cls.IsValidPositionForRoomType(position_code, room_type):
-          return position_code
+      #      position_code = (0x10 * random.randint(x_offset + 0, x_offset + 11) +
+      #                       random.randint(y_offset + 0, y_offset + 6))
+      position_code = random.randint(0x20, 0xDC)
+      if not cls.IsValidPositionForRoomType(position_code, room_type_1, is_item_position):
+        continue
+      if (room_type_2 is not RoomType.NO_ROOM_TYPE and
+          not cls.IsValidPositionForRoomType(position_code, room_type_2, is_item_position)):
+        continue
+      return position_code
 
   @classmethod
-  def IsValidPositionForRoomType(cls, position_code: int, room_type: "RoomType") -> bool:
-    return RoomType(room_type).IsValidItemPosition(position_code)
-
-  def IsValidItemPosition(self, position_code: int) -> bool:
+  def IsValidPositionForRoomType(cls,
+                                 position_code: int,
+                                 room_type: "RoomType",
+                                 is_item_position: bool = False) -> bool:
+    #    return room_type.IsValidItemPosition(position_code)
+    #
+    #  def IsValidItemPosition(self, position_code: int, is_item_position : bool) -> bool:
     x_code = math.floor(position_code / 0x10)
     y_code = position_code % 0x10
 
+    col = x_code - 2
+    row = y_code - 6 if is_item_position else 5
+
     # Technically 0x02 is an okay x_code but since we want to ensure the spot to the left is also
     # free for items that have repeated sprites (like the ladder and triforce)
-    if x_code not in range(0x03, 0x0E):  # (2-D are valid values)
+    if col not in range(12):  # (2-D are valid values)
       return False
-    if y_code not in range(0x06, 0x0D):  # (6-C are valid values)
+    if row not in range(7):  # (5-B are valid values)
       return False
-    if self == RoomType.ITEM_STAIRCASE:
-      return (y_code == 0xA and x_code in range(0x7, 0xE)) or y_code == 0x0D
+    #if self == RoomType.ITEM_STAIRCASE:
+    #  return (y_code == 0xA and x_code in range(0x7, 0xE)) or y_code == 0x0D
     # Don't allow item positions that are right in front of doorways
-    if x_code in [0x03, 0x0D] and y_code == 0x9:
-      return False
-    if y_code in [0x06, 0x0C] and x_code in [0x7, 0x8]:
-      return False
 
-    col = x_code - 2
-    row = y_code - 6
-    return ROOM_DATA[self.value][row][col] in [0, 5]
-
-  
+    return ROOM_DATA[room_type.value][row][col] in [0, 5]
 
   @classmethod
   def PrintStats(cls) -> None:
-    for x in range (11):
+    for x in range(12):
       for y in range(7):
         non_working_types: List[RoomType] = []
-        for room_type in range (42):
+        for room_type in range(42):
           print("%d, %d, %d" % (room_type, y, x))
-          if ROOM_DATA[room_type][y][x] not in [0,5]:
+          if ROOM_DATA[room_type][y][x] not in [0, 5]:
             non_working_types.append(RoomType(room_type))
         print("For y=%d, x=%d:  %s" % (y, x, non_working_types))
         input("")
