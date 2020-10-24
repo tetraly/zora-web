@@ -14,9 +14,9 @@ from .location import Location
 from .room import Room
 from .room_type import RoomType
 
-from colorama import Fore, Back, Style
-
 GRID_B_LEVEL_NUMBERS = [LevelNum.LEVEL_7, LevelNum.LEVEL_8, LevelNum.LEVEL_9]
+
+"""from colorama import Fore, Back, Style
 
 COLORS: Dict[int, "Fore"] = {
     0: Fore.WHITE,
@@ -28,7 +28,7 @@ COLORS: Dict[int, "Fore"] = {
     6: Fore.RED,
     7: Fore.WHITE
 }
-
+"""
 
 def GetNextRoomNum(room_num: RoomNum, direction: Direction) -> RoomNum:
   assert room_num in Range.VALID_ROOM_NUMBERS
@@ -582,7 +582,7 @@ class DungeonGenerator:
             possible_start_rooms.append((room_num, entrance_direction))
     return random.choice(possible_start_rooms)
 
-  def _GetColorForPrinting(self, room_num: RoomNum, level_num: Optional[LevelNum] = None) -> Fore:
+  """def _GetColorForPrinting(self, room_num: RoomNum, level_num: Optional[LevelNum] = None) -> Fore:
     grid_gen = self._GetGridGenerator(level_num)
     level_num_of_room = grid_gen.GetLevelNumForRoomNum(room_num)
     if level_num and level_num != level_num_of_room:
@@ -662,6 +662,7 @@ class DungeonGenerator:
                 end='')
         print('_____|', end='')
       print(Fore.WHITE)
+  """
 
   def GenerateLevels(self) -> None:
     #print(self.level_start_rooms)
@@ -679,7 +680,7 @@ class DungeonGenerator:
         print("Adding transport staircase %x for level %d" % (stairway_room_num, level_num))
         self.data_table.AddStaircaseRoomNumberForLevel(level_num, stairway_room_num)
       #self.data_table.SetItemPositionsForLevel(level_num, [0x89, 0x69, 0x89, 0x42])
-      self.Print(level_num)
+      #self.Print(level_num)
       #input()
 
     self.data_table.SetLevelGrid(GridId.GRID_A, self.room_grid_a)
@@ -854,7 +855,7 @@ class DungeonGenerator:
       counter += 1
       if counter > 1000:
         if level_num > 6:
-          self.Print(level_num)
+          #self.Print(level_num)
           #input("timeout")
         return False
       maybe_parent_room_num = random.choice(assigned_room_nums)
