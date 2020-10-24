@@ -358,15 +358,15 @@ class TextDataTable():
     for line in RICK_ROLL_STORY_TEXT:
       print("%x" % addr)
       if addr >= 0x1A8B3:
-        input("UH OH 1!")
+        print("UH OH 1!")
         break
       self.patch.AddData(addr  ,self.__ascii_string_to_bytes(line))
       addr += 0x23
       if "             " in line:
-        input("blank!")
+        print("blank!")
         continue
       if addr >= 0x1A8B3:
-        input("UH OH 2!")
+        print("UH OH 2!")
         break
       self.patch.AddData(addr  ,self.__ascii_string_to_bytes("  #                          @  "))
       addr += 0x23
@@ -486,7 +486,7 @@ class TextDataTable():
       print(hint)
     elif hint_type not in COMMUNITY_HINTS:
       #return self.GenerateTestingString(num)
-      input("Warning! nothing for %s" % hint_type)
+      print("Warning! nothing for %s" % hint_type)
       hint_type = HintType.FRENCH_COMMUNITY_HINT if FRENCH_MODE else HintType.ENGLISH_COMMUNITY_HINT
       hint = random.choice(COMMUNITY_HINTS[hint_type])
     else:
@@ -503,7 +503,7 @@ class TextDataTable():
       print(lines[i])
       if len(lines[i]) > 23:
         print("WARNING! long line: %s" % lines[i])
-        input("!!")
+        print("!!")
       tbr.append(0x25)
       line = lines[i].strip().center(22)
       """new_line = []

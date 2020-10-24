@@ -1,8 +1,12 @@
-Django==3.0.7
+Django==3.1.2
 jsonfield2
 jsonViewer
 Markdown
 absl-py
 urllib3
-gunicorn
-django-heroku
+gunicorn==20.0.4
+asgiref==3.2.10
+psycopg2-binary==2.8.6
+pytz==2020.1
+sqlparse==0.3.1
+whitenoise==5.2.0

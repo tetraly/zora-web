@@ -246,7 +246,7 @@ class LevelPlanGenerator:
 
       if blocking_border_type == BorderType.BAIT_BLOCK:
         self.data_table.AdjustHungryEnemyForSpriteSet(level_plan[level_num]['enemy_sprite_set'])
-        input("HUNGRY ENEMY CHANGE to %s" % level_plan[level_num]['enemy_sprite_set'])
+        #input("HUNGRY ENEMY CHANGE to %s" % level_plan[level_num]['enemy_sprite_set'])
 
       item_pool.append(stairway_item_pool.pop(0))
       item_pool.append(Item.COMPASS)
@@ -684,7 +684,7 @@ class DungeonGenerator:
 
     self.data_table.SetLevelGrid(GridId.GRID_A, self.room_grid_a)
     self.data_table.SetLevelGrid(GridId.GRID_B, self.room_grid_b)
-    input("done!")
+    #input("done!")
 
   def CreateRoomTree(self, level_num: LevelNum) -> None:
     while True:
@@ -1390,7 +1390,7 @@ class DungeonGenerator:
         elif screen_num in Screen.RECORDER_BLOCKED_CAVE_SCREENS:
           hint_text += "UNDERNEATH A LAKE"
         self.data_table.hints.append(hint_text)
-        input(hint_text)
+        #input(hint_text)
     assert -1 not in recorder_screen_nums
     self.data_table.UpdateAnyRoadAndRecorderScreensNums(any_road_screen_nums, recorder_screen_nums)
     

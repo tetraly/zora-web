@@ -59,11 +59,11 @@ class Validator():
 
     # TODO: Only check this if incremental upgrade flag is enabled
     if self._IsAnIncrementalUpgradeItemAvaliableInAShop():
-      input("Incremental upgrade item found in shop -- shouldn't happen right?")
+      print("Incremental upgrade item found in shop -- shouldn't happen right?")
       return False
 
     if not self._HasInitialWeapon():
-      input("No initial weapon -- shouldn't happen right?")
+      print("No initial weapon -- shouldn't happen right?")
       return False
 
     while self.inventory.StillMakingProgress():
@@ -78,9 +78,9 @@ class Validator():
                 self.inventory.Has(Item.BOW) and self.inventory.Has(Item.RAFT) and
                 self.inventory.Has(Item.RECORDER) and self.inventory.Has(Item.POWER_BRACELET) and
                 self.inventory.GetTriforceCount() == 8):
-          input("WARNING: Missing a key item")
+          print("WARNING: Missing a key item")
         print("Seed appears to be beatable. :)")
-        input()
+        #input()
         return True
       if num_iterations > 10:
         return False
@@ -199,7 +199,7 @@ class Validator():
         print("-- Room has %s but I can't get it. Enemy is %s" % (room.GetItem(), room.GetEnemy()))
     if room.GetEnemy() == Enemy.THE_BEAST and self.inventory.HasBowSilverArrowsAndSword():
       print("Got the triforce of power!")
-      input()
+      #input()
       self.inventory.AddItem(Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM, current_location)
     if room.GetEnemy() == Enemy.THE_KIDNAPPED:
       print("Found the kidnapped")

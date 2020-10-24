@@ -10,27 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
-import os
 
-try:
-    import local_settings as local
-except ImportError:
-    import example_local as local
+from pathlib import Path
+import os
+from urllib.parse import urlparse
+
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "please-change-this"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['*'] 
-
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 # Application definition
 
 INSTALLED_APPS = [
@@ -51,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'zora_web.urls'
@@ -58,8 +58,7 @@ ROOT_URLCONF = 'zora_web.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,7 +76,6 @@ WSGI_APPLICATION = 'zora_web.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = local.DATABASES
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -127,30 +125,16 @@ LOGGING = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = local.TIME_ZONE
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_L10N = True
+
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-# STATIC_URL = '/randomizer/static/'
-#STATIC_ROOT = local.STATIC_ROOT
-
 STATIC_URL = '/randomizer/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# Extra places for collectstatic to find static files.
-#STATICFILES_DIRS = (
-#    os.path.join(BASE_DIR, 'static'),
-#)
-
-
-# Allow larger max upload size for packing WAD file.
-DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 25  # 25 MB
-
-# Beta site flag.
-BETA = local.BETA
+STATIC_ROOT = os.path.join(BASE_DIR, "static")

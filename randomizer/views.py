@@ -74,7 +74,7 @@ class RandomizerView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['version'] = VERSION
         context['debug_enabled'] = settings.DEBUG
-        context['beta_site'] = settings.BETA
+#        context['beta_site'] = settings.BETA
         context['categories'] = CATEGORIES
         context['presets'] = PRESETS
         context['flags'] = FLAGS
@@ -180,7 +180,7 @@ class GenerateView(FormView):
         }
 
         # Save patch to the database (don't need to save EU since it's the same as US).
-        with transaction.atomic():
+        """with transaction.atomic():
             # If there's an existing seed with the same hash, replace it.
             try:
                 s = Seed.objects.get(hash="hash") #world.hash)
@@ -203,7 +203,7 @@ class GenerateView(FormView):
                 h.update(patch_dump.encode())
                 p = Patch(seed=s, region=region, sha1=h.hexdigest(), patch=patch_dump)
                 p.save()
-
+        """
         # Check if we're including the patch data in the response.
         if self.return_patch_data:
             result['patch'] = patches['US']  # Patch for EU version is the same as US.
