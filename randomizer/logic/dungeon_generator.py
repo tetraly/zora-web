@@ -854,7 +854,7 @@ class DungeonGenerator:
         break
       counter += 1
       if counter > 1000:
-        if level_num > 6:
+#        if level_num > 6:
           #self.Print(level_num)
           #input("timeout")
         return False
