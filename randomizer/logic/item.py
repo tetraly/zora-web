@@ -134,7 +134,7 @@ class Item(IntEnum):
         Item.BLUE_CANDLE,
         Item.RED_CANDLE,
         Item.WOOD_ARROWS,
-        Item.SILVER_ARROWS,  # Item.BLUE_RING, Item.RED_RING, 
+        Item.SILVER_ARROWS,   Item.BLUE_RING, Item.RED_RING, 
         Item.BOOMERANG,
         Item.MAGICAL_BOOMERANG
     ]

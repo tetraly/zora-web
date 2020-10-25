@@ -150,11 +150,13 @@ class ZoraRandomizer():
 
   def _AddExtras(self, patch: Patch) -> None:
     if self.settings.IsEnabled(flags.ProgressiveItems):
-      patch.AddData(0x6B49, [0x11, 0x12, 0x13])  # Swords
-      patch.AddData(0x6B4E, [0x11, 0x12])  # Candles
-      patch.AddData(0x6B50, [0x11, 0x12])  # Arrows
+      
+      patch.AddData(0x6D06, [0x18, 0x79, 0x57, 0x06, 0xEA])
+      #patch.AddData(0x6B49, [0x11, 0x12, 0x13])  # Swords
+      #patch.AddData(0x6B4E, [0x11, 0x12])  # Candles
+      #patch.AddData(0x6B50, [0x11, 0x12])  # Arrows
       # patch.AddData(0x6B5A, [0x11, 0x12])  # Rings
-      patch.AddData(0x6B65, [0x11, 0x12])  # Boomerangs
+      #patch.AddData(0x6B65, [0x11, 0x12])  # Boomerangs
 
     # Change "no item" code from 0x03 (Mags) to 0x0E (Triforce of Power)
     patch.AddData(0x1785F, [0x0E])
