@@ -399,9 +399,9 @@ class DungeonGenerator:
     # that is valid for the room type.
     positions = [
         0x89,
-        RoomType.GetValidPositionForRoomType(RoomType.CIRCLE_BLOCK_WALL_ROOM,
+        RoomType.GetValidPositionForRoomTypes(RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.ZIGZAG_ROOM,
                                              is_item_position=True),
-        RoomType.GetValidPositionForRoomType(RoomType.VERTICAL_LINES, is_item_position=True),
+        RoomType.GetValidPositionForRoomTypes(RoomType.VERTICAL_LINES, RoomType.SINGLE_SIX_BLOCK_ROOM, is_item_position=True),
         RoomType.GetValidPositionForRoomTypes(RoomType.HORIZONTAL_LINES,
                                               RoomType.SPIRAL_STAIR_ROOM,
                                               is_item_position=True)
@@ -420,9 +420,9 @@ class DungeonGenerator:
           break
       print(room_type)
       assert room_type in self.item_position_dict
-    self.item_position_dict[RoomType(0x31)] = 0
-    self.item_position_dict[RoomType(0x32)] = 0
-    self.item_position_dict[RoomType(0x33)] = 0
+    #self.item_position_dict[RoomType(0x31)] = 0
+    #self.item_position_dict[RoomType(0x32)] = 0
+    #self.item_position_dict[RoomType(0x33)] = 0
     self.item_position_dict[RoomType(0x3F)] = 0
 
   ## Helper methods ##

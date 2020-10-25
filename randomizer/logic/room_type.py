@@ -296,7 +296,7 @@ class RoomType(IntEnum):
     y_code = position_code % 0x10
 
     col = x_code - 2
-    row = y_code - 6 if is_item_position else 5
+    row = y_code - (6 if is_item_position else 5)
 
     # Technically 0x02 is an okay x_code but since we want to ensure the spot to the left is also
     # free for items that have repeated sprites (like the ladder and triforce)
