@@ -168,6 +168,12 @@ class ItemRandomizer():
           CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C, CaveType.SHOP_D
       ]:
         tbr += "A VENDOR IS SELLING A"
+      elif location.GetCaveType() == CaveType.LETTER_CAVE:
+        tbr += "A letter writer has a"
+      elif location.GetCaveType() == CaveType.WHITE_SWORD_CAVE:
+        tbr += "a combat guru gives a"
+      elif location.GetCaveType() == CaveType.MAGICAL_SWORD_CAVE:
+        tbr += "you can master using a"
       elif location.GetCaveType() == CaveType.ARMOS_ITEM_VIRTUAL_CAVE:
         tbr += "AN ARMOS STANDS UPON A"
       elif location.GetCaveType() == CaveType.COAST_ITEM_VIRTUAL_CAVE:
