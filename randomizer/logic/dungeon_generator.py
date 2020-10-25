@@ -967,13 +967,12 @@ class DungeonGenerator:
         }
         enemy = random.choice(okay_enemies[border_type])
         border_room.SetEnemy(enemy)
-        border_room.SetEnemyQuantityCode(0)
+        border_room.SetEnemyQuantityCode(random.randrange(0,3))
         if border_room.GetLockingDirection() != Direction.STAIRCASE:
           border_room.SetWallType(border_dir, WallType.SHUTTER_DOOR)
           border_room.SetRoomAction(RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS)
         if border_type == BorderType.BOSS:
           border_room.SetItem(Item.HEART_CONTAINER)
-          room.SetItemPositionCode(2)
           border_room.SetRoomAction(RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_AND_DROPS_ITEM)
       elif border_type == BorderType.TRIFORCE_ROOM:
         border_room.SetRoomType(RoomType.TRIFORCE_ROOM)
