@@ -150,7 +150,7 @@ class ZoraRandomizer():
 
   def _AddExtras(self, patch: Patch) -> None:
     if self.settings.IsEnabled(flags.ProgressiveItems):
-      
+
       patch.AddData(0x6D06, [0x18, 0x79, 0x57, 0x06, 0xEA])
       #patch.AddData(0x6B49, [0x11, 0x12, 0x13])  # Swords
       #patch.AddData(0x6B4E, [0x11, 0x12])  # Candles

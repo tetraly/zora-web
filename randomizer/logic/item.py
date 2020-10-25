@@ -101,41 +101,17 @@ class Item(IntEnum):
 
   def IsMajorItem(self) -> bool:
     return self in [
-        Item.WOOD_SWORD,
-        Item.WHITE_SWORD,
-        Item.MAGICAL_SWORD,
-        Item.BLUE_CANDLE,
-        Item.WOOD_ARROWS,
-        Item.RAFT,
-        Item.LADDER,
-        Item.RECORDER,
-        Item.WAND,
-        Item.RED_CANDLE,
-        Item.SILVER_ARROWS,
-        Item.BOW,
-        Item.MAGICAL_KEY,
-        Item.BOOK,
-        Item.BLUE_RING,
-        Item.RED_RING,
-        Item.POWER_BRACELET,
-        Item.LETTER,
-        Item.HEART_CONTAINER,
-        Item.BOOMERANG,
-        Item.MAGICAL_BOOMERANG,
-        Item.BAIT,
-        Item.MAGICAL_SHIELD,
+        Item.WOOD_SWORD, Item.WHITE_SWORD, Item.MAGICAL_SWORD, Item.BLUE_CANDLE, Item.WOOD_ARROWS,
+        Item.RAFT, Item.LADDER, Item.RECORDER, Item.WAND, Item.RED_CANDLE, Item.SILVER_ARROWS,
+        Item.BOW, Item.MAGICAL_KEY, Item.BOOK, Item.BLUE_RING, Item.RED_RING, Item.POWER_BRACELET,
+        Item.LETTER, Item.HEART_CONTAINER, Item.BOOMERANG, Item.MAGICAL_BOOMERANG, Item.BAIT,
+        Item.MAGICAL_SHIELD
     ]
 
   def IsAnIncrementalUpgradeItem(self) -> bool:
     return self in [
-        Item.WOOD_SWORD,
-        Item.WHITE_SWORD,
-        Item.MAGICAL_SWORD,
-        Item.BLUE_CANDLE,
-        Item.RED_CANDLE,
-        Item.WOOD_ARROWS,
-        Item.SILVER_ARROWS,   Item.BLUE_RING, Item.RED_RING, 
-        Item.BOOMERANG,
+        Item.WOOD_SWORD, Item.WHITE_SWORD, Item.MAGICAL_SWORD, Item.BLUE_CANDLE, Item.RED_CANDLE,
+        Item.WOOD_ARROWS, Item.SILVER_ARROWS, Item.BLUE_RING, Item.RED_RING, Item.BOOMERANG,
         Item.MAGICAL_BOOMERANG
     ]
 
@@ -144,7 +120,6 @@ class Item(IntEnum):
 
 
 class BorderType(IntEnum):
-  #STUN_ONLY_ENEMY_BOOMERANG_BLOCK = 0x1D
   NO_BORDER_TYPE = 0x00
   BOMB_HOLE = 0x16
   MINI_BOSS = 0x02

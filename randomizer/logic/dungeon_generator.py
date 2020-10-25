@@ -399,9 +399,12 @@ class DungeonGenerator:
     # that is valid for the room type.
     positions = [
         0x89,
-        RoomType.GetValidPositionForRoomTypes(RoomType.CIRCLE_BLOCK_WALL_ROOM, RoomType.ZIGZAG_ROOM,
-                                             is_item_position=True),
-        RoomType.GetValidPositionForRoomTypes(RoomType.VERTICAL_LINES, RoomType.SINGLE_SIX_BLOCK_ROOM, is_item_position=True),
+        RoomType.GetValidPositionForRoomTypes(RoomType.CIRCLE_BLOCK_WALL_ROOM,
+                                              RoomType.ZIGZAG_ROOM,
+                                              is_item_position=True),
+        RoomType.GetValidPositionForRoomTypes(RoomType.VERTICAL_LINES,
+                                              RoomType.SINGLE_SIX_BLOCK_ROOM,
+                                              is_item_position=True),
         RoomType.GetValidPositionForRoomTypes(RoomType.HORIZONTAL_LINES,
                                               RoomType.SPIRAL_STAIR_ROOM,
                                               is_item_position=True)
@@ -967,7 +970,7 @@ class DungeonGenerator:
         }
         enemy = random.choice(okay_enemies[border_type])
         border_room.SetEnemy(enemy)
-        border_room.SetEnemyQuantityCode(random.randrange(0,3))
+        border_room.SetEnemyQuantityCode(random.randrange(0, 3))
         if border_room.GetLockingDirection() != Direction.STAIRCASE:
           border_room.SetWallType(border_dir, WallType.SHUTTER_DOOR)
           border_room.SetRoomAction(RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS)
