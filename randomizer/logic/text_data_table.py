@@ -131,19 +131,29 @@ COMMUNITY_HINTS = {
         "SIDE EFFECTS MAY|INCLUDE EXTENDED|REFILL TIMES",
     ],
     HintType.SHOP_1: [
-        "NOW OFFERING|CURBSIDE PICKUP", "SHOP TIL YOU DROP!", "FRESH IMPORTS FROM|KOHOLINT ISLAND",
-        "COME BACK TOMORROW|FOR A TWO FOR ONE|SALE", "I'D BUY THAT|FOR A RUPEE",
-        "DO YOU KNOW HOW MANY|DOORS I SOLD TODAY?", "WOAH THERE|I'VE GOT SOME NEAT|JUNK FOR SALE",
+        "NOW OFFERING|CURBSIDE PICKUP",
+        "SHOP TIL YOU DROP!",
+        "FRESH IMPORTS FROM|KOHOLINT ISLAND",
+        "COME BACK TOMORROW|FOR A TWO FOR ONE|SALE",
+        "I'D BUY THAT|FOR A RUPEE",
+        "DO YOU KNOW HOW MANY|DOORS I SOLD TODAY?",
+        "WOAH THERE|I'VE GOT SOME NEAT|JUNK FOR SALE",
         "VISIT OUR OTHER LOCATION IN THE|WESTLAKE MALL",
         "DOWNLOAD OUR APP TO|EARN DISCOUNTS ON|FUTURE PURCHASES!",
-        "I'M NOT LIKE THOSE|OTHER MERCHANTS!", "Math is hard.|Let's go shopping!",
+        "I'M NOT LIKE THOSE|OTHER MERCHANTS!",
+        "Math is hard.|Let's go shopping!",
     ],
     HintType.SHOP_2: [
-        "AS SEEN ON TV", "COME BACK LATER FOR|OUR BLACK FRIDAY SALE",
-        "WHAT KIND OF|CHEESE SHOP|IS THIS?", "AND IT CAN BE YOURS|IF THE PRICE IS RIGHT!",
-        "YOU CAN PROBABLY|FIND THIS CHEAPER|ONLINE", "SHOP LOCAL, SUPPORT|SMALL BUSINESSES",
-        "HELLO TRAVELLER!|HOW CAN I HELP YOU?", "I HAVE GREAT DEALS|IN STORE FOR YOU",
-        "THE MIDDLE ITEM IS|MY FAMILY HEIRLOOM", "GET IN, LOSER,|WE'RE GOING SHOPPING",
+        "AS SEEN ON TV",
+        "COME BACK LATER FOR|OUR BLACK FRIDAY SALE",
+        "WHAT KIND OF|CHEESE SHOP|IS THIS?",
+        "AND IT CAN BE YOURS|IF THE PRICE IS RIGHT!",
+        "YOU CAN PROBABLY|FIND THIS CHEAPER|ONLINE",
+        "SHOP LOCAL, SUPPORT|SMALL BUSINESSES",
+        "HELLO TRAVELLER!|HOW CAN I HELP YOU?",
+        "I HAVE GREAT DEALS|IN STORE FOR YOU",
+        "THE MIDDLE ITEM IS|MY FAMILY HEIRLOOM",
+        "GET IN, LOSER,|WE'RE GOING SHOPPING",
         "SIGN UP FOR THE STORE|CARD TO GET 10 PERCENT|OFF YOUR 1ST PURCHASE",
     ],
     HintType.ANY_ROAD: [
@@ -351,7 +361,7 @@ class TextDataTable():
     self.hints = hints
     random.shuffle(hints)
     self.letter_cave_text = letter_cave_text
-    
+
   def RandomizeTitleStory(self) -> None:
     #addr = 0x1A4BF
     addr = 0x1A528
@@ -360,7 +370,7 @@ class TextDataTable():
       if addr >= 0x1A8B3:
         print("UH OH 1!")
         break
-      self.patch.AddData(addr  ,self.__ascii_string_to_bytes(line))
+      self.patch.AddData(addr, self.__ascii_string_to_bytes(line))
       addr += 0x23
       if "             " in line:
         print("blank!")
@@ -368,9 +378,8 @@ class TextDataTable():
       if addr >= 0x1A8B3:
         print("UH OH 2!")
         break
-      self.patch.AddData(addr  ,self.__ascii_string_to_bytes("  #                          @  "))
+      self.patch.AddData(addr, self.__ascii_string_to_bytes("  #                          @  "))
       addr += 0x23
-    
 
   def GetPatch(self) -> Patch:
     self._AddTextSpeedToPatchIfNeeded()

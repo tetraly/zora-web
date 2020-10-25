@@ -15,7 +15,6 @@ from .room import Room
 from .room_type import RoomType
 
 GRID_B_LEVEL_NUMBERS = [LevelNum.LEVEL_7, LevelNum.LEVEL_8, LevelNum.LEVEL_9]
-
 """from colorama import Fore, Back, Style
 
 COLORS: Dict[int, "Fore"] = {
@@ -29,6 +28,7 @@ COLORS: Dict[int, "Fore"] = {
     7: Fore.WHITE
 }
 """
+
 
 def GetNextRoomNum(room_num: RoomNum, direction: Direction) -> RoomNum:
   assert room_num in Range.VALID_ROOM_NUMBERS
@@ -854,9 +854,9 @@ class DungeonGenerator:
         break
       counter += 1
       if counter > 1000:
-#        if level_num > 6:
-          #self.Print(level_num)
-          #input("timeout")
+        #        if level_num > 6:
+        #self.Print(level_num)
+        #input("timeout")
         return False
       maybe_parent_room_num = random.choice(assigned_room_nums)
       maybe_parent_room = self._GetRoom(maybe_parent_room_num, level_num)
@@ -1394,4 +1394,3 @@ class DungeonGenerator:
         #input(hint_text)
     assert -1 not in recorder_screen_nums
     self.data_table.UpdateAnyRoadAndRecorderScreensNums(any_road_screen_nums, recorder_screen_nums)
-    
