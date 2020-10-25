@@ -103,11 +103,8 @@ class Inventory():
     if self.Has(Item.MAGICAL_KEY):
       return
     if (level_num, room_num, exit_direction) in self.locations_where_keys_were_used:
-      print("Going through an already opened door")
-      #      input()
       return
     self.num_keys -= 1
-    print("Using a key. Currently have %d keys" % self.num_keys)
     self.locations_where_keys_were_used.add((level_num, room_num, exit_direction))
 
   # Methods to check what's in the inventory

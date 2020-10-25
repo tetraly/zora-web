@@ -14,8 +14,6 @@ from .room_type import RoomType
 from .settings import Settings
 from . import flags
 
-#log = logging.getLogger(__name__)
-
 
 class Validator():
   NUM_HEARTS_FOR_WHITE_SWORD_ITEM = 5
@@ -31,23 +29,16 @@ class Validator():
       cave_type = self.data_table.GetLevelNumberOrCaveType(screen_num)
       print("Screen %x has cave type %s" % (screen_num, cave_type))
       if not isinstance(cave_type, CaveType):
-        print("Not a cave -- ignoring")
         continue
       print("Checking %s" % cave_type)
       if cave_type != CaveType.WOOD_SWORD_CAVE:
-        print("Not wood sword cave, ignoring")
         continue
-      #input("...")
       location = Location(cave_type=cave_type, position_num=2)
       print(self.data_table.GetCaveItem(location))
-      #input("?????")
       if self.data_table.GetCaveItem(location).IsSwordOrWand():
         print("screen %x has cave %s with %s" %
               (screen_num, cave_type, self.data_table.GetCaveItem(location)))
-        #input("YAY!")
         return True
-        # else:
-        #   input("Item is %s" % self.data_table.GetCaveItem(location) )
     return False
 
   def IsSeedValid(self) -> bool:
@@ -120,7 +111,6 @@ class Validator():
 
   def _ConditionallyVisitCavesForScreens(self, condition: bool, screen_numbers: List[int]) -> None:
     if not condition:
-      #print('... condition not met')
       return
     for screen_number in screen_numbers:
       level_num_or_cave_type = self.data_table.GetLevelNumberOrCaveType(screen_number)
@@ -132,14 +122,10 @@ class Validator():
                                        self.data_table.GetLevelEntranceDirection(level_num))
         print("Exiting level %s" % level_num)
       elif level_num_or_cave_type in Range.VALID_CAVE_TYPES_WITH_ITEMS:
-        #        print("  Found cave %s at screen %x Visiting it." % (CaveType(level_num_or_cave_type, screen_number)))
         cave_type = CaveType(level_num_or_cave_type)
         self._VisitCave(cave_type)
-        #print("  Done with cave.")
       else:
         pass
-        #log.error("Encountered unexpected level num or cave type: 0x%x" % level_num_or_cave_type)
-        #sys.exit()
 
   def _VisitCave(self, cave_type: CaveType) -> None:
     if not cave_type.HasItems():

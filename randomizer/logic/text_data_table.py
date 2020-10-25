@@ -446,29 +446,7 @@ class TextDataTable():
 
     return misc_char_map[char] or misc_char_map['_']
 
-  def GenerateTestingString(self, num: int) -> List[int]:
-    lower_digit = num % 10
-    higher_digit = int((num - lower_digit) / 10)
-    testing: List[int] = [0x1D, 0x0E, 0x1C, 0x1D, 0x12, 0x17, 0x10, 0x24, higher_digit, lower_digit]
-    double_testing = [0x25]
-    double_testing.extend(testing.copy())
-    double_testing.append(0x24)
-    double_testing.extend(testing.copy())
-
-    tbr = double_testing.copy()
-    tbr.append(0xAC)
-    tbr.extend(double_testing)
-    tbr.append(0x6C)
-    tbr.extend(double_testing)
-    tbr.append(0xEC)
-    l = len(tbr)
-    print(l)
-    print("%x" % l)
-    assert (l == 0x45)
-    return tbr
-
   def DoTextyStuff(self) -> None:
-
     addresses: List[int] = []
     for n in range(19):
       addresses.append(0x404C + n * 0x45)
@@ -480,7 +458,6 @@ class TextDataTable():
       low_byte = address % 0x100
       high_byte = int((address - low_byte) / 0x100)
       high_byte += 0x40
-
       self.patch.AddData(0x4000 + 0x10 + 2 * counter, [low_byte, high_byte])
       self.patch.AddData(address + 0x10, self.NewGenerateTestingString(counter))
       counter += 1
@@ -515,17 +492,6 @@ class TextDataTable():
         print("!!")
       tbr.append(0x25)
       line = lines[i].strip().center(22)
-      """new_line = []
-      foo = True
-      for n in range(len(line)):
-        if foo and line[n] == ' ':
-          new_line.append('~')
-        else:
-          foo = False
-          new_line.append(line[n])
-      print("Old line: %s" % line)
-      print("New line: %s" % new_line)
-      input("")"""
       things = self.__ascii_string_to_bytes(lines[i].strip().center(22))
       foo = True
       for n in range(len(things)):
