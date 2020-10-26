@@ -1,6 +1,6 @@
+from absl import logging as log
 import collections
 from typing import Dict, List, Optional, Set, Type
-
 from .flags import Flag, CATEGORIES
 
 
@@ -32,8 +32,8 @@ class Settings:
     for category in CATEGORIES:
       for flag2 in category.flags:
         self._check_flag_from_form_data(flag2, flag_data)
-    print("Enabled flags:")
-    print(self._enabled_flags)
+    log.info("Enabled flags:")
+    log.info(self._enabled_flags)
 
     # Sanity check.
     if debug_mode:

@@ -75,47 +75,63 @@ class AvoidHardCombat(Flag):
   value = 'Hc'
   modes = ['standard']
 
+
 class PlusOrMinus2HP(Flag):
-    name = 'Plus or Minus 2 Enemy HP'
-    description = 'Enemies may have up to two more or less hit points than usual.'
-    value = 'Hp2'
+  name = 'Plus or Minus 2 Enemy HP'
+  description = 'Enemies may have up to two more or less hit points than usual.'
+  value = 'Hp2'
+
+
 class PlusOrMinus4HP(Flag):
-    name = 'PM4'
-    value = 'Hp4'
+  name = 'PM4'
+  value = 'Hp4'
+
+
 class Minus2HP(Flag):
-    name = 'M2'
-    value = 'Hm2'
+  name = 'M2'
+  value = 'Hm2'
+
+
 class Minus4HP(Flag):
-    name = 'M4'
-    value = 'Hm4'
+  name = 'M4'
+  value = 'Hm4'
+
+
 class ZeroHP(Flag):
-    name = 'Zero HP enemies'
-    value = 'Hz'
+  name = 'Zero HP enemies'
+  value = 'Hz'
+
+
 class VanillaHP(Flag):
-    name = 'Vanilla HP enemeis'
-    value = 'Hv'
-  
+  name = 'Vanilla HP enemeis'
+  value = 'Hv'
+
+
 class EnemyHP(Flag):
-    name = 'Enemy HP'
-    description = "TODO add something about HP here"
-    modes = ['standard']
-    value = '@H'
-    choices = [
-        PlusOrMinus2HP,
-        PlusOrMinus4HP,
-        Minus2HP,
-        Minus4HP,
-        ZeroHP,
-        VanillaHP,
-    ]
+  name = 'Enemy HP'
+  description = "TODO add something about HP here"
+  modes = ['standard']
+  value = '@H'
+  choices = [
+      PlusOrMinus2HP,
+      PlusOrMinus4HP,
+      Minus2HP,
+      Minus4HP,
+      ZeroHP,
+      VanillaHP,
+  ]
+
 
 class DifficultyCategory(FlagCategory):
   name = 'Difficulty Settings'
-  flags = [AvoidHardCombat, EnemyHP,]
+  flags = [
+      AvoidHardCombat,
+      EnemyHP,
+  ]
+
 
 # ******** Items
-
-class ProgressiveItems(Flag):
+"""class ProgressiveItems(Flag):
   name = 'Progressive Items'
   description = 'Makes swords, candles, boomerangs, rings, and arrows progresive upgrades.'
   inverse_description = "(Keeps item levels as is in the vanilla game.)"
@@ -132,8 +148,9 @@ class ShuffleShopItems(Flag):
 class ItemsCategory(FlagCategory):
   name = 'Item Settings'
   flags = [ProgressiveItems, ShuffleShopItems,]
-
+"""
 # ******** Speedups
+
 
 class FastDungeonTransitions(Flag):
   name = 'Fast Dungeon Transitions'
@@ -141,22 +158,26 @@ class FastDungeonTransitions(Flag):
   inverse_description = "(Keeps dungeon room transition speed as it is in the vanilla game)"
   modes = ['standard']
   value = 'Fs'
-    
+
+
 class FastText(Flag):
   name = 'Fast Text Scrolling'
   description = 'Makes NPC text scroll much more quickly.'
   inverse_description = "(Keeps text speed as it is in the vanilla game)"
   modes = ['standard']
   value = 'Ft'
- 
+
+
 class SpeedupsCategory(FlagCategory):
-   name = 'Speedups'
-   flags = [
-       FastDungeonTransitions,
-       FastText,
-   ]
-  
+  name = 'Speedups'
+  flags = [
+      FastDungeonTransitions,
+      FastText,
+  ]
+
+
 # ********* Extras
+
 
 class DisableBeeping(Flag):
   name = "Disable Low Health Beeping"
@@ -165,12 +186,14 @@ class DisableBeeping(Flag):
   modes = ['standard']
   value = 'Xb'
 
+
 class DisableFlashing(Flag):
   name = "Disable Flashing"
   description = "The background won't brightly flash when a bomb explodes or a triforce is obtained."
   inverse_description = "(Flashing will occur as it does in the vanilla game.)"
   modes = ['standard']
   value = 'Xf'
+
 
 class RandomizeLevelText(Flag):
   name = 'Randomize Level Text'
@@ -179,12 +202,14 @@ class RandomizeLevelText(Flag):
   modes = ['standard']
   value = 'Xl'
 
+
 class EnableSelectSwap(Flag):
   name = "Enable Select Swap"
   description = "Pressing select will rotate through B button items."
   inverse_description = "(Pressing select will pause and unpause the game.)"
   modes = ['standard']
   value = 'Xs'
+
 
 class FrenchCommunityHints(Flag):
   name = "Add Hints from the French Zelda 1 community"
@@ -193,14 +218,15 @@ class FrenchCommunityHints(Flag):
   modes = ['standard']
   value = 'Xfr'
 
+
 class ExtrasCategory(FlagCategory):
   name = 'Extra settings'
   flags = [
-    DisableBeeping,
-    DisableFlashing,
-    RandomizeLevelText,
-    EnableSelectSwap,   
-    FrenchCommunityHints, 
+      DisableBeeping,
+      DisableFlashing,
+      RandomizeLevelText,
+      EnableSelectSwap,
+      FrenchCommunityHints,
   ]
 
 
@@ -216,13 +242,13 @@ class Preset:
 class CasualPreset(Preset):
   name = 'Test'
   description = 'Test flags for a casual playthrough of the game.'
-  flags = 'S C'
+  flags = 'Hcm2 Fst'
 
 
 class AdvancedPreset(Preset):
   name = 'Advanced'
-  description = 'More difficult.'
-  flags = 'S'
+  description = 'More difficult combat settings for the randomizer.'
+  flags = 'Hp4 Fst'
 
 
 # ************************************** Default lists for the site.
@@ -230,7 +256,7 @@ class AdvancedPreset(Preset):
 # List of categories for the site.
 CATEGORIES = (
     DifficultyCategory,
-    ItemsCategory,
+    # ItemsCategory,
     SpeedupsCategory,
     ExtrasCategory,
 )

@@ -1,6 +1,5 @@
-from absl import logging
+from absl import logging as log
 from typing import Optional
-
 from .constants import CaveType, LevelNum, LevelNumOrCaveType, PositionNum, Range, RoomNum, RoomOrPositionNum
 
 
@@ -31,7 +30,7 @@ class Location():
       self.sub_id = RoomOrPositionNum(position_num)
 
     else:
-      logging.fatal("Location: level or cave number must be specified")
+      log.fatal("Location: level or cave number must be specified")
 
   @classmethod
   def LevelRoom(cls, level_num: LevelNum, room_num: RoomNum) -> "Location":

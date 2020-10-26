@@ -1,12 +1,10 @@
-import logging
+from absl import logging as log
 from typing import Set, Tuple
 
 from .constants import LevelNum, RoomNum
 from .direction import Direction
 from .item import Item
 from .location import Location
-
-log = logging.getLogger(__name__)
 
 
 class Inventory():
@@ -55,26 +53,26 @@ class Inventory():
     self.SetStillMakingProgressBit()
 
     if item == Item.TRIFORCE_OF_POWER_PLACEHOLDER_ITEM:
-      log.warning("   Found Triforce of Power in L%d Room %x", item_location.GetLevelNum(),
-                  item_location.GetRoomNum())
+      log.info("   Found Triforce of Power in L%d Room %x", item_location.GetLevelNum(),
+               item_location.GetRoomNum())
     elif item == Item.KIDNAPPED_PLACEHOLDER_ITEM:
-      log.warning("    Found Kidnapped in L%d Room %x", item_location.GetLevelNum(),
-                  item_location.GetRoomNum())
+      log.info("    Found Kidnapped in L%d Room %x", item_location.GetLevelNum(),
+               item_location.GetRoomNum())
     elif item == Item.HEART_CONTAINER:
       self.num_heart_containers += 1
       assert self.num_heart_containers <= 16
       return
     elif item == Item.TRIFORCE:
       self.num_triforce_pieces += 1
-      log.warning("   Found %s.  Now have %d tringles", item, self.num_triforce_pieces)
+      log.info("   Found %s.  Now have %d tringles", item, self.num_triforce_pieces)
       assert self.num_triforce_pieces <= 8
       return
     elif item == Item.KEY:
       self.num_keys += 1
-      print(" Got a key!  Currently have %d keys" % self.num_keys)
+      log.info(" Got a key!  Currently have %d keys" % self.num_keys)
       return
 
-    log.warning("    Found %s", item)
+    log.info("    Found %s", item)
 
     if item == Item.WOOD_SWORD and Item.WOOD_SWORD in self.items:
       self.items.add(Item.WHITE_SWORD)

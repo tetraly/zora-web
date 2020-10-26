@@ -1,13 +1,12 @@
+from absl import logging as log
 import random
 from typing import List
-from absl import logging
 from enum import IntEnum
 from .constants import HintType
 from .data_table import DataTable
 from .patch import Patch
 from .settings import Settings
 from . import flags
-
 
 COMMUNITY_HINTS = {
     HintType.WOOD_SWORD: [
@@ -17,11 +16,12 @@ COMMUNITY_HINTS = {
         "GOOD LUCK! WE'RE ALL|... OOPS!|WRONG RANDOMIZER!",
         "It's dangerous|to go alone.|See ya!",
         "SPEAK SOFTLY AND|CARRY A BIG STICK",
-        "I'll take S WORDS|FOR 100 rupees",
-        "FINDING THE WOOD|SWORD FILLS YOU| WITH DETERMINATION",
+        "I'll take|S WORDS|FOR 100!",
+        "FINDING THE WOOD|SWORD FILLS YOU|WITH DETERMINATION",
     ],
     HintType.WHITE_AND_MASTER_SWORD: [
         "DON'T TAKE ANYTHING|OR I'LL DISAPPEAR|FOREVER!",
+        "This is heavy",
         "EVERYBODY GETS ONE",
         "COME BACK WHEN|YOU ARE READY",
         "I hate insect puns|they really bug me.",
@@ -34,7 +34,7 @@ COMMUNITY_HINTS = {
     ],
     HintType.SECRET: [
         "BANANA. TAKE A BUCK!|BANANA. TAKE A BUCK!",
-        "HERE'S SOME MONEY| GO SEE A STAR WAR",
+        "HERE'S SOME MONEY|GO SEE A STAR WAR",
         "SWEET, SWEET MONEY",
         "IF YOU GET A LOT OF|THESE, SOMETHING GOOD|IS BOUND TO HAPPEN",
         "BANK ERROR IN|YOUR FAVOR|COLLECT ...",
@@ -44,13 +44,11 @@ COMMUNITY_HINTS = {
         "TAKE YOUR BLOOD|MONEY AND GO.",
         "WOOOOOAAAH!|THANK YOU COKE GAMING!",
         "YOU GOT IT FOR FREE|ARE YOU HAPPY?",
-        "See back of receipt|for the return policy",
-        "Sorry, we're out|of clorox wipes",
         "We're in the money|We're in the money",
     ],
     HintType.DOOR_REPAIR: [
         "DON'T AWOO.|350 RUPEE PENALTY.",
-        "HELP TEMMIE PAY| FOR COOL LEG",
+        "HELP TEMMIE PAY|FOR COOL LEG",
         "QUICK, PRESS UP|AND A BEFORE I|TAKE YOUR MONEY!",
         "THAT DOOR REALLY|TIED THE ROOM TOGETHER",
         "TOSS A RUPEE|TO YOUR WITCHER",
@@ -60,7 +58,7 @@ COMMUNITY_HINTS = {
         "STAND CLEAR OF THE|CLOSING DOORS, PLEASE!",
         "YOUR HEAD A SPLODE",
         "HERE'S A RUPOOR|FOR YOUR TROUBLES",
-        "Stop trying to make|fetch happen. It's not|going to happen.",
+        "HONK!",
     ],
     HintType.TAKE_ANY: [
         "AH YES,|THE TWO GENDERS ...",
@@ -69,7 +67,7 @@ COMMUNITY_HINTS = {
         "CANDYGRAM FOR LINK",
         "YOU GOTTA HAVE HEART",
         "PLEASE SELECT ITEM",
-        "TAKE NEITHER ITEM.| JUST LEAVE.",
+        "TAKE NEITHER ITEM.|JUST LEAVE.",
         "Cake or Death?",
         "eenie, meenie,|miney, mo",
         "Limit one per customer",
@@ -94,6 +92,7 @@ COMMUNITY_HINTS = {
         "I'D BUY THAT|FOR A RUPEE",
         "DO YOU KNOW HOW MANY|DOORS I SOLD TODAY?",
         "WOAH THERE|I'VE GOT SOME NEAT|JUNK FOR SALE",
+        "YOU CAN PROBABLY|FIND THIS CHEAPER|ONLINE",
         "VISIT OUR OTHER|LOCATION IN THE|WESTLAKE MALL",
         "DOWNLOAD OUR APP TO|EARN DISCOUNTS ON|FUTURE PURCHASES!",
         "I'M NOT LIKE THOSE|OTHER MERCHANTS!",
@@ -101,16 +100,18 @@ COMMUNITY_HINTS = {
     ],
     HintType.SHOP_2: [
         "AS SEEN ON TV",
-        "COME BACK LATER FOR|OUR BLACK FRIDAY SALE",
+        "SORRY, WE'RE ALL OUT|OF DISINFECTING WIPES"
+        "USE DISCOUNT CODE|\"ZORA\" FOR 10 PERCENT|OFF YOUR NEXT ORDER",
         "WHAT KIND OF|CHEESE SHOP|IS THIS?",
         "AND IT CAN BE YOURS|IF THE PRICE IS RIGHT!",
-        "YOU CAN PROBABLY|FIND THIS CHEAPER|ONLINE",
         "SHOP LOCAL, SUPPORT|SMALL BUSINESSES",
         "HELLO TRAVELLER!|HOW CAN I HELP YOU?",
         "I HAVE GREAT DEALS|IN STORE FOR YOU",
         "THE MIDDLE ITEM IS|MY FAMILY HEIRLOOM",
         "GET IN, LOSER,|WE'RE GOING SHOPPING",
         "SIGN UP FOR THE STORE|CARD TO GET 10 PERCENT|OFF YOUR 1ST PURCHASE",
+        "See back of receipt|for the return policy",
+        "Merchandising!|Where the real money|from the movie is made",
     ],
     HintType.ANY_ROAD: [
         "I CHALLENGE YOU TO|A STAIRING CONTEST!",
@@ -120,12 +121,11 @@ COMMUNITY_HINTS = {
         "JUST KEEP SWIMMING!",
         "YOU KNOW BAGU?|THEN I WILL HELP|YOU CROSS",
         "WELCOME TO|WARP ZONE",
-        "WHICH WAY DID HE GO,|GEORGE?",
         "BE CAREFUL, STAIRS|ARE ALWAYS UP TO|SOMETHING",
         "TRAVELLING TOO MUCH?|TRY A ZOOM MEETING",
         "MY ADVICE? TAKE THE|ROAD LESS TRAVELLED",
-        "EVERY DAY IS A|WINDING ROAD",
-        "THIS IS A|LOST HILLS-BOUND|4 EXPRESS TRAIN",
+        "IN CASE OF EMERGENCY|PLEASE USE STAIRWAYS",
+        "THIS IS A|LOST WOODS-BOUND|4 EXPRESS TRAIN",
     ],
     HintType.PAY_ME: [
         "ARE THESE HINTS|VANILLA? BUY ONE|TO FIND OUT",
@@ -169,6 +169,7 @@ COMMUNITY_HINTS = {
         "MEOW!",
         "STOP TALKING ABOUT|VORING THE FAE",
         "ORB!",
+        "Beware the evil Mr.|Glitch. He will eat|you if you are wrong.",
         "SAY CHEESE!",
         "IS THIS ZELDA OR|GHOSTS AND MOBLINS?",
         "YOUR AD HERE|CALL 555-ZORA",
@@ -177,7 +178,6 @@ COMMUNITY_HINTS = {
         "MARCY?|MARCY?",
         "NAME THAT INKBLOT",
         "ZZZZZZZZ ... |ZZZZZZZZ... |ARE THEY GONE YET?",
-        "HONK!",
         "THIS LINE HERE|IS MOSTLY|FILLER",
         "NEED MORE QUOTE|SUBMISSIONS PLEASE!",
         "HELLO WORLD!",
@@ -200,6 +200,7 @@ COMMUNITY_HINTS = {
         "I JUST MET YOU & THIS|IS CRAZY BUT HERES MY|NUMBER. CALL ME MAYBE?",
         "IF YOU CAN READ THIS|YOU DON'T NEED|NEW GLASSES",
         "INCONCEIVABLE!",
+        "Stop trying to make|fetch happen. It's not|going to happen.",
         "BY YOUR COMMAND",
         "WOW, I DON'T EVEN|KNOW WHAT TO SAY|TO YOU ANYMORE!",
     ],
@@ -234,11 +235,14 @@ COMMUNITY_HINTS = {
     ],
     HintType.MUGGER: [
         "GENDER ISN'T BINARY|BUT THIS CHOICE IS",
-        "SUGGEST MUGGER QUOTES|IN THE ZORA DISCORD|PLEASE!", "I'M SORRY,|WE DON'T|TAKE DISCOVER",
+        "SUGGEST MUGGER QUOTES|IN THE ZORA DISCORD|PLEASE!",
+        "I'M SORRY,|WE DON'T|TAKE DISCOVER",
         "USE E-Z PASS TO|SAVE TIME PAYING TOLLS",
-        "FOR YOUR CONVENIENCE|WE ACCEPT MULTIPLE|PAYMENT METHODS", "TICKETS, PLEASE!",
-        "GOTTA PAY TO PLAY", "PLEASE INSERT COIN|TO CONTINUE"
-        "I KNOW ...|I DON'T LIKE IN-APP|PURCHASES EITHER"
+        "FOR YOUR CONVENIENCE|WE ACCEPT MULTIPLE|PAYMENT METHODS",
+        "TICKETS, PLEASE!",
+        "GOTTA PAY TO PLAY",
+        "PLEASE INSERT COIN|TO CONTINUE"
+        "I KNOW ...|I DON'T LIKE IN-APP|PURCHASES EITHER",
     ],
     HintType.FRENCH_COMMUNITY_HINT: [
         "Han Ouais",
@@ -322,17 +326,17 @@ class TextDataTable():
   def RandomizeTitleStory(self) -> None:
     addr = 0x1A528
     for line in RICK_ROLL_STORY_TEXT:
-      print("%x" % addr)
+      log.info("%x" % addr)
       if addr >= 0x1A8B3:
-        print("UH OH 1!")
+        log.warning("UH OH 1!")
         break
       self.patch.AddData(addr, self.__ascii_string_to_bytes(line))
       addr += 0x23
       if "             " in line:
-        print("blank!")
+        log.info("blank!")
         continue
       if addr >= 0x1A8B3:
-        print("UH OH 2!")
+        log.warning("UH OH 2!")
         break
       self.patch.AddData(addr, self.__ascii_string_to_bytes("  #                          @  "))
       addr += 0x23
@@ -432,15 +436,13 @@ class TextDataTable():
     elif (num in range(19, 34) and not hint_type in [HintType.BOMB_UPGRADE, HintType.MUGGER] or
           num in range(10, 14)):
       hint = self.hints.pop(0)
-      print(hint)
+      log.info(hint)
     elif hint_type not in COMMUNITY_HINTS:
-      #return self.GenerateTestingString(num)
-      print("Warning! nothing for %s" % hint_type)
-      hint_type = HintType.FRENCH_COMMUNITY_HINT if self.settings.IsEnabled(flags.FrenchCommunityHints) else HintType.ENGLISH_COMMUNITY_HINT
+      log.warning("Warning! nothing for %s" % hint_type)
+      hint_type = HintType.FRENCH_COMMUNITY_HINT if self.settings.IsEnabled(
+          flags.FrenchCommunityHints) else HintType.ENGLISH_COMMUNITY_HINT
       hint = random.choice(COMMUNITY_HINTS[hint_type])
     else:
-      print(":(")
-      print(num)
       if self.settings.IsEnabled(flags.FrenchCommunityHints):
         hint_type = HintType.FRENCH_COMMUNITY_HINT
       hint = random.choice(COMMUNITY_HINTS[hint_type])
@@ -449,10 +451,9 @@ class TextDataTable():
     tbr: List[int] = []
     for i in range(3):
       is_last_line = True if i + 1 == num_lines else False
-      print(lines[i])
+      log.info(lines[i])
       if len(lines[i]) > 23:
-        print("WARNING! long line: %s" % lines[i])
-        print("!!")
+        log.warning("WARNING! long line: %s" % lines[i])
       tbr.append(0x25)
       line = lines[i].strip().center(22)
       things = self.__ascii_string_to_bytes(lines[i].strip().center(22))
@@ -468,13 +469,10 @@ class TextDataTable():
         modifier = 0x80
       elif not is_last_line and i == 1:
         modifier = 0x40
-      print(things)
+      log.info(things)
       things[-1] += modifier
-      print(things)
+      log.info(things)
       tbr.extend(things)
       if is_last_line:
         break
-    for a in tbr:
-      print("%x" % a, end='')
-    print()
     return tbr

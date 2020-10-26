@@ -327,8 +327,6 @@ class Enemy(IntEnum):
     assert enemy_sprite_set in [
         SpriteSet.GORIYA_SPRITE_SET, SpriteSet.DARKNUT_SPRITE_SET, SpriteSet.WIZZROBE_SPRITE_SET
     ]
-    print(boss_sprite_set)
-    print(enemy_sprite_set)
     while True:
       try:
         enemy = cls(random.randrange(0x0, 0x7F))

@@ -1,7 +1,7 @@
+from absl import logging as log
+import math
 import random
 from typing import List
-import math
-
 from .data_table import DataTable
 from .dungeon_generator import DungeonGenerator
 from .item_randomizer import ItemRandomizer, NotAllItemsWereShuffledAndIDontKnowWhyException
@@ -24,6 +24,7 @@ class ZoraRandomizer():
     self.level_generator = LevelGenerator(self.data_table)
     self.item_randomizer = ItemRandomizer(self.data_table, self.settings)
     self.validator = Validator(self.data_table, self.settings)
+    log.set_verbosity(log.WARNING)
 
   def Randomize(self) -> None:
     random.seed(self.seed)
@@ -37,17 +38,14 @@ class ZoraRandomizer():
       counter = 0
       while True:
         counter += 1
-        print()
-        print("Re-randomizing items")
-        print()
+        log.info("Re-randomizing items")
         try:
           self.item_randomizer.Randomize()
         except NotAllItemsWereShuffledAndIDontKnowWhyException:
-          print("NotAllItemsWereShuffledAndIDontKnowWhyException")
+          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
           break
-        print()
-        print("Back to Validating")
-        print()
+        log.info("Back to Validating")
+
         if self.validator.IsSeedValid():
           done = True
           break
@@ -66,17 +64,17 @@ class ZoraRandomizer():
       counter = 0
       while True:
         counter += 1
-        print()
-        print("Re-randomizing items")
-        print()
+
+        log.info("Re-randomizing items")
+
         try:
           self.item_randomizer.Randomize()
         except NotAllItemsWereShuffledAndIDontKnowWhyException:
-          print("NotAllItemsWereShuffledAndIDontKnowWhyException")
+          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
           break
-        print()
-        print("Back to Validating")
-        print()
+
+        log.info("Back to Validating")
+
         if self.validator.IsSeedValid():
           done = True
           break
@@ -85,9 +83,18 @@ class ZoraRandomizer():
 
   def GetPatch(self) -> Patch:
     patch = self.data_table.GetPatch()
-    
-    
+
     patch += self.RandomizeHP()
+    # Old Zero HP code
+    # zeros: List[int] = []
+    # for unused_counter in range(0x26):
+    #  zeros.append(0x00)
+    # patch.AddData(0x1FB5E, zeros)
+
+    if self.settings.IsEnabled(flags.FastDungeonTransitions):
+      # For fast scrolling. Puts NOPs instead of branching based on dungeon vs. Level 0 (OW)
+      for addr in [0x141F3, 0x1426B, 0x1446B, 0x14478, 0x144AD]:
+        patch.AddData(addr, [0xEA, 0xEA])
 
     # Make rare (vanilla blue ring) shop single purchase only
     patch.AddData(0x45F3, [0x7A])
@@ -96,11 +103,10 @@ class ZoraRandomizer():
     patch.AddData(0x4708, [0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xAD, 0x66, 0x06, 0xC9, 0x01, 0xF0])
 
     # Randomize secret prices
-    patch.AddData(0x18680, [random.randrange(25, 40)])
-    patch.AddData(0x18683, [random.randrange(80, 125)])
-    patch.AddData(0x18686, [random.randrange(5, 24)])
-    # Door repair
-    patch.AddData(0x48A0, [random.randrange(15, 25)])
+    patch.AddData(0x18680, [random.randrange(25, 40)])  # Medium secret
+    patch.AddData(0x18683, [random.randrange(80, 125)])  # Large secret
+    patch.AddData(0x18686, [random.randrange(5, 24)])  # Small secret
+    patch.AddData(0x48A0, [random.randrange(15, 25)])  # Door repair
 
     # Ropes.  DF = Burn only. Overwrite 2nd quest stuff w/ NOPs
     # patch.AddData(0x112D7, [0xA9, 0xDF, 0x99, 0xB3, 0x04, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA])
@@ -116,17 +122,6 @@ class ZoraRandomizer():
 
     # Temporary L2 PB change
     patch.AddData(0x14C90, [0xAD, 0x65, 0x06, 0xD0, 0xA4])
-
-    if self.settings.IsEnabled(flags.FastDungeonTransitions):  
-      # For fast scrolling. Puts NOPs instead of branching based on dungeon vs. Level 0 (OW)
-      for addr in [0x141F3, 0x1426B, 0x1446B, 0x14478, 0x144AD]:
-        patch.AddData(addr, [0xEA, 0xEA])
-
-    
-    zeros: List[int] = []
-    for unused_counter in range(0x26):
-      zeros.append(0x00)
-    patch.AddData(0x1FB5E, zeros)
 
     patch.AddData(0x16fd8, [
         0xFF, 0xA5, 0xEC, 0x30, 0x0B, 0x49, 0x80, 0xCD, 0xA1, 0x6B, 0xD0, 0x09, 0xA4, 0x10, 0xF0,
@@ -147,14 +142,15 @@ class ZoraRandomizer():
     return patch
 
   def _AddExtras(self, patch: Patch) -> None:
-    if self.settings.IsEnabled(flags.ProgressiveItems):
-
+    if True:  # self.settings.IsEnabled(flags.ProgressiveItems):
       patch.AddData(0x6D06, [0x18, 0x79, 0x57, 0x06, 0xEA])
-      #patch.AddData(0x6B49, [0x11, 0x12, 0x13])  # Swords
-      #patch.AddData(0x6B4E, [0x11, 0x12])  # Candles
-      #patch.AddData(0x6B50, [0x11, 0x12])  # Arrows
+
+      # An old way of doing incremental upgrades -- do not use anymore
+      # patch.AddData(0x6B49, [0x11, 0x12, 0x13])  # Swords
+      # patch.AddData(0x6B4E, [0x11, 0x12])  # Candles
+      # patch.AddData(0x6B50, [0x11, 0x12])  # Arrows
       # patch.AddData(0x6B5A, [0x11, 0x12])  # Rings
-      #patch.AddData(0x6B65, [0x11, 0x12])  # Boomerangs
+      # patch.AddData(0x6B65, [0x11, 0x12])  # Boomerangs
 
     # Change "no item" code from 0x03 (Mags) to 0x0E (Triforce of Power)
     patch.AddData(0x1785F, [0x0E])
@@ -173,13 +169,10 @@ class ZoraRandomizer():
     if self.settings.IsEnabled(flags.DisableBeeping):
       # Turn off low health warning
       patch.AddData(0x1ED33, [0x00])
-  
+
     if self.settings.IsEnabled(flags.DisableFlashing):
-      # Disable triforce flashing
-      patch.AddData(0x1A283, [0x18])
-  
-      # Disable bomb explosion flashing
-      patch.AddData(0x6A3B, [0x60])
+      patch.AddData(0x1A283, [0x18])  # Disable triforce flashing
+      patch.AddData(0x6A3B, [0x60])  # Disable bomb explosion flashing
 
     if self.settings.IsEnabled(flags.EnableSelectSwap):
       patch.AddData(0x1EC4C, [0x4C, 0xC0, 0xFF])
@@ -188,25 +181,17 @@ class ZoraRandomizer():
           0xA9, 0x01, 0x20, 0xC8, 0xB7, 0x4C, 0x58, 0xEC
       ])
 
-
-
-    #Ring fix (TODO)
-    #  patch.AddData(0x6C71, [0x4C, 0xD8, 0xFF])
-    #  patch.AddData(0x1FFE8, [0x4C, 0xB5, 0x73])
-
     # What does this do?
     patch.AddData(
         0x1A129,
         [0x0C, 0x18, 0x0D, 0x0E, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24])
 
-
     text_data_table = TextDataTable(self.settings, self.data_table)
     patch += text_data_table.GetPatch()
-    
-    
+
   def RandomizeHPValue(self, value: int) -> int:
     hp_setting = self.settings.get_flag_choice(flags.EnemyHP)
-    
+
     #assert value in range(0x10)
     #assert setting in ["0hp", "plusminus2", "plusminus4", "minus4", "minus2"]
     if hp_setting == flags.ZeroHP:
@@ -222,7 +207,8 @@ class ZoraRandomizer():
     elif hp_setting == flags.PlusOrMinus4HP:
       upper_modifier = 4
     else:
-      assert(1==2)
+      # At least one HP setting should be enabled
+      assert (False)
     new_value = random.randrange(value + lower_modifier, value + upper_modifier)
     if new_value > 0xF:
       return 0xF
@@ -240,7 +226,7 @@ class ZoraRandomizer():
     hp_setting = self.settings.get_flag_choice(flags.EnemyHP)
     if hp_setting is None or hp_setting == flags.VanillaHP:
       return Patch()
-    
+
     vanilla_hp_bytes = [
         0x06, 0x43, 0x25, 0x31, 0x12, 0x24, 0x81, 0x14, 0x22, 0x42, 0x00, 0xA9, 0x8F, 0x20, 0x00,
         0x3F, 0xF9, 0xFA, 0x46, 0x62, 0x11, 0x2F, 0xFF, 0xFF, 0x7F, 0xF6, 0x2F, 0xFF, 0xFF, 0x22,

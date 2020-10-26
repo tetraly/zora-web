@@ -1,10 +1,11 @@
+from absl import logging as log
+import math
 import random
 from typing import List
+
 from .constants import LevelNum, Range, RoomNum, WallType
 from .direction import Direction
 from .data_table import DataTable
-
-import math
 
 
 def GetNextRoomNum(room_num: RoomNum, direction: Direction) -> RoomNum:
@@ -68,7 +69,7 @@ class GridGenerator:
             #print("Stairway room %d" % room_num)
             self.level_room_numbers[0].append(room_num)
         return
-    print("This should never happen (GenerateLevelGrid)!")
+    log.fatal("This should never happen (GenerateLevelGrid)!")
 
   def _AttemptGeneratingLevelGrid(self, num_levels: int, level_sizes: List[int]) -> bool:
     counter = 0

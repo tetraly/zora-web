@@ -1,7 +1,7 @@
 import random
 from typing import IO, List, Optional
 from shutil import copyfile
-from absl import logging
+from absl import logging as log
 
 
 class Rom():
@@ -24,9 +24,8 @@ class Rom():
   # Opens a ROM file for reading
   def OpenFile(self, write_mode: bool = False) -> None:
     self.write_mode = write_mode
-    print("Opening %s %s ...\n\n" % (self.rom_filename, "for writing" if write_mode else ""))
+    log.info("Opening %s %s ...\n\n" % (self.rom_filename, "for writing" if write_mode else ""))
     self.rom_file = open(self.rom_filename, "r+b" if write_mode else "rb")
-    print("2")
 
   def ShuffleRanges(self, start_locations: List[int], num_bytes: int) -> None:
     """Randomly shuffles up the specified ranges/ranges of data. """
@@ -89,7 +88,7 @@ class Rom():
     self.WriteMultipleBytes([byte_to_write])
 
   def SetAddress(self, address: int) -> None:
-    logging.debug("Setting address to 0x%x" % address)
+    log.debug("Setting address to 0x%x" % address)
     self.address = address
 
   def GetAddress(self) -> int:

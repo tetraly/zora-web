@@ -310,18 +310,6 @@ class RoomType(IntEnum):
 
     return ROOM_DATA[room_type.value][row][col] in [0, 5]
 
-  @classmethod
-  def PrintStats(cls) -> None:
-    for x in range(12):
-      for y in range(7):
-        non_working_types: List[RoomType] = []
-        for room_type in range(42):
-          print("%d, %d, %d" % (room_type, y, x))
-          if ROOM_DATA[room_type][y][x] not in [0, 5]:
-            non_working_types.append(RoomType(room_type))
-        print("For y=%d, x=%d:  %s" % (y, x, non_working_types))
-        input("")
-
 
 # Shoutouts to Imasock for creating this!
 

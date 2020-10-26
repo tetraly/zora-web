@@ -1,3 +1,4 @@
+from absl import logging as log
 import math
 import random
 import sys
@@ -314,7 +315,7 @@ class LevelGenerator:
       (start_room,
        entrance_direction) = self._PickStartRoomForLevel(level_num)  #, entrance_direction)
       print("Chose start room %x for level %d" % (start_room, level_num))
-      print("Direction is %s" % entrance_direction)
+      log.info("Direction is %s" % entrance_direction)
       self.data_table.SetStartRoomDataForLevel(level_num, start_room, entrance_direction)
       self.level_start_rooms.append(start_room)
       self.level_entrance_directions.append(entrance_direction)
@@ -330,8 +331,8 @@ class LevelGenerator:
           new_room_num = GetNextRoomNum(room_num, direction)
           if (direction == self.level_entrance_directions[level_num] and
               room_num == self.level_start_rooms[level_num]):
-            print("Setting start room %x for level %d" % (room_num, level_num))
-            print("Direction is %s" % direction)
+            log.info("Setting start room %x for level %d" % (room_num, level_num))
+            log.info("Direction is %s" % direction)
             room_grid[room_num].SetWallType(direction, WallType.OPEN_DOOR)
           elif new_room_num not in Range.VALID_ROOM_NUMBERS:
             continue
@@ -342,10 +343,10 @@ class LevelGenerator:
             room_grid[room_num].SetWallType(direction, WallType.OPEN_DOOR)
 
       if grid_id == GridId.GRID_A:
-        print("Grid A complete")
+        log.info("Grid A complete")
         self.room_grid_a = room_grid
       else:
-        print("Grid B complete")
+        log.info("Grid B complete")
         self.room_grid_b = room_grid
 
   # Main Logic starts here
@@ -427,7 +428,7 @@ class LevelGenerator:
       while True:
         counter += 1
         if counter > MAIN_THRESHOLD:
-          #print("Reached main counter timeout")
+          log.warning("Reached main counter timeout")
           exit()
         if not self.AddRoomTypes(level_num,
                                  item_stairway_assignments[level_num],

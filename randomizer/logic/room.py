@@ -1,5 +1,5 @@
+from absl import logging as log
 from typing import List, Optional
-import logging
 import random
 import sys
 from .constants import DungeonPalette, Range, RoomAction, RoomNum, WallType
@@ -7,8 +7,6 @@ from .direction import Direction
 from .enemy import Enemy
 from .item import Item
 from .room_type import RoomType
-
-log = logging.getLogger(__name__)
 
 
 def NumBitsToShiftForBitmask(bitmask: int) -> int:
@@ -293,7 +291,7 @@ class Room():
       self._SetRomBits(3, 0x40, 0x00)
       self._SetRomBits(5, 0x07, 0x06)
     else:
-      log.error("Found undefined room action code: %d" % int(room_action))
+      log.fatal("Found undefined room action code: %d" % int(room_action))
       sys.exit(1)
 
   def GetRoomAction(self) -> int:

@@ -2,7 +2,7 @@ import math
 import random
 import sys
 from typing import Dict, List, Tuple, Union
-from absl import logging
+from absl import logging as log
 from .cave import Cave
 from .constants import CaveType, GridId, LevelNum, LevelNumOrCaveType, Range, RoomNum, SpriteSet
 from .direction import Direction
@@ -193,12 +193,10 @@ class DataTable():
 
   def AdjustHungryEnemyForSpriteSet(self, sprite_set: SpriteSet) -> None:
     sprite_code = 0xB4  # Wizzrobe
-    #if sprite_set == SpriteSet.WIZZROBE_SPRITE_SET:
-    #  code = 0xB4
     if sprite_set == SpriteSet.DARKNUT_SPRITE_SET:
-      sprite_code = random.choice([0xAA, 0xB0])  # Gibdo, Darknut
+      sprite_code = random.choice([0xAC, 0xB0])  # Gibdo, Darknut
     elif sprite_set == SpriteSet.GORIYA_SPRITE_SET:
-      sprite_code = random.choice([0xAA, 0xAC, 0xAE, 0xB0])  # Rope, Stalfos, Wallmaster, Goriya
+      sprite_code = random.choice([0xAC, 0xB0])  # Rope, Stalfos, Wallmaster, Goriya
     self.misc_data_patch.AddData(self.HUNGRY_ENEMY_SPRITE_CODE_ADDRESS, [sprite_code])
 
   def RandomizeBombUpgrades(self) -> None:
@@ -213,7 +211,7 @@ class DataTable():
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_PRICE_ADDRESS, [price])
     self.misc_data_patch.AddData(self.BOMB_UPGRADE_QUANTITY_ADDRESS, [quantity])
 
-    print(price)
+    log.info(price)
     bomb_upgrade_price_text: List[int] = [
         0x01 if price >= 100 else 0x24,
         math.floor((price % 100) / 10), price % 10
@@ -268,31 +266,31 @@ class DataTable():
       self.overworld_raw_data[0x280 + screen_num] = bits_to_keep + bits_to_write
 
   def ClearAllVisitMarkers(self) -> None:
-    logging.debug("Clearing Visit markers")
+    log.debug("Clearing Visit markers")
     for room in self.level_1_to_6_rooms:
       room.ClearVisitMark()
     for room in self.level_7_to_9_rooms:
       room.ClearVisitMark()
 
   def ClearStaircaseRoomNumbersForLevel(self, level_num: LevelNum) -> None:
-    print("CLEAR!  level %s" % level_num)
+    log.info("CLEAR!  level %s" % level_num)
     assert level_num in Range.VALID_LEVEL_NUMBERS
     offset = level_num * self.LEVEL_METADATA_OFFSET + self.STAIRCASE_LIST_OFFSET
     for counter in range(0, 9):
       self.level_metadata[offset + counter] = 0xFF
 
   def AddStaircaseRoomNumberForLevel(self, level_num: LevelNum, room_num: RoomNum) -> None:
-    print("ADD!  level %s" % level_num)
+    log.info("ADD!  level %s" % level_num)
     assert level_num in Range.VALID_LEVEL_NUMBERS
     offset = level_num * self.LEVEL_METADATA_OFFSET + self.STAIRCASE_LIST_OFFSET
     assert room_num in range(0, 0x80)
     for counter in range(0, 9):
       if self.level_metadata[offset + counter] == 0xFF:
-        print("Found a FF")
+        log.info("Found a FF")
         self.level_metadata[offset + counter] = room_num
         return
-    print("This should never happen! (AddStaircaseRoomNumberForLevel)")
-    assert (1 == 2)
+    log.fatal("This should never happen! (AddStaircaseRoomNumberForLevel)")
+    assert (False)
 
   def UpdateCompassPointer(self, location: Location) -> None:
     assert location.IsLevelRoom()
@@ -373,10 +371,10 @@ class DataTable():
 
   def SetItemPositionsForLevel(self, level_num: LevelNum, item_positions: List[int]) -> None:
     enemy_quantities = []
-    enemy_quantities.append(random.randrange(0, 2))
-    enemy_quantities.append(random.randrange(2, 5))
-    enemy_quantities.append(random.randrange(4, 7))
-    enemy_quantities.append(random.randrange(5, 8))
+    enemy_quantities.append(random.randrange(1, 3))
+    enemy_quantities.append(random.randrange(3, 5))
+    enemy_quantities.append(random.randrange(5, 7))
+    enemy_quantities.append(random.randrange(6, 8))
     enemy_quantities.sort()
 
     assert item_positions[0] == 0x89
