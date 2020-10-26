@@ -1,5 +1,6 @@
 import random
 from typing import List
+import math
 
 from .data_table import DataTable
 from .dungeon_generator import DungeonGenerator
@@ -84,17 +85,12 @@ class ZoraRandomizer():
 
   def GetPatch(self) -> Patch:
     patch = self.data_table.GetPatch()
-
-    # Turn off low health warning
-    patch.AddData(0x1ED33, [0x00])
+    
+    
+    patch += self.RandomizeHP()
 
     # Make rare (vanilla blue ring) shop single purchase only
     patch.AddData(0x45F3, [0x7A])
-
-    # Disable triforce flashing
-    patch.AddData(0x1A283, [0x18])
-    # Disable bomb explosion flashing
-    patch.AddData(0x6A3B, [0x60])
 
     # Auto-"use" the letter the first time entering a potion shop
     patch.AddData(0x4708, [0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xAD, 0x66, 0x06, 0xC9, 0x01, 0xF0])
@@ -121,10 +117,12 @@ class ZoraRandomizer():
     # Temporary L2 PB change
     patch.AddData(0x14C90, [0xAD, 0x65, 0x06, 0xD0, 0xA4])
 
-    # For fast scrolling. Puts NOPs instead of branching based on dungeon vs. Level 0 (OW)
-    for addr in [0x141F3, 0x1426B, 0x1446B, 0x14478, 0x144AD]:
-      patch.AddData(addr, [0xEA, 0xEA])
+    if self.settings.IsEnabled(flags.FastDungeonTransitions):  
+      # For fast scrolling. Puts NOPs instead of branching based on dungeon vs. Level 0 (OW)
+      for addr in [0x141F3, 0x1426B, 0x1446B, 0x14478, 0x144AD]:
+        patch.AddData(addr, [0xEA, 0xEA])
 
+    
     zeros: List[int] = []
     for unused_counter in range(0x26):
       zeros.append(0x00)
@@ -172,6 +170,26 @@ class ZoraRandomizer():
         0x60, 0xFF, 0xFF, 0x1E, 0x0A, 0x06, 0x01
     ])
 
+    if self.settings.IsEnabled(flags.DisableBeeping):
+      # Turn off low health warning
+      patch.AddData(0x1ED33, [0x00])
+  
+    if self.settings.IsEnabled(flags.DisableFlashing):
+      # Disable triforce flashing
+      patch.AddData(0x1A283, [0x18])
+  
+      # Disable bomb explosion flashing
+      patch.AddData(0x6A3B, [0x60])
+
+    if self.settings.IsEnabled(flags.EnableSelectSwap):
+      patch.AddData(0x1EC4C, [0x4C, 0xC0, 0xFF])
+      patch.AddData(0x1FFD0, [
+          0xA9, 0x05, 0x20, 0xAC, 0xFF, 0xAD, 0x56, 0x06, 0xC9, 0x0F, 0xD0, 0x02, 0xA9, 0x07, 0xA8,
+          0xA9, 0x01, 0x20, 0xC8, 0xB7, 0x4C, 0x58, 0xEC
+      ])
+
+
+
     #Ring fix (TODO)
     #  patch.AddData(0x6C71, [0x4C, 0xD8, 0xFF])
     #  patch.AddData(0x1FFE8, [0x4C, 0xB5, 0x73])
@@ -181,12 +199,56 @@ class ZoraRandomizer():
         0x1A129,
         [0x0C, 0x18, 0x0D, 0x0E, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24])
 
-    if self.settings.IsEnabled(flags.SelectSwap):
-      patch.AddData(0x1EC4C, [0x4C, 0xC0, 0xFF])
-      patch.AddData(0x1FFD0, [
-          0xA9, 0x05, 0x20, 0xAC, 0xFF, 0xAD, 0x56, 0x06, 0xC9, 0x0F, 0xD0, 0x02, 0xA9, 0x07, 0xA8,
-          0xA9, 0x01, 0x20, 0xC8, 0xB7, 0x4C, 0x58, 0xEC
-      ])
 
     text_data_table = TextDataTable(self.settings, self.data_table)
     patch += text_data_table.GetPatch()
+    
+    
+  def RandomizeHPValue(self, value: int) -> int:
+    hp_setting = self.settings.get_flag_choice(flags.EnemyHP)
+    
+    #assert value in range(0x10)
+    #assert setting in ["0hp", "plusminus2", "plusminus4", "minus4", "minus2"]
+    if hp_setting == flags.ZeroHP:
+      return 0
+    if hp_setting in [flags.PlusOrMinus2HP, flags.Minus2HP]:
+      lower_modifier = -2
+    elif hp_setting in [flags.PlusOrMinus4HP, flags.Minus4HP]:
+      lower_modifier = -4
+    if hp_setting in [flags.Minus2HP, flags.Minus4HP]:
+      upper_modifier = 0
+    elif hp_setting == flags.PlusOrMinus2HP:
+      upper_modifier = 2
+    elif hp_setting == flags.PlusOrMinus4HP:
+      upper_modifier = 4
+    else:
+      assert(1==2)
+    new_value = random.randrange(value + lower_modifier, value + upper_modifier)
+    if new_value > 0xF:
+      return 0xF
+    elif new_value < 0x0:
+      return 0x0
+    return new_value
+
+  def RandomizeHPByte(self, hp_byte: int) -> int:
+    (hp_1, hp_2) = (math.floor(hp_byte / 0x10), hp_byte % 0x10)
+    (new_hp_1, new_hp_2) = (self.RandomizeHPValue(hp_1), self.RandomizeHPValue(hp_1))
+    assert new_hp_1 in range(0x10) and new_hp_2 in range(0x10)
+    return 0x10 * new_hp_1 + new_hp_2
+
+  def RandomizeHP(self) -> Patch:
+    hp_setting = self.settings.get_flag_choice(flags.EnemyHP)
+    if hp_setting is None or hp_setting == flags.VanillaHP:
+      return Patch()
+    
+    vanilla_hp_bytes = [
+        0x06, 0x43, 0x25, 0x31, 0x12, 0x24, 0x81, 0x14, 0x22, 0x42, 0x00, 0xA9, 0x8F, 0x20, 0x00,
+        0x3F, 0xF9, 0xFA, 0x46, 0x62, 0x11, 0x2F, 0xFF, 0xFF, 0x7F, 0xF6, 0x2F, 0xFF, 0xFF, 0x22,
+        0x46, 0xF1, 0xF2, 0xAA, 0xAA, 0xFB, 0xBF, 0xF0
+    ]
+    new_hp_bytes: List[int] = []
+    for vanilla_hp_byte in vanilla_hp_bytes:
+      new_hp_bytes.append(self.RandomizeHPByte(vanilla_hp_byte))
+    patch = Patch()
+    patch.AddData(0x1FB5E, new_hp_bytes)
+    return patch

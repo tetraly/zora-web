@@ -12,7 +12,7 @@
         "Legend of Zelda, The (USA) (Rev 1) (GameCube Edition)": "6cad5e2c04b0ac395ab596248ba28568",
         "Legend of Zelda, The (USA) (Rev 1) (Virtual Console)": "964eeefbeae0a14bcdc21d00d0f0aa51",
         "Legend of Zelda, The (USA) (Rev 1) (No Intro)": "77accbcdbe136f159d34198a16c1a80a",
-        "Legend of Zelda, The (USA).nes (No Intro)": "37e2240a75b51b7b517f0e8350488a7b",
+        "Legend of Zelda, The (USA) (No Intro)": "37e2240a75b51b7b517f0e8350488a7b",
         //"B": "37a6259cc0c1dae299a7866489dff0bd",
         //"C": "d9a1631d5c32d35594b9484862a26cba",
         //"D": "d3f453931146e95b04a31647de80fdab",
@@ -55,9 +55,9 @@
                         break;
                     }
                 }
-                if (!this.region) {
-                  window.alert("For debuging use: " + this.checkMD5()); 
-                }
+                //if (!this.region) {
+                //  window.alert("For debuging use: " + this.checkMD5()); 
+                //}
                 if (this.region && this.region !== 'JP') {
                     if (this.arrayBuffer.byteLength === ROM_SIZE) {
                         this.valid = true;
@@ -164,14 +164,14 @@
 
         // Patch for each mode.
         applyModeChanges(mode) {
-            window.alert("applyModeChanges() -- shouldn't see this")
+            window.alert("applyModeChanges() -- this should never happen!")
             return new Promise((resolve) => {
-                if (mode === "linear") {
+                if (mode === "itemonly") {
                     $.getJSON("{% static 'randomizer/patches/linear_mode.json' %}", {}, (patch) => {
                         this.parsePatch(patch);
                         resolve(this);
                     });
-                } else if (mode === "open") {
+                } else if (mode === "standard") {
                     $.getJSON("{% static 'randomizer/patches/open_mode.json' %}", {}, (patch) => {
                         this.parsePatch(patch);
                         resolve(this);

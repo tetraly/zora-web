@@ -1,8 +1,8 @@
 from django import forms
 
 MODES = (
-    ('open', 'Open'),
-    ('linear', 'Linear'),
+    ('standard', 'Standard'),
+    ('itemonly', 'Item Only'),
 )
 
 

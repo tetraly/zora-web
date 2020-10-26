@@ -143,7 +143,7 @@ class Settings:
   def IsEnabled(self, flag: Type[Flag]) -> bool:
     return flag in self._enabled_flags
 
-  def get_flag_choice(self, flag: Flag) -> Optional[Type[Flag]]:
+  def get_flag_choice(self, flag: Type[Flag]) -> Optional[Type[Flag]]:
     for choice in flag.choices:
       if self.IsEnabled(choice):
         return choice

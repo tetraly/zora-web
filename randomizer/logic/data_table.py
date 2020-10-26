@@ -388,46 +388,6 @@ class DataTable():
       self.level_metadata[offset + self.ITEM_POSITIONS_OFFSET] = item_positions[counter]
       self.level_metadata[offset + self.ENEMY_QUANTITIES_OFFSET] = enemy_quantities[counter]
 
-  def RandomizeHPValue(self, value: int) -> int:
-    setting = "minus4"
-    assert value in range(0x10)
-    assert setting in ["0hp", "plusminus2", "plusminus4", "minus4", "minus2"]
-    if setting == "0hp":
-      return 0
-    if setting in ["plusminus2", "minus2"]:
-      lower_modifier = -2
-    elif setting in ["plusminus4", "minus4"]:
-      lower_modifier = -4
-    if setting in ["minus2", "minus4"]:
-      upper_modifier = 0
-    elif setting == "plusminus2":
-      upper_modifier = 2
-    elif setting == "plusminus4":
-      upper_modifier = 4
-    new_value = random.randrange(value + lower_modifier, value + upper_modifier)
-    if new_value > 0xF:
-      return 0xF
-    elif new_value < 0x0:
-      return 0x0
-    return new_value
-
-  def RandomizeHPByte(self, hp_byte: int) -> int:
-    (hp_1, hp_2) = (math.floor(hp_byte / 0x10), hp_byte % 0x10)
-    (new_hp_1, new_hp_2) = (self.RandomizeHPValue(hp_1), self.RandomizeHPValue(hp_1))
-    assert new_hp_1 in range(0x10) and new_hp_2 in range(0x10)
-    return 0x10 * new_hp_1 + new_hp_2
-
-  def RandomizeHP(self) -> None:
-    vanilla_hp_bytes = [
-        0x06, 0x43, 0x25, 0x31, 0x12, 0x24, 0x81, 0x14, 0x22, 0x42, 0x00, 0xA9, 0x8F, 0x20, 0x00,
-        0x3F, 0xF9, 0xFA, 0x46, 0x62, 0x11, 0x2F, 0xFF, 0xFF, 0x7F, 0xF6, 0x2F, 0xFF, 0xFF, 0x22,
-        0x46, 0xF1, 0xF2, 0xAA, 0xAA, 0xFB, 0xBF, 0xF0
-    ]
-    new_hp_bytes: List[int] = []
-    for vanilla_hp_byte in vanilla_hp_bytes:
-      new_hp_bytes.append(self.RandomizeHPByte(vanilla_hp_byte))
-    self.misc_data_patch.AddData(0x1FB5E, new_hp_bytes)
-
   def GetPatch(self) -> Patch:
     patch = Patch()
     patch += self._GetPatchForLevelGrid(self.LEVEL_1_TO_6_DATA_START_ADDRESS,

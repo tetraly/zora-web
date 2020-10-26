@@ -8,7 +8,6 @@ from .patch import Patch
 from .settings import Settings
 from . import flags
 
-FRENCH_MODE = False
 
 COMMUNITY_HINTS = {
     HintType.WOOD_SWORD: [
@@ -319,12 +318,6 @@ class TextDataTable():
     self.hints = self.data_table.location_hints.copy()
     self.hints.extend(self.data_table.item_hints.copy())
     random.shuffle(self.hints)
-    """self.text_speed = text_speed
-    self.phrase = phrase
-    self.hints = item_hints
-    self.hints.extend(location_hints)
-    random.shuffle(self.hints)
-    self.letter_cave_text = letter_cave_text"""
 
   def RandomizeTitleStory(self) -> None:
     addr = 0x1A528
@@ -352,7 +345,7 @@ class TextDataTable():
     return self.patch
 
   def _MaybeAddTextSpeedToPatch(self) -> None:
-    if self.settings.IsEnabled(flags.SpeedUpText):
+    if self.settings.IsEnabled(flags.FastText):
       self.patch.AddData(self.TEXT_SPEED_ADDRESS, [self.FAST_TEXT_SPEED_SETTING])
 
   def _MaybeAddLevelNameToPatch(self) -> None:
@@ -377,7 +370,7 @@ class TextDataTable():
         '_hole-',
         '_cave-',
     ])
-    if FRENCH_MODE:
+    if self.settings.IsEnabled(flags.FrenchCommunityHints):
       phrase = random.choice(["monde-", "terre-"])  #, "tempe-"])
     assert len(self.__ascii_string_to_bytes(phrase)) == 6
     self.patch.AddData(self.TEXT_LEVEL_ADDRESS, self.__ascii_string_to_bytes(phrase))
@@ -443,12 +436,12 @@ class TextDataTable():
     elif hint_type not in COMMUNITY_HINTS:
       #return self.GenerateTestingString(num)
       print("Warning! nothing for %s" % hint_type)
-      hint_type = HintType.FRENCH_COMMUNITY_HINT if FRENCH_MODE else HintType.ENGLISH_COMMUNITY_HINT
+      hint_type = HintType.FRENCH_COMMUNITY_HINT if self.settings.IsEnabled(flags.FrenchCommunityHints) else HintType.ENGLISH_COMMUNITY_HINT
       hint = random.choice(COMMUNITY_HINTS[hint_type])
     else:
       print(":(")
       print(num)
-      if FRENCH_MODE:
+      if self.settings.IsEnabled(flags.FrenchCommunityHints):
         hint_type = HintType.FRENCH_COMMUNITY_HINT
       hint = random.choice(COMMUNITY_HINTS[hint_type])
     lines = hint.split('|')
