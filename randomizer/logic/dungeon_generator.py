@@ -147,7 +147,7 @@ class LevelPlanGenerator:
     assert not boss_sprite_set_assignments
     assert not palette_assignments
 
-    # Elder assigments (Hints and Bomb upgrades only -- not muggers or hungry enemies)
+    # Elder assigments (assigments and Bomb upgrades only -- not muggers or hungry enemies)
     level_group_assignments = ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
     elder_assigments: Dict[int, List[Enemy]] = {}
     elder_group_a: List[Enemy] = [
@@ -889,8 +889,8 @@ class DungeonGenerator:
           stairway_room.SetRoomType(RoomType.ITEM_STAIRCASE)
           stairway_room.SetStairwayRoomExit(room_num=item_room_num, is_right_side=True)
           stairway_room.SetStairwayRoomExit(room_num=item_room_num, is_right_side=False)
-          stairway_room.SetItemPositionCode(0)
           stairway_room.SetItem(item)
+          stairway_room.SetItemPositionCode(0)
           item_room.SetStairsDestination(stairway_room_num)
           item_room.SetInnerPalette(DungeonPalette.WATER)
           room_type = RoomType.RandomValueOkayForStairs()
@@ -971,16 +971,19 @@ class DungeonGenerator:
         enemy = random.choice(okay_enemies[border_type])
         border_room.SetEnemy(enemy)
         border_room.SetEnemyQuantityCode(random.randrange(0, 3))
+        room_type = RoomType.RandomValue(okay_for_enemy=enemy)
+        border_room.SetRoomType(room_type)
         if border_room.GetLockingDirection() != Direction.STAIRCASE:
           border_room.SetWallType(border_dir, WallType.SHUTTER_DOOR)
           border_room.SetRoomAction(RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS)
         if border_type == BorderType.BOSS:
           border_room.SetItem(Item.HEART_CONTAINER)
+          border_room.SetItemPositionCode(self.item_position_dict[room_type])
           border_room.SetRoomAction(RoomAction.KILLING_ENEMIES_OPENS_SHUTTER_DOORS_AND_DROPS_ITEM)
       elif border_type == BorderType.TRIFORCE_ROOM:
         border_room.SetRoomType(RoomType.TRIFORCE_ROOM)
         border_room.SetItem(Item.TRIFORCE)
-        room.SetItemPositionCode(0)
+        border_room.SetItemPositionCode(0)
         border_room.SetEnemy(Enemy.NO_ENEMY)
         self.data_table.UpdateCompassPointer(Location(level_num=level_num,
                                                       room_num=border_room_num))
@@ -1091,7 +1094,7 @@ class DungeonGenerator:
         room.SetRoomType(room_type)
         item = random.choice([Item.BOMBS, Item.FIVE_RUPEES, Item.RUPEE, Item.NOTHING, Item.NOTHING])
         room.SetItem(item)
-
+        room.SetItemPositionCode(self.item_position_dict[room_type])
         if item != Item.NOTHING:
           room.SetRoomAction(
               random.choice([
@@ -1218,6 +1221,7 @@ class DungeonGenerator:
         destinations.remove(CaveType.ANY_ROAD_CAVE)
     assert len(destinations) == len(screen_nums)
 
+    self.data_table.location_hints = []
     for screen_num in screen_nums:
       print(destinations[0])
       destination = destinations.pop(0)
@@ -1245,6 +1249,6 @@ class DungeonGenerator:
           hint_text += "ON A SMALL ISLAND"
         elif screen_num in Screen.RECORDER_BLOCKED_CAVE_SCREENS:
           hint_text += "UNDERNEATH A LAKE"
-        self.data_table.hints.append(hint_text)
+        self.data_table.location_hints.append(hint_text)
     assert -1 not in recorder_screen_nums
     self.data_table.UpdateAnyRoadAndRecorderScreensNums(any_road_screen_nums, recorder_screen_nums)

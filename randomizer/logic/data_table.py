@@ -78,7 +78,8 @@ class DataTable():
     self.level_7_to_9_rooms: List[Room] = []
     self.sprite_set_patch = Patch()
     self.misc_data_patch = Patch()
-    self.hints: List[str] = []
+    self.location_hints: List[str] = []
+    self.item_hints: List[str] = []
     self.letter_cave_text = ""
 
   def GetCaveDestination(self, screen_num: int) -> Union[LevelNum, CaveType]:

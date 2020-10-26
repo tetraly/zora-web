@@ -2,56 +2,13 @@ import random
 from typing import List
 from absl import logging
 from enum import IntEnum
-from .constants import TextSpeed
+from .constants import HintType
+from .data_table import DataTable
 from .patch import Patch
+from .settings import Settings
+from . import flags
 
 FRENCH_MODE = False
-
-
-class HintType(IntEnum):
-  WOOD_SWORD = 0
-  WHITE_AND_MASTER_SWORD = 1
-  ANY_ROAD = 2
-  OW_HINT_1 = 3
-  MMG = 4
-  DOOR_REPAIR = 5
-  LETTER_CAVE = 6
-  OW_HINT_2 = 7
-  POTION_SHOP = 8
-  PAY_ME = 9
-  PAY_ANSWER_1 = 10
-  PAY_ANSWER_2 = 11
-  PAY_ANSWER_3 = 12
-  PAY_ANSWER_4 = 13
-  SHOP_1 = 14
-  SHOP_2 = 15
-  TAKE_ANY = 16
-  SECRET = 17
-  HUNGRY_ENEMY = 18
-  DUNGEON_HINT_A1 = 19
-  DUNGEON_HINT_A2 = 20
-  DUNGEON_HINT_B1 = 21
-  DUNGEON_HINT_155 = 22  # ?
-  DUNGEON_HINT_16666 = 23  # X. 5
-  DUNGEON_HINT_1777777 = 24  # X. 5
-  BOMB_UPGRADE = 25
-  DUNGEON_HINT_177777788 = 26  # X. 5
-  MUGGER = 27
-  SOMETHING_1 = 28
-  SOMETHING_2 = 29
-  SOMETHING_3 = 30
-  SOMETHING_4 = 31
-  SOMETHING_5 = 32
-  SOMETHING_6 = 33
-  TRIFORCE_CHECK = 34
-  LEVEL_9_HINT = 35
-  LEVEL_9_HINT_2 = 36
-  LEVEL_9_HINT_3 = 37
-  LEVEL_9_HINT_4 = 37
-  LEVEL_9_HINT_5 = 38
-  ENGLISH_COMMUNITY_HINT = 98
-  FRENCH_COMMUNITY_HINT = 99
-
 
 COMMUNITY_HINTS = {
     HintType.WOOD_SWORD: [
@@ -252,19 +209,19 @@ COMMUNITY_HINTS = {
         "HI, I'M BOMB BARKER|please have your pets|spayed or neutered!",
         "SPLOOSH!|KABOOM!",
         "SOMEONE SET UP US|THE BOMB UPGRADE",
-        "ACME BOMBS!|GUARANTEED TO|STOP DIGDOGGERS",
         "BOOM CLAP, THE SOUND|OF MY HEART THE BEAT|GOES ON AND ON AND ON",
+        "KEEP TALKING AND|NOBODY EXPLODES",
+        "YEAH, YOU AND|EVERYONE ELSE WANTS|TO HOARD BOMBS",
     ],
     HintType.MMG: [
-        "VEGAS, BABY!",
+        "WHAT HAPPENS IN VEGAS|STAYS IN VEGAS!",
         "LET'S PLAY MONEY|TAKING GAME",
+        "THE HOUSE ALWAYS WINS",
         "TRENDY GAME|ONE PLAY|10 RUPEES",
         "THE CURRENT LOTTO|JACKPOT IS|255 RUPEES",
         "LET'S GET LUCKY!",
         "Have a rupee,|leave a rupee",
         "BONUS CHANCE||PRESS 'A' BUTTON",
-        "KEEP TALKING AND|NOBODY EXPLODES",
-        "YEAH, YOU AND|EVERYONE ELSE WANTS|TO HOARD BOMBS",
     ],
     HintType.TRIFORCE_CHECK: [
         "MASK OR FACE COVERING|REQUIRED FOR ENTRY",
@@ -353,17 +310,23 @@ RICK_ROLL_STORY_TEXT = [
 class TextDataTable():
   TEXT_SPEED_ADDRESS = 0x482D
   TEXT_LEVEL_ADDRESS = 0x19D17
+  FAST_TEXT_SPEED_SETTING = 2
 
-  def __init__(self, text_speed: str, phrase: str, hints: List[str], letter_cave_text: str) -> None:
+  def __init__(self, settings: Settings, data_table: DataTable) -> None:
     self.patch = Patch()
-    self.text_speed = text_speed
+    self.settings = settings
+    self.data_table = data_table
+    self.hints = self.data_table.location_hints.copy()
+    self.hints.extend(self.data_table.item_hints.copy())
+    random.shuffle(self.hints)
+    """self.text_speed = text_speed
     self.phrase = phrase
-    self.hints = hints
-    random.shuffle(hints)
-    self.letter_cave_text = letter_cave_text
+    self.hints = item_hints
+    self.hints.extend(location_hints)
+    random.shuffle(self.hints)
+    self.letter_cave_text = letter_cave_text"""
 
   def RandomizeTitleStory(self) -> None:
-    #addr = 0x1A4BF
     addr = 0x1A528
     for line in RICK_ROLL_STORY_TEXT:
       print("%x" % addr)
@@ -382,35 +345,42 @@ class TextDataTable():
       addr += 0x23
 
   def GetPatch(self) -> Patch:
-    self._AddTextSpeedToPatchIfNeeded()
-    self._AddLevelNameToPatchIfNeeded()
+    self._MaybeAddTextSpeedToPatch()
+    self._MaybeAddLevelNameToPatch()
     self.DoTextyStuff()
     self.RandomizeTitleStory()
     return self.patch
 
-  def _AddTextSpeedToPatchIfNeeded(self) -> None:
-    logging.debug("Updating text speed.")
+  def _MaybeAddTextSpeedToPatch(self) -> None:
+    if self.settings.IsEnabled(flags.SpeedUpText):
+      self.patch.AddData(self.TEXT_SPEED_ADDRESS, [self.FAST_TEXT_SPEED_SETTING])
 
-    converted_text_speed = TextSpeed.NORMAL
-    if self.text_speed == 'normal':
+  def _MaybeAddLevelNameToPatch(self) -> None:
+    if not self.settings.IsEnabled(flags.RandomizeLevelText):
       return
-    if self.text_speed == 'random':
-      converted_text_speed = random.choice(list(TextSpeed))
-    else:
-      converted_text_speed = TextSpeed[self.text_speed.upper()]
-
-    self.patch.AddData(self.TEXT_SPEED_ADDRESS, [int(converted_text_speed)])
-
-  def _AddLevelNameToPatchIfNeeded(self) -> None:
-    assert len(self.phrase) == 6, "The level prefix must be six characters long."
+    phrase = random_level_text = random.choice([
+        'house-',
+        'abode-',
+        'block-',
+        '_cage-',
+        '_home-',
+        '_maze-',
+        'shape-',
+        'kitty-',
+        'vault-',
+        'thing-',
+        'world-',
+        '_land-',
+        'puppy-',
+        '_area-',
+        'roost-',
+        '_hole-',
+        '_cave-',
+    ])
     if FRENCH_MODE:
-      self.phrase = random.choice(["monde-", "terre-"])  #, "tempe-"])
-    if self.phrase.lower() == 'level-':
-      return  # No need to replace the existing text with the same text.
-    assert len(self.__ascii_string_to_bytes(self.phrase)) == 6
-    print(self.phrase)
-    self.patch.AddData(self.TEXT_LEVEL_ADDRESS, self.__ascii_string_to_bytes(self.phrase))
-    print(self.__ascii_string_to_bytes(self.phrase))
+      phrase = random.choice(["monde-", "terre-"])  #, "tempe-"])
+    assert len(self.__ascii_string_to_bytes(phrase)) == 6
+    self.patch.AddData(self.TEXT_LEVEL_ADDRESS, self.__ascii_string_to_bytes(phrase))
 
   def __ascii_string_to_bytes(self, phrase: str) -> List[int]:
     """Convert the string to a form the game can understand."""
@@ -465,7 +435,7 @@ class TextDataTable():
   def NewGenerateTestingString(self, num: int) -> List[int]:
     hint_type = HintType(num)
     if hint_type == HintType.LETTER_CAVE:
-      hint = self.letter_cave_text
+      hint = self.data_table.letter_cave_text
     elif (num in range(19, 34) and not hint_type in [HintType.BOMB_UPGRADE, HintType.MUGGER] or
           num in range(10, 14)):
       hint = self.hints.pop(0)

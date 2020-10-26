@@ -127,7 +127,7 @@ class ItemRandomizer():
     self.item_shuffler.ShuffleItems()
 
   def WriteItemsAndLocationsToTable(self) -> None:
-    self.hints = []
+    self.data_table.item_hints = []
     for (location, item) in self.item_shuffler.GetAllLocationAndItemData():
       if location.IsLevelRoom():
         print(item)
@@ -151,7 +151,7 @@ class ItemRandomizer():
         tbr += "IN LEVEL SEVEN"
       else:
         tbr += random.choice(["OFF", "DOWN", "DEEP"])
-        tbr += " IN LEVEL %d" % level_num.value
+        tbr += "IN LEVEL %d" % level_num.value
     else:
       tbr += "IN THE OVERWORLD"
     tbr += '|'
@@ -164,10 +164,12 @@ class ItemRandomizer():
       else:
         tbr += "A MAJOR BOSS DEFENDS A"
     else:
-      if location.GetCaveType() in [
-          CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C, CaveType.SHOP_D
-      ]:
+      if location.GetCaveType() in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C]:
         tbr += "A VENDOR IS SELLING A"
+      elif location.GetCaveType() == CaveType.SHOP_D:
+        tbr += "a specialty shop has a"
+      elif location.GetCaveType() == CaveType.POTION_SHOP:
+        tbr += "see a pharmacist for a"
       elif location.GetCaveType() == CaveType.LETTER_CAVE:
         tbr += "A letter writer has a"
       elif location.GetCaveType() == CaveType.WHITE_SWORD_CAVE:
@@ -183,7 +185,7 @@ class ItemRandomizer():
     tbr += '|'
     tbr += item.GetHintText()
     print(tbr)
-    self.data_table.hints.append(tbr)
+    self.data_table.item_hints.append(tbr)
 
 
 class ItemShuffler():
@@ -219,8 +221,8 @@ class ItemShuffler():
     if self.settings.IsEnabled(flags.ProgressiveItems):
       if item == Item.RED_CANDLE:
         item = Item.BLUE_CANDLE
-      # elif item == Item.RED_RING:
-      #   item = Item.BLUE_RING
+      elif item == Item.RED_RING:
+        item = Item.BLUE_RING
       elif item == Item.SILVER_ARROWS:
         item = Item.WOOD_ARROWS
       elif item == Item.WHITE_SWORD:
