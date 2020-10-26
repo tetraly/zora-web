@@ -1195,30 +1195,37 @@ class DungeonGenerator:
 
   def RandomizeOverworldCaves(self) -> None:
     destinations: List[Union[LevelNum, CaveType]] = []
+    screen_nums = Screen.ALL_SCREENS_WITH_1Q_CAVES.copy()
     any_road_screen_nums: List[int] = []
     recorder_screen_nums: List[int] = [-1] * 8
 
-    all_screen_nums = Screen.ALL_SCREENS_WITH_1Q_CAVES.copy()
-    all_screen_nums.sort()
-    for screen_num in all_screen_nums:
-      dest = self.data_table.GetCaveDestination(screen_num)
-      destinations.append(dest)
+    all_screens = Screen.ALL_SCREENS_WITH_1Q_CAVES.copy()
+    all_screens.sort()
+    for screen in all_screens:
+      destinations.append(self.data_table.GetCaveDestination(screen))
     random.shuffle(destinations)
+
+    assert len(destinations) == len(screen_nums)
 
     # Assign Wood Sword cave to an open cave
     wood_sword_cave_screen_num = random.choice(Screen.POSSIBLE_FIRST_WEAPON_SCREENS)
-    self.data_table.SetCaveDestination(wood_sword_cave_screen_num, CaveType.WOOD_SWORD_CAVE)
-    screen_nums = Screen.ALL_SCREENS_WITH_1Q_CAVES.copy()
-    assert len(destinations) == len(screen_nums)
     screen_nums.remove(wood_sword_cave_screen_num)
     destinations.remove(CaveType.WOOD_SWORD_CAVE)
+    self.data_table.SetCaveDestination(wood_sword_cave_screen_num, CaveType.WOOD_SWORD_CAVE)
     assert len(destinations) == len(screen_nums)
+    print(destinations)
+    print(screen_nums)
 
-    while len(any_road_screen_nums) < 4:
+    while True:
       random.shuffle(screen_nums)
       if screen_nums[0] not in [0x03, 0x07, 0x0A, 0x1E, 0x6D]:  # From Sinistral's research
-        any_road_screen_nums.append(screen_nums.pop(0))
+        any_road_screen_num = screen_nums.pop(0)
+        any_road_screen_nums.append(any_road_screen_num)
         destinations.remove(CaveType.ANY_ROAD_CAVE)
+        self.data_table.SetCaveDestination(any_road_screen_num, CaveType.ANY_ROAD_CAVE)
+        assert len(destinations) == len(screen_nums)
+      if len(any_road_screen_nums) == 4:
+        break
     assert len(destinations) == len(screen_nums)
 
     self.data_table.location_hints = []
