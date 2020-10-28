@@ -12,7 +12,6 @@ from .item import Item
 from .location import Location
 from .settings import Settings
 
-
 #class NotAllItemsWereShuffledAndIDontKnowWhyException(Exception):
 #  pass
 
@@ -265,10 +264,11 @@ class ItemShuffler():
           self.per_level_item_location_lists[level_or_cave_num]) - len(
               self.per_level_item_lists[level_or_cave_num])
       try:
-        while (CaveType(level_or_cave_num) in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C]
-               and self.item_num_list[0] in [
-                   Item.WOOD_ARROWS, Item.WOOD_SWORD, Item.BOOMERANG, Item.BLUE_CANDLE, Item.BLUE_RING
-               ]):
+        while (
+            CaveType(level_or_cave_num) in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C] and
+            self.item_num_list[0] in [
+                Item.WOOD_ARROWS, Item.WOOD_SWORD, Item.BOOMERANG, Item.BLUE_CANDLE, Item.BLUE_RING
+            ]):
           log.info("Shufflin!")
           random.shuffle(self.item_num_list)
         while (CaveType(level_or_cave_num) == CaveType.WOOD_SWORD_CAVE and

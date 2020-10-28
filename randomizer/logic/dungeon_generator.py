@@ -18,18 +18,18 @@ from .room_type import RoomType
 from .settings import Settings
 
 COLORS: Dict[int, "Fore"] = {
-        0: Fore.WHITE,
-        1: Fore.CYAN,
-        2: Fore.BLUE,
-        3: Fore.GREEN,
-        4: Fore.YELLOW,
-        5: Fore.MAGENTA,
-        6: Fore.RED,
-        7: Fore.WHITE
-    }
-    
-    
+    0: Fore.WHITE,
+    1: Fore.CYAN,
+    2: Fore.BLUE,
+    3: Fore.GREEN,
+    4: Fore.YELLOW,
+    5: Fore.MAGENTA,
+    6: Fore.RED,
+    7: Fore.WHITE
+}
+
 GRID_B_LEVEL_NUMBERS = [LevelNum.LEVEL_7, LevelNum.LEVEL_8, LevelNum.LEVEL_9]
+
 
 def GetNextRoomNum(room_num: RoomNum, direction: Direction) -> RoomNum:
   assert room_num in Range.VALID_ROOM_NUMBERS
@@ -56,7 +56,7 @@ OK_BORDER_TYPES_FOR_TRANSPORT_STAIRCASE = [
 
 class LevelPlanGenerator:
 
-  def __init__(self, data_table: DataTable, settings:Settings) -> None:
+  def __init__(self, data_table: DataTable, settings: Settings) -> None:
     self.data_table = data_table
     self.settings = settings
 
@@ -359,14 +359,14 @@ class LevelPlanGenerator:
 
     # TODO: Make this a self thing from the start (and put the initialization in the constructor)
     if self.settings.debug_mode:
-     for a, b in level_plan.items():
-      if isinstance(b, dict):
-        print(a, ":")
-        # Again iterate over the nested dictionary
-        for c, d in b.items():
-          print(' ', c, ': ', d)
-      else:
-        print(a, ':', b)
+      for a, b in level_plan.items():
+        if isinstance(b, dict):
+          print(a, ":")
+          # Again iterate over the nested dictionary
+          for c, d in b.items():
+            print(' ', c, ': ', d)
+        else:
+          print(a, ':', b)
     return level_plan
 
 
@@ -392,7 +392,6 @@ class DungeonGenerator:
     self.room_grid_a: List[Room] = []
     self.room_grid_b: List[Room] = []
     self.item_position_dict: Dict[LevelNum, Dict[RoomType, int]] = {}
-    
 
   def GenerateItemPositions(self) -> None:
     # For each level, pick four random item drop positions such that at least one will be a valid
@@ -623,9 +622,9 @@ class DungeonGenerator:
         room = self._GetRoom(RoomNum(16 * row + col), level_num)
         print(self._GetColorForPrinting(RoomNum(16 * row + col), level_num), end='')
         #print('| %10s |' % "", end='')
-        
+
         #print('| %10s |' % room.GetItem().GetShortName(), end='')
-        print('| %7s %2d |' % (room.GetDebugString()[:7],  room.GetRoomAction()), end='')
+        print('| %7s %2d |' % (room.GetDebugString()[:7], room.GetRoomAction()), end='')
       print('')
       for col in range(col_min, col_max + 1):
         room = self._GetRoom(RoomNum(16 * row + col), level_num)

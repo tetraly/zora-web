@@ -4,7 +4,7 @@ import random
 from typing import List
 from .data_table import DataTable
 from .dungeon_generator import DungeonGenerator
-from .item_randomizer import ItemRandomizer #, NotAllItemsWereShuffledAndIDontKnowWhyException
+from .item_randomizer import ItemRandomizer  #, NotAllItemsWereShuffledAndIDontKnowWhyException
 #from .level_generator import LevelGenerator
 from .patch import Patch
 from .settings import Settings
@@ -38,11 +38,11 @@ class ZoraRandomizer():
       while True:
         counter += 1
         log.info("Re-randomizing items")
-#        try:
+        #        try:
         self.item_randomizer.Randomize()
-#        except NotAllItemsWereShuffledAndIDontKnowWhyException:
-#          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
-#          break
+        #        except NotAllItemsWereShuffledAndIDontKnowWhyException:
+        #          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
+        #          break
         log.info("Back to Validating")
 
         if self.validator.IsSeedValid():

@@ -87,10 +87,12 @@ class PlusOrMinus4HP(Flag):
   description = 'Enemies may have up to four more or fewer hit points than usual.'
   value = 'H4'
 
+
 class Minus2HP(Flag):
   name = 'Minus 2 HP'
   description = 'Enemies will have up to two fewer HP than usual.'
   value = 'Ht'
+
 
 class Minus4HP(Flag):
   name = 'Minus 4 HP'
@@ -214,20 +216,21 @@ class FrenchCommunityHints(Flag):
   modes = ['standard']
   value = 'Xf'
 
+
 class ExtraCustomizations(Flag):
-    name = 'Customization settings that don\'t materially affect gameplay.'
-    value = '@X'
-    options = [
-        DisableBeeping,
-        DisableLightFlashes,
-        EnableSelectSwap,
-        FrenchCommunityHints,
-        RandomizeLevelText,
-    ]
+  name = 'Customization settings that don\'t materially affect gameplay.'
+  value = '@X'
+  options = [
+      DisableBeeping,
+      DisableLightFlashes,
+      EnableSelectSwap,
+      FrenchCommunityHints,
+      RandomizeLevelText,
+  ]
 
 
 class ExtrasCategory(FlagCategory):
-  name = 'Extra customization settings' 
+  name = 'Extra customization settings'
   flags = [
       ExtraCustomizations,
   ]
