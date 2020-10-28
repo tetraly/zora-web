@@ -267,7 +267,7 @@ class ItemShuffler():
       try:
         while (CaveType(level_or_cave_num) in [CaveType.SHOP_A, CaveType.SHOP_B, CaveType.SHOP_C]
                and self.item_num_list[0] in [
-                   Item.WOOD_ARROWS, Item.WOOD_SWORD, Item.BOOMERANG, Item.BLUE_CANDLE
+                   Item.WOOD_ARROWS, Item.WOOD_SWORD, Item.BOOMERANG, Item.BLUE_CANDLE, Item.BLUE_RING
                ]):
           log.info("Shufflin!")
           random.shuffle(self.item_num_list)

@@ -34,7 +34,6 @@ class ZoraRandomizer():
       self.data_table.ResetToVanilla()
       self.dungeon_generator = DungeonGenerator(self.data_table)
       self.dungeon_generator.Generate()
-      random.seed(12345)
       counter = 0
       while True:
         counter += 1
@@ -50,35 +49,6 @@ class ZoraRandomizer():
           done = True
           break
         if counter > 1000:
-          break
-
-  def OldRandomize(self) -> None:
-    random.seed(self.seed)
-
-    done = False
-    while not done:
-      self.data_table.ResetToVanilla()
-      self.level_generator = LevelGenerator(self.data_table)
-      self.level_generator.Generate()
-
-      counter = 0
-      while True:
-        counter += 1
-
-        log.info("Re-randomizing items")
-
-        try:
-          self.item_randomizer.Randomize()
-        except NotAllItemsWereShuffledAndIDontKnowWhyException:
-          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
-          break
-
-        log.info("Back to Validating")
-
-        if self.validator.IsSeedValid():
-          done = True
-          break
-        if counter > 100:
           break
 
   def GetPatch(self) -> Patch:
@@ -112,13 +82,13 @@ class ZoraRandomizer():
     # patch.AddData(0x112D7, [0xA9, 0xDF, 0x99, 0xB3, 0x04, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA])
 
     # Make red/black keese boomerang-only
-    patch.AddData(0x10448, [0xA9, 0xFD, 0x99, 0xB3, 0x04])
+    # patch.AddData(0x10448, [0xA9, 0xFD, 0x99, 0xB3, 0x04])
 
     # A9 E2      LDA #$E2. -- E2 is damage types
     # 99 B3 04   STA $04B3,Y
 
     # Manhandala's damage type bit. Vanilla E2. Make wand only
-    patch.AddData(0x12138, [0xEF])
+    # patch.AddData(0x12138, [0xEF])
 
     # Temporary L2 PB change
     patch.AddData(0x14C90, [0xAD, 0x65, 0x06, 0xD0, 0xA4])
@@ -170,7 +140,7 @@ class ZoraRandomizer():
       # Turn off low health warning
       patch.AddData(0x1ED33, [0x00])
 
-    if self.settings.IsEnabled(flags.DisableFlashing):
+    if self.settings.IsEnabled(flags.DisableLightFlashes):
       patch.AddData(0x1A283, [0x18])  # Disable triforce flashing
       patch.AddData(0x6A3B, [0x60])  # Disable bomb explosion flashing
 
@@ -224,7 +194,7 @@ class ZoraRandomizer():
 
   def RandomizeHP(self) -> Patch:
     hp_setting = self.settings.get_flag_choice(flags.EnemyHP)
-    if hp_setting is None or hp_setting == flags.VanillaHP:
+    if hp_setting is None:
       return Patch()
 
     vanilla_hp_bytes = [

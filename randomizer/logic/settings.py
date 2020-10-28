@@ -6,7 +6,7 @@ from .flags import Flag, CATEGORIES
 
 class Settings:
 
-  def __init__(self, mode: str = 'open', debug_mode: bool = False, flag_string: str = '') -> None:
+  def __init__(self, mode: str = 'standard', debug_mode: bool = False, flag_string: str = '') -> None:
     """Provide either form data fields or flag string to set flags on creation.
 
         Args:
@@ -20,23 +20,19 @@ class Settings:
     # If flag string provided, make fake form data based on it to parse.
     flag_data: Dict[str, List[str]] = {}
     for flag in flag_string.strip().split():
-      #if flag.startswith('-'):
-      #    # Solo flag that begins with a dash.
-      #    flag_data[flag] = True
-      #elif flag:
-      # Flag that may have a subsection of choices and/or options.
-      if flag[0] not in flag_data:
+      if flag.startswith('-'):
+        # Solo flag that begins with a dash.
+        flag_data[flag] = True
+      elif flag[0] not in flag_data:
         flag_data[flag[0]] = []
       flag_data[flag[0]] += [c for c in flag[1:]]
     # Get flags from form data.
     for category in CATEGORIES:
       for flag2 in category.flags:
         self._check_flag_from_form_data(flag2, flag_data)
-    log.info("Enabled flags:")
-    log.info(self._enabled_flags)
 
     # Sanity check.
-    if debug_mode:
+    if True: # debug_mode:
       provided_parts = set(flag_string.strip().split())
       parsed_parts = set(self.flag_string.split())
       if provided_parts != parsed_parts:

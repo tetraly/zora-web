@@ -40,11 +40,11 @@ COMMUNITY_HINTS = {
         "BANK ERROR IN|YOUR FAVOR|COLLECT ...",
         "YOU HAVE WON|SECOND PRIZE IN|A BEAUTY CONTEST",
         "I'd shell out|good rupees|for a conch.",
-        "There’s always|money in the|Banana Stand",
+        "THERE'S ALWAYS|MONEY IN THE|BANANA STAND",
         "TAKE YOUR BLOOD|MONEY AND GO.",
         "WOOOOOAAAH!|THANK YOU COKE GAMING!",
         "YOU GOT IT FOR FREE|ARE YOU HAPPY?",
-        "We're in the money|We're in the money",
+        "WE'RE IN THE MONEY|WE'RE IN THE MONEY",
     ],
     HintType.DOOR_REPAIR: [
         "DON'T AWOO.|350 RUPEE PENALTY.",
@@ -68,7 +68,7 @@ COMMUNITY_HINTS = {
         "YOU GOTTA HAVE HEART",
         "PLEASE SELECT ITEM",
         "TAKE NEITHER ITEM.|JUST LEAVE.",
-        "Cake or Death?",
+        "CAKE OR DEATH?",
         "eenie, meenie,|miney, mo",
         "Limit one per customer",
     ],
@@ -101,7 +101,7 @@ COMMUNITY_HINTS = {
     HintType.SHOP_2: [
         "AS SEEN ON TV",
         "SORRY, WE'RE ALL OUT|OF DISINFECTING WIPES"
-        "USE DISCOUNT CODE|\"ZORA\" FOR 10 PERCENT|OFF YOUR NEXT ORDER",
+        "USE DISCOUNT CODE|'ZORA' FOR 10 PERCENT|OFF YOUR NEXT ORDER",
         "WHAT KIND OF|CHEESE SHOP|IS THIS?",
         "AND IT CAN BE YOURS|IF THE PRICE IS RIGHT!",
         "SHOP LOCAL, SUPPORT|SMALL BUSINESSES",
@@ -325,7 +325,7 @@ class TextDataTable():
 
   def RandomizeTitleStory(self) -> None:
     addr = 0x1A528
-    for line in RICK_ROLL_STORY_TEXT:
+    for line in STAR_WARS_STORY_TEXT:
       log.info("%x" % addr)
       if addr >= 0x1A8B3:
         log.warning("UH OH 1!")

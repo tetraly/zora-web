@@ -82,7 +82,7 @@ class Validator():
       for position_num in [1, 2, 3]:
         location = Location(cave_type=cave_type, position_num=position_num)
         if self.data_table.GetCaveItem(location).IsAnIncrementalUpgradeItem():
-          log.debug("  Found %s in %s" % (self.data_table.GetCaveItem(location), cave_type))
+          log.warning("  Found %s in %s" % (self.data_table.GetCaveItem(location), cave_type))
           return True
     return False
 

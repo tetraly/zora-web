@@ -25,6 +25,8 @@ COMMAND_LINE_FLAGS = flags.FLAGS
 
 
 def main(unused_argv: Any) -> None:
+  print("Seed is %s" % COMMAND_LINE_FLAGS.seed)
+  print("Flag string is %s" % COMMAND_LINE_FLAGS.flag_string)
   settings = Settings(flag_string=COMMAND_LINE_FLAGS.flag_string)
   randomizer = ZoraRandomizer(COMMAND_LINE_FLAGS.seed, settings)
   randomizer.Randomize()

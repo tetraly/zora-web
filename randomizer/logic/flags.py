@@ -72,44 +72,41 @@ class AvoidHardCombat(Flag):
   name = 'Avoid hard combat'
   description = 'Item placement logic won\'t require "hard" combat without a ring and sword upgrade'
   inverse_description = "(Item placement logic won't be modified for difficulty.)"
-  value = 'Hc'
+  value = 'C'
   modes = ['standard']
 
 
 class PlusOrMinus2HP(Flag):
   name = 'Plus or Minus 2 Enemy HP'
-  description = 'Enemies may have up to two more or less hit points than usual.'
-  value = 'Hp2'
+  description = 'Enemies may have up to two more or fewer hit points than usual.'
+  value = 'H2'
 
 
 class PlusOrMinus4HP(Flag):
-  name = 'PM4'
-  value = 'Hp4'
-
+  name = 'Plus or Minus 4 Enemy HP'
+  description = 'Enemies may have up to four more or fewer hit points than usual.'
+  value = 'H4'
 
 class Minus2HP(Flag):
-  name = 'M2'
-  value = 'Hm2'
-
+  name = 'Minus 2 HP'
+  description = 'Enemies will have up to two fewer HP than usual.'
+  value = 'Ht'
 
 class Minus4HP(Flag):
-  name = 'M4'
-  value = 'Hm4'
+  name = 'Minus 4 HP'
+  description = 'Enemies will have up to four fewer HP than usual.'
+  value = 'Hm'
 
 
 class ZeroHP(Flag):
   name = 'Zero HP enemies'
+  description = 'Enemies will have no HP and die in one hit.'
   value = 'Hz'
 
 
-class VanillaHP(Flag):
-  name = 'Vanilla HP enemeis'
-  value = 'Hv'
-
-
 class EnemyHP(Flag):
-  name = 'Enemy HP'
-  description = "TODO add something about HP here"
+  name = 'Randomize Enemy HP'
+  description = "Randomize or Zero out HP"
   modes = ['standard']
   value = '@H'
   choices = [
@@ -118,7 +115,6 @@ class EnemyHP(Flag):
       Minus2HP,
       Minus4HP,
       ZeroHP,
-      VanillaHP,
   ]
 
 
@@ -157,7 +153,7 @@ class FastDungeonTransitions(Flag):
   description = 'Makes dungeon room transition times approximately two times faster.'
   inverse_description = "(Keeps dungeon room transition speed as it is in the vanilla game)"
   modes = ['standard']
-  value = 'Fs'
+  value = 'F'
 
 
 class FastText(Flag):
@@ -165,7 +161,7 @@ class FastText(Flag):
   description = 'Makes NPC text scroll much more quickly.'
   inverse_description = "(Keeps text speed as it is in the vanilla game)"
   modes = ['standard']
-  value = 'Ft'
+  value = 'T'
 
 
 class SpeedupsCategory(FlagCategory):
@@ -187,12 +183,12 @@ class DisableBeeping(Flag):
   value = 'Xb'
 
 
-class DisableFlashing(Flag):
-  name = "Disable Flashing"
+class DisableLightFlashes(Flag):
+  name = "Disable Light Flashes"
   description = "The background won't brightly flash when a bomb explodes or a triforce is obtained."
   inverse_description = "(Flashing will occur as it does in the vanilla game.)"
   modes = ['standard']
-  value = 'Xf'
+  value = 'Xl'
 
 
 class RandomizeLevelText(Flag):
@@ -200,7 +196,7 @@ class RandomizeLevelText(Flag):
   description = 'Chooses a random value for the "level-#" text displayed in dungeons.'
   inverse_description = "(Keeps 'LEVEL' text when in levels)"
   modes = ['standard']
-  value = 'Xl'
+  value = 'Xt'
 
 
 class EnableSelectSwap(Flag):
@@ -216,17 +212,24 @@ class FrenchCommunityHints(Flag):
   description = "Community hints will be in French and come from the Zelda 1 Francophone community."
   inverse_description = "(All hints will be written in English.)"
   modes = ['standard']
-  value = 'Xfr'
+  value = 'Xf'
+
+class ExtraCustomizations(Flag):
+    name = 'Customization settings that don\'t materially affect gameplay.'
+    value = '@X'
+    options = [
+        DisableBeeping,
+        DisableLightFlashes,
+        EnableSelectSwap,
+        FrenchCommunityHints,
+        RandomizeLevelText,
+    ]
 
 
 class ExtrasCategory(FlagCategory):
-  name = 'Extra settings'
+  name = 'Extra customization settings' 
   flags = [
-      DisableBeeping,
-      DisableFlashing,
-      RandomizeLevelText,
-      EnableSelectSwap,
-      FrenchCommunityHints,
+      ExtraCustomizations,
   ]
 
 
