@@ -4,8 +4,8 @@ import random
 from typing import List
 from .data_table import DataTable
 from .dungeon_generator import DungeonGenerator
-from .item_randomizer import ItemRandomizer, NotAllItemsWereShuffledAndIDontKnowWhyException
-from .level_generator import LevelGenerator
+from .item_randomizer import ItemRandomizer #, NotAllItemsWereShuffledAndIDontKnowWhyException
+#from .level_generator import LevelGenerator
 from .patch import Patch
 from .settings import Settings
 from .text_data_table import TextDataTable
@@ -21,7 +21,7 @@ class ZoraRandomizer():
     self.seed = seed
     self.settings = settings
     self.data_table = DataTable()
-    self.level_generator = LevelGenerator(self.data_table)
+    #self.level_generator = LevelGenerator(self.data_table)
     self.item_randomizer = ItemRandomizer(self.data_table, self.settings)
     self.validator = Validator(self.data_table, self.settings)
     log.set_verbosity(log.WARNING)
@@ -32,17 +32,17 @@ class ZoraRandomizer():
     done = False
     while not done:
       self.data_table.ResetToVanilla()
-      self.dungeon_generator = DungeonGenerator(self.data_table)
+      self.dungeon_generator = DungeonGenerator(self.data_table, self.settings)
       self.dungeon_generator.Generate()
       counter = 0
       while True:
         counter += 1
         log.info("Re-randomizing items")
-        try:
-          self.item_randomizer.Randomize()
-        except NotAllItemsWereShuffledAndIDontKnowWhyException:
-          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
-          break
+#        try:
+        self.item_randomizer.Randomize()
+#        except NotAllItemsWereShuffledAndIDontKnowWhyException:
+#          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
+#          break
         log.info("Back to Validating")
 
         if self.validator.IsSeedValid():

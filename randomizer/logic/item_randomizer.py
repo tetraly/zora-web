@@ -13,8 +13,8 @@ from .location import Location
 from .settings import Settings
 
 
-class NotAllItemsWereShuffledAndIDontKnowWhyException(Exception):
-  pass
+#class NotAllItemsWereShuffledAndIDontKnowWhyException(Exception):
+#  pass
 
 
 class ItemRandomizer():
@@ -285,8 +285,9 @@ class ItemShuffler():
       if level_or_cave_num in Range.VALID_LEVEL_NUMBERS:  # Technically this could be for OW and caves too
         random.shuffle(self.per_level_item_lists[level_or_cave_num])
 
-    if self.item_num_list:
-      raise NotAllItemsWereShuffledAndIDontKnowWhyException()
+    if self.settings.debug_mode and self.item_num_list:
+      log.fatal("NotAllItemsWereShuffledAndIDontKnowWhyException()")
+      exit()
 
   def GetAllLocationAndItemData(self) -> Iterable[Tuple[Location, Item]]:
     for level_num_or_cave_type in Range.VALID_LEVEL_NUMS_AND_CAVE_TYPES:
