@@ -4,8 +4,7 @@ import random
 from typing import List
 from .data_table import DataTable
 from .dungeon_generator import DungeonGenerator
-from .item_randomizer import ItemRandomizer  #, NotAllItemsWereShuffledAndIDontKnowWhyException
-#from .level_generator import LevelGenerator
+from .item_randomizer import ItemRandomizer
 from .patch import Patch
 from .settings import Settings
 from .text_data_table import TextDataTable
@@ -17,17 +16,15 @@ VERSION = '1.0'
 
 class ZoraRandomizer():
 
-  def __init__(self, seed: int, settings: Settings) -> None:
-    self.seed = seed
+  def __init__(self, settings: Settings) -> None:
     self.settings = settings
     self.data_table = DataTable()
-    #self.level_generator = LevelGenerator(self.data_table)
-    self.item_randomizer = ItemRandomizer(self.data_table, self.settings)
     self.validator = Validator(self.data_table, self.settings)
+    self.item_randomizer = ItemRandomizer(self.data_table, self.settings)
     log.set_verbosity(log.WARNING)
 
   def Randomize(self) -> None:
-    random.seed(self.seed)
+    random.seed(self.settings.seed)
 
     done = False
     while not done:
@@ -38,13 +35,8 @@ class ZoraRandomizer():
       while True:
         counter += 1
         log.info("Re-randomizing items")
-        #        try:
         self.item_randomizer.Randomize()
-        #        except NotAllItemsWereShuffledAndIDontKnowWhyException:
-        #          log.error("NotAllItemsWereShuffledAndIDontKnowWhyException")
-        #          break
         log.info("Back to Validating")
-
         if self.validator.IsSeedValid():
           done = True
           break
@@ -53,7 +45,6 @@ class ZoraRandomizer():
 
   def GetPatch(self) -> Patch:
     patch = self.data_table.GetPatch()
-
     patch += self.RandomizeHP()
     # Old Zero HP code
     # zeros: List[int] = []

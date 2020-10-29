@@ -43,7 +43,6 @@ COMMUNITY_HINTS = {
         "THERE'S ALWAYS|MONEY IN THE|BANANA STAND",
         "TAKE YOUR BLOOD|MONEY AND GO.",
         "WOOOOOAAAH!|THANK YOU COKE GAMING!",
-        "YOU GOT IT FOR FREE|ARE YOU HAPPY?",
         "WE'RE IN THE MONEY|WE'RE IN THE MONEY",
     ],
     HintType.DOOR_REPAIR: [
@@ -122,29 +121,16 @@ COMMUNITY_HINTS = {
         "YOU KNOW BAGU?|THEN I WILL HELP|YOU CROSS",
         "WELCOME TO|WARP ZONE",
         "BE CAREFUL, STAIRS|ARE ALWAYS UP TO|SOMETHING",
-        "TRAVELLING TOO MUCH?|TRY A ZOOM MEETING",
         "MY ADVICE? TAKE THE|ROAD LESS TRAVELLED",
         "IN CASE OF EMERGENCY|PLEASE USE STAIRWAYS",
         "THIS IS A|LOST WOODS-BOUND|4 EXPRESS TRAIN",
     ],
-    HintType.PAY_ME: [
+    HintType.HINT_SHOP: [
         "ARE THESE HINTS|VANILLA? BUY ONE|TO FIND OUT",
         "HEY! LISTEN!",
         "I HAVE APPROXIMATE|KNOWLEDGE OF|MANY THINGS",
+        "YOU ARE TECHNICALLY|CORRECT. THE BEST|KIND OF CORRECT",
     ],
-    HintType.PAY_ANSWER_1: [
-        "YES",
-        "YES. YES THEY ARE.",
-        "NO",
-        "I DON'T THINK SO",
-        "MAYBE?",
-        "KINDA?",
-        "WOW, YOU'RE RICH!",
-        "OUTLOOK UNCLEAR|COME BACK LATER",
-    ],
-    HintType.PAY_ANSWER_2: ["I DON'T THINK SO?",],
-    HintType.PAY_ANSWER_3: ["MAYBE?",],
-    HintType.PAY_ANSWER_4: ["YES. YES THEY ARE.",],
     HintType.HUNGRY_ENEMY: [
         "grumble grumble ...|Seriously, you were|supposed to bring food",
         "OM NOM NOM NOM TIME?",
@@ -161,6 +147,7 @@ COMMUNITY_HINTS = {
         "If you were a burrito,|what kind of a|burrito would you be?",
         "I am on a seafood|diet. Every time|I see food, I eat it.",
         "The soup is|for my family.",
+        "I'm a vegetarian.|Don't bring meat in|here or I'm leaving!",
     ],
     HintType.ENGLISH_COMMUNITY_HINT: [
         "WHAT'S WORLD RECORD|FOR THIS SEED?",
@@ -225,7 +212,6 @@ COMMUNITY_HINTS = {
     ],
     HintType.TRIFORCE_CHECK: [
         "MASK OR FACE COVERING|REQUIRED FOR ENTRY",
-        "PLEASE SUGGEST MORE|TRIFORCE CHECK QUOTES|IN THE ZORA DISCORD",
         "IS THIS A|DOKI DOKI PANIC|REMAKE?",
         "One does not|simply walk into|Death Mountain",
         "YOU SHALL NOT PASS!",
@@ -235,12 +221,10 @@ COMMUNITY_HINTS = {
     ],
     HintType.MUGGER: [
         "GENDER ISN'T BINARY|BUT THIS CHOICE IS",
-        "SUGGEST MUGGER QUOTES|IN THE ZORA DISCORD|PLEASE!",
         "I'M SORRY,|WE DON'T|TAKE DISCOVER",
         "USE E-Z PASS TO|SAVE TIME PAYING TOLLS",
         "FOR YOUR CONVENIENCE|WE ACCEPT MULTIPLE|PAYMENT METHODS",
-        "TICKETS, PLEASE!",
-        "GOTTA PAY TO PLAY",
+        "GOTTA PAY TO PLAY!",
         "PLEASE INSERT COIN|TO CONTINUE"
         "I KNOW ...|I DON'T LIKE IN-APP|PURCHASES EITHER",
     ],
@@ -416,8 +400,8 @@ class TextDataTable():
   def DoTextyStuff(self) -> None:
     addresses: List[int] = []
     for n in range(19):
-      addresses.append(0x404C + n * 0x45)
-    for n in range(19):
+      addresses.append(0x4050 + n * 0x45)
+    for n in range(20):
       addresses.append(0x7770 + n * 0x45)
 
     counter = 0
@@ -434,7 +418,7 @@ class TextDataTable():
     if hint_type == HintType.LETTER_CAVE:
       hint = self.data_table.letter_cave_text
     elif (num in range(19, 34) and not hint_type in [HintType.BOMB_UPGRADE, HintType.MUGGER] or
-          num in range(10, 14)):
+          num in range(10, 14) or num in range(38, 40)):
       hint = self.hints.pop(0)
       log.info(hint)
     elif hint_type not in COMMUNITY_HINTS:

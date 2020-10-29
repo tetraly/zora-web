@@ -9,26 +9,30 @@ from randomizer.logic.rom import Rom
 from randomizer.logic.settings import Settings
 
 flags.DEFINE_integer(name='seed', default=0, help='The seed number to initialize RNG with.')
+flags.DEFINE_string(
+    name='flag_string',
+    default='',
+    help='The flags to use when randomizing the game')
+flags.DEFINE_bool(
+  name='debug_mode',
+  default=False,
+  help='Use debug mode with extra print statements and error checking'
+)
 flags.DEFINE_string(name='input_filename',
                     default='',
                     help='The filename of the vanilla ROM to randomize.')
 flags.DEFINE_string(name='output_location',
                     default='',
                     help='The location to put the randomized ROM.')
-flags.DEFINE_string(
-    name='flag_string',
-    default='',
-    help='The flags to use when randomizing the game',
-)
-
 COMMAND_LINE_FLAGS = flags.FLAGS
 
 
 def main(unused_argv: Any) -> None:
   print("Seed is %s" % COMMAND_LINE_FLAGS.seed)
   print("Flag string is %s" % COMMAND_LINE_FLAGS.flag_string)
-  settings = Settings(debug_mode=True, flag_string=COMMAND_LINE_FLAGS.flag_string)
-  randomizer = ZoraRandomizer(COMMAND_LINE_FLAGS.seed, settings)
+  settings = Settings(seed=COMMAND_LINE_FLAGS.seed,  flag_string=COMMAND_LINE_FLAGS.flag_string,mode='standard',
+  debug_mode=COMMAND_LINE_FLAGS.debug_mode)
+  randomizer = ZoraRandomizer(settings)
   randomizer.Randomize()
   patch = randomizer.GetPatch()
 

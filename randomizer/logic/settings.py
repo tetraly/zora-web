@@ -7,9 +7,10 @@ from .flags import Flag, CATEGORIES
 class Settings:
 
   def __init__(self,
+               flag_string: str,
+               seed: int,
                mode: str = 'standard',
-               debug_mode: bool = False,
-               flag_string: str = '') -> None:
+               debug_mode: bool = False) -> None:
     """Provide either form data fields or flag string to set flags on creation.
 
         Args:
@@ -17,6 +18,7 @@ class Settings:
             debug_mode (bool): Debug flag.
             flag_string (str): Flag string if parsing flags from string.
         """
+    self._seed = seed
     self._mode = mode
     self._debug_mode = debug_mode
     self._enabled_flags: Set[Type[Flag]] = set()
@@ -41,7 +43,6 @@ class Settings:
 
   def _check_flag_from_form_data(self, flag: Type[Flag], flag_data: Dict[str, List[str]]) -> None:
     """
-
         Args:
             flag (randomizer.logic.flags.Flag): Flag to check if enabled.
             flag_data (dict): Form data dictionary.
@@ -82,6 +83,10 @@ class Settings:
   @property
   def debug_mode(self) -> bool:
     return self._debug_mode
+
+  @property
+  def seed(self) -> int:
+    return self._seed
 
   def _build_flag_string_part(self, flag: Type[Flag], flag_strings: Dict[str, List[str]]) -> None:
     """

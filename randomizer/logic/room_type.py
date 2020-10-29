@@ -309,7 +309,7 @@ class RoomType(IntEnum):
     # Don't allow item positions that are right in front of doorways
     if col in [5, 6] and row in [0, 6]:
       return False
-    if col in [0, 11] and row == 3:
+    if col in [0, 1, 10, 11] and row == 3:
       return False
 
     return ROOM_DATA[room_type.value][row][col] in [0, 5]
