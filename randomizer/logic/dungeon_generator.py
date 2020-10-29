@@ -650,10 +650,12 @@ class DungeonGenerator:
       for stairway_room_num in self.level_plan[level_num]['transport_stairway_room_nums']:
         log.info("Adding transport staircase %x for level %d" % (stairway_room_num, level_num))
         self.data_table.AddStaircaseRoomNumberForLevel(level_num, stairway_room_num)
-      #self.Print(level_num)
+      if self.settings.debug_mode:
+        self.Print(level_num)
     self.data_table.SetLevelGrid(GridId.GRID_A, self.room_grid_a)
     self.data_table.SetLevelGrid(GridId.GRID_B, self.room_grid_b)
-    #input("done!")
+    if self.settings.debug_mode:
+      input("done!")
 
   def CreateRoomTree(self, level_num: LevelNum) -> None:
     while True:
@@ -1030,7 +1032,7 @@ class DungeonGenerator:
           log.info("Direction in iter %s" % direction)
           log.info("locking dir %s" % border_room.GetLockingDirection())
           log.info(" -> reverse %s" % border_room.GetLockingDirection().Reverse())
-          if direction != border_room.GetLockingDirection():
+          if direction != border_room.GetLockingDirection() and direction != Direction.NORTH:
             log.info("skipping")
             continue
           if border_room.GetWallType(direction) != WallType.SOLID_WALL:
@@ -1143,7 +1145,7 @@ class DungeonGenerator:
         continue
       if bottom_room.GetEnemy() in [
           Enemy.ELDER, Enemy.ELDER_2, Enemy.ELDER_3, Enemy.ELDER_4, Enemy.BOMB_UPGRADER,
-          Enemy.ELDER_6, Enemy.ELDER_8
+          Enemy.ELDER_6, Enemy.ELDER_8, Enemy.MUGGER
       ]:
         continue
       wall_type = random.choice([WallType.OPEN_DOOR, WallType.BOMB_HOLE])
