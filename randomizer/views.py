@@ -147,7 +147,7 @@ class GenerateView(FormView):
         race_mode = bool(data['race_mode'])
 
         # Build game world, randomize it, and generate the patch.
-        randomizer = ZoraRandomizer(seed, Settings(mode, debug_mode, data['flags'] or ''))
+        randomizer = ZoraRandomizer(Settings(seed, data['flags'] or '', mode, debug_mode))
 
         try:
             print("Randomize()")

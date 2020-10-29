@@ -7,8 +7,8 @@ from .flags import Flag, CATEGORIES
 class Settings:
 
   def __init__(self,
-               flag_string: str,
                seed: int,
+               flag_string: str = '',
                mode: str = 'standard',
                debug_mode: bool = False) -> None:
     """Provide either form data fields or flag string to set flags on creation.

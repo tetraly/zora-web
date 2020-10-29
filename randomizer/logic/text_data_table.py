@@ -132,22 +132,17 @@ COMMUNITY_HINTS = {
         "YOU ARE TECHNICALLY|CORRECT. THE BEST|KIND OF CORRECT",
     ],
     HintType.HUNGRY_ENEMY: [
-        "grumble grumble ...|Seriously, you were|supposed to bring food",
-        "OM NOM NOM NOM TIME?",
-        "ARE YOU GOING|TO EAT THAT?",
-        "FEED ME SEYMOUR!",
-        "MUMBLE MUMBLE|SOMETHING ABOUT FOOD"
-        "BUT YOU'RE|STILL HUNGRY ...",
-        "DO YOU HAVE|A VEGAN OPTION?",
-        "ARE YOU MY UBER EATS|DELIVERY CARRIER?",
-        "WE TALK ABOUT FOOD HERE",
+        "grumble grumble ...|Seriously, you were|supposed to bring food", "OM NOM NOM NOM TIME?",
+        "ARE YOU GOING|TO EAT THAT?", "FEED ME SEYMOUR!", "MUMBLE MUMBLE|SOMETHING ABOUT FOOD"
+        "BUT YOU'RE|STILL HUNGRY ...", "DO YOU HAVE|A VEGAN OPTION?",
+        "ARE YOU MY UBER EATS|DELIVERY CARRIER?", "WE TALK ABOUT FOOD HERE",
         "C IS FOR COOKIE|THAT'S GOOD ENOUGH|FOR ME",
         "I'VE HAD ONE, YES.|BUT WHAT ABOUT|SECOND BREAKFAST?",
         "If you find|my lunch,|don't eat it.",
         "If you were a burrito,|what kind of a|burrito would you be?",
-        "I am on a seafood|diet. Every time|I see food, I eat it.",
-        "The soup is|for my family.",
-        "I'm a vegetarian.|Don't bring meat in|here or I'm leaving!",
+        "I am on a seafood|diet. Every time|I see food, I eat it.", "The soup is|for my family.",
+        "I'm a vegetarian.|Don't bring meat in|here or I'm leaving!", "I ONLY CAME FOR CAKE",
+        "THE CAKE IS A LIE"
     ],
     HintType.ENGLISH_COMMUNITY_HINT: [
         "WHAT'S WORLD RECORD|FOR THIS SEED?",
@@ -190,6 +185,11 @@ COMMUNITY_HINTS = {
         "Stop trying to make|fetch happen. It's not|going to happen.",
         "BY YOUR COMMAND",
         "WOW, I DON'T EVEN|KNOW WHAT TO SAY|TO YOU ANYMORE!",
+        "WIT BEYOND MEASURE|IS THE GREATEST|TREASURE",
+        "NO MORE RHYMING|I REALLY MEAN IT!",
+        "IF YOU'RE HAPPY|AND YOU KNOW IT|CLAP YOUR HANDS",
+        "I AM ROOT",
+        "THE WIND FISH|IS GETTING RESTLESS",
     ],
     HintType.BOMB_UPGRADE: [
         "BADA BING|BADA BANG|BADA BOOM",

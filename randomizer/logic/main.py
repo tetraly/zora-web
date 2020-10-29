@@ -1,5 +1,6 @@
 from absl import logging as log
 import math
+import os
 import random
 from typing import List
 from .data_table import DataTable
@@ -127,6 +128,9 @@ class ZoraRandomizer():
         0x60, 0xFF, 0xFF, 0x1E, 0x0A, 0x06, 0x01
     ])
 
+    if self.settings.debug_mode:
+      patch += self.AddRecorderTune()
+
     if self.settings.IsEnabled(flags.DisableBeeping):
       # Turn off low health warning
       patch.AddData(0x1ED33, [0x00])
@@ -198,4 +202,33 @@ class ZoraRandomizer():
       new_hp_bytes.append(self.RandomizeHPByte(vanilla_hp_byte))
     patch = Patch()
     patch.AddData(0x1FB5E, new_hp_bytes)
+    return patch
+
+  def AddRecorderTune(self) -> Patch:
+    patch = Patch()
+#    patch.AddData(0x1B00, [0x20, 0x00, 0xA0])
+#    patch.AddData(0x1B14, [0x20, 0x10, 0xA0])
+#    patch.AddData(0x1B3F, [0x20, 0x10, 0xA0])
+    patch.AddData(
+        0x2010,
+        [0xAD, 0x07, 0x06, 0xC9, 0x10, 0xD0, 0x03, 0xA9, 0x00, 0x60, 0xB9, 0x54, 0x9A, 0x60])
+    patch.AddData(
+        0x2020,
+        [0xAD, 0x07, 0x06, 0xC9, 0x10, 0xD0, 0x04, 0xB9, 0x20, 0xA0, 0x60, 0xB9, 0x55, 0x9A, 0x60])
+
+    # take this out -- just for testing with one seed
+    patch.AddData(
+        0x18629, [0x05])
+    random.seed(1999)
+    tunes = []
+    path = "randomizer/data/recorder/"
+    for maybe_tune in os.listdir(path):
+      if '.bin' in maybe_tune:
+        tunes.append(maybe_tune)
+    tune_filename = random.choice(tunes)
+    tune_data = open(path + tune_filename, "r+b").read()
+    patch.AddData(0x2030, tune_data)
+    print(tunes)
+    print(tune_filename)
+    input("---")
     return patch
