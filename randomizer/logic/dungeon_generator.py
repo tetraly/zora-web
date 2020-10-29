@@ -650,10 +650,10 @@ class DungeonGenerator:
       for stairway_room_num in self.level_plan[level_num]['transport_stairway_room_nums']:
         log.info("Adding transport staircase %x for level %d" % (stairway_room_num, level_num))
         self.data_table.AddStaircaseRoomNumberForLevel(level_num, stairway_room_num)
-      self.Print(level_num)
+      #self.Print(level_num)
     self.data_table.SetLevelGrid(GridId.GRID_A, self.room_grid_a)
     self.data_table.SetLevelGrid(GridId.GRID_B, self.room_grid_b)
-    input("done!")
+    #input("done!")
 
   def CreateRoomTree(self, level_num: LevelNum) -> None:
     while True:
