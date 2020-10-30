@@ -1,13 +1,12 @@
 # ZORA (Zelda One Randomizer for All)
 
+This is the source code repositiory for the ZORA randomizer. For more information and to generate seeds using the web UI, go to https://zora.tetra.ly 
 
-[add text here]
-
-For most users, go to [link] to . If you're a tech-savy user and want to run a ZORA server locally, follow these instructions:
+If you're familiar with programming in Python and want to run ZORA locally or contribute to it, follow these instructions. If you're stuck or have questions, feel free to ask @tetraly on Twitter or tetraly#1131 on Discord.
 
 ## Install Python
 
-This app is written in Python 3, which is sort of implied by the requirements since Django 2.0 and beyond doesn't support Python 2 any longer.  You should install the latest version of Python 3 on your system, [instructions available on the official site](https://www.python.org).
+This app is written in Python 3, which is sort of implied by the requirements since Django 2.0 and beyond no longer support Python 2.  You should install the latest version of Python 3 on your system, [instructions available on the official site](https://www.python.org).
 
 ## Installing required packages
 
@@ -15,7 +14,17 @@ I would recommend making a virtual environment using something like virtualenv, 
 
 ```> pip install -r requirements.txt```
 
-## Setting up
+## Running the command line interface
+
+To create a seed from the command line, run the following command:
+
+```>  python zora_cli.py --input_filename="[ROM filename]" --flag_string="[flags]" --seed=[seed number]```
+
+For example: 
+
+```>  python zora_cli.py --input_filename="/path/to/my-zelda-rom.nes" --flag_string="C Hz F T Xblst" --seed=12345```
+
+## Running the webserver locally
 
 1. Make a copy of `example_local.py` and call it `local_settings.py`. This is where you will enter any deployment-specific settings for your instance of the website.
 
