@@ -139,7 +139,7 @@ class Room():
   # ...x xx..	Type of Door on Right Wall
   # .... ..xx	Code for Palette 1 (Inner Section)
   def SetWallType(self, direction: Direction, wall_type: WallType) -> None:
-    assert self.GetRoomType() not in [RoomType.ITEM_STAIRCASE, RoomType.TRANSPORT_STAIRCASE]
+    assert not self.IsStairwayRoom()
     assert direction in Range.CARDINAL_DIRECTIONS
 
     byte_num = 1 if direction in [Direction.EAST, Direction.WEST] else 0
@@ -147,9 +147,11 @@ class Room():
     self._SetRomBits(byte_num, write_bitmask, wall_type.value)
 
   def SetOuterPalette(self, palette: DungeonPalette) -> None:
+    assert not self.IsStairwayRoom()
     self._SetRomBits(0, 0x03, palette.value)
 
   def SetInnerPalette(self, palette: DungeonPalette) -> None:
+    assert not self.IsStairwayRoom()
     self._SetRomBits(1, 0x03, palette.value)
 
   ### Staircase room methods ###
@@ -191,6 +193,7 @@ class Room():
 
   def SetReturnPosition(self, return_position: int) -> None:
     assert self.IsStairwayRoom()
+    print("!!Return position is %x" % return_position)
     self._SetRomBits(2, 0xFF, return_position)
 
   # Byte 2
@@ -209,11 +212,12 @@ class Room():
 
   def SetEnemyQuantityCode(self, code: int) -> None:
     assert code in range(0, 4)
+    assert not self.IsStairwayRoom()
     self._SetRomBits(2, 0xC0, code)
 
   # Byte 3
   def GetRoomType(self) -> RoomType:
-    return RoomType(self._ReadRomBits(byte_num=3, read_bitmask=0x3F))
+    return RoomType(self._ReadRomBits(3, 0x3F))
 
   def SetRoomType(self, room_type: RoomType) -> None:
     self._SetRomBits(3, 0x3F, room_type.value)
@@ -226,7 +230,7 @@ class Room():
 
   ### Byte 4 -- Item-related methods ###
   def SetItem(self, item_num: Item) -> None:
-    self._SetRomBits(byte_num=4, write_bitmask=0x1F, value=item_num.value)
+    self._SetRomBits(4, 0x1F, item_num.value)
 
   def GetItem(self) -> Item:
     return Item(self._ReadRomBits(byte_num=4, read_bitmask=0x1F))

@@ -399,7 +399,6 @@ class DungeonGenerator:
     # Then, create a dictionary for each level mapping each room type to the position number (0-3)
     # that is valid for the room type.
     for level_num in Range.VALID_LEVEL_NUMBERS:
-      # print(level_num)
       positions = [
           0x89,
           RoomType.GetValidPositionForRoomTypes(RoomType.CIRCLE_BLOCK_WALL_ROOM,
@@ -729,8 +728,8 @@ class DungeonGenerator:
         next_room.SetRoomType(next_room_type)
         current_room.SetRoomAction(current_room_type.GetRoomActionIfHasStairs())
         next_room.SetRoomAction(next_room_type.GetRoomActionIfHasStairs())
-        stairway_room.SetReturnPosition(
-            RoomType.GetValidPositionForRoomTypes(current_room_type, next_room_type))
+        return_position = RoomType.GetValidPositionForRoomTypes(current_room_type, next_room_type)
+        stairway_room.SetReturnPosition(return_position)
         current_room.SetLockingDirection(Direction.STAIRCASE)
         next_room.SetLockLevel(current_room.GetLockLevel() + 1)
         current_room.AddChildRoomNum(next_room_num)
